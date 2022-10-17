@@ -1,39 +1,49 @@
+import {ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX} from './address';
 import {AbiCoder} from './ethersUtils';
-import TronWeb from 'index';
-import {ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX} from 'utils/address';
+import TronWeb from '..';
 
 const abiCoder = new AbiCoder();
 
-function _isArray(_array) {
-    return Array.isArray(_array);
-}
-
-function _addressToHex(value) {
+function _addressToHex(value: string): string {
     return TronWeb.address.toHex(value).replace(ADDRESS_PREFIX_REGEX, '0x');
 }
 
-function deepCopy(target) {
+function deepCopy<T>(target: T): T {
     if (
         Object.prototype.toString.call(target) !== '[object Object]' &&
         Object.prototype.toString.call(target) !== '[object Array]'
-    ) {
+    )
         return target;
-    }
-    const newTarget = _isArray(target) ? [] : {};
 
-    Object.keys(target).forEach(key =>
-        newTarget[key] = target[key] instanceof Object && !target[key]._isBigNumber ? deepCopy(target[key]) : target[key]
-    );
+    const newTarget = (Array.isArray(target) ? [] : {}) as typeof target;
+
+    for (const key in target)
+        newTarget[key] = target[key] instanceof Object && !target[key]._isBigNumber ? deepCopy(target[key]) : target[key];
 
     return newTarget;
 }
 
-export function decodeParams(names, types, output, ignoreMethodHash) {
-    if (!output || typeof output === 'boolean') {
-        ignoreMethodHash = output;
-        output = types;
-        types = names;
+export function decodeParams(names_: string[], types_: string, output_: boolean): any[];
+export function decodeParams(names_: string[], types_: string[] | string, output_: string | boolean, ignoreMethodHash_: boolean): any[];
+export function decodeParams(names_: string[], types_: string[] | string, output_: string | boolean, ignoreMethodHash_?: boolean): any[] {
+    let ignoreMethodHash: boolean;
+    let output: string;
+    let types: string[];
+    let names: string[];
+    if (!output_ || typeof output_ === 'boolean') {
+        // @ts-ignore
+        ignoreMethodHash = output_;
+        // @ts-ignore
+        output = types_;
+        types = names_;
         names = [];
+    } else {
+        // @ts-ignore
+        ignoreMethodHash = ignoreMethodHash_;
+        output = output_;
+        // @ts-ignore
+        types = types_;
+        names = names_;
     }
 
     if (ignoreMethodHash && output.replace(/^0x/, '').length % 64 === 8)

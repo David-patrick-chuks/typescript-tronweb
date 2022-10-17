@@ -33,7 +33,27 @@ const baseConfig = {
                         plugins: basePlugins
                     }
                 }
-            }
+            },
+            {
+                test: /\.ts$/,
+                exclude: /(node_modules|bower_components)/,
+                use: {
+                    loader: 'ts-loader',
+                    options: {
+                        // presets: [
+                        //     ['@babel/env', {
+                        //         targets: {
+                        //             browsers: [
+                        //                 '>0.25%',
+                        //                 'not dead'
+                        //             ]
+                        //         }
+                        //     }]
+                        // ],
+                        // plugins: basePlugins
+                    },
+                },
+            },
         ]
     },
     resolve: {
@@ -41,6 +61,7 @@ const baseConfig = {
             'node_modules',
             path.resolve(__dirname, 'src')
         ],
+        extensions: ['.ts', '.js'],
     },
     devtool: 'source-map',
     mode

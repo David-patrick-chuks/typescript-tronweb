@@ -1,3 +1,4 @@
+import {ADDRESS_PREFIX} from './address';
 import * as accounts from './accounts';
 import * as base58 from './base58';
 import * as bytes from './bytes';
@@ -10,10 +11,9 @@ import {TypedDataEncoder as _TypedDataEncoder} from './typedData'
 
 import validator from 'validator';
 import BigNumber from 'bignumber.js';
-import {ADDRESS_PREFIX} from 'utils/address';
 
 const utils = {
-    isValidURL(url) {
+    isValidURL(url: any): url is string {
         if (typeof url !== 'string')
             return false;
         return validator.isURL(url.toString(), {
@@ -22,15 +22,15 @@ const utils = {
         });
     },
 
-    isObject(obj) {
+    isObject(obj: any): obj is object {
         return obj === Object(obj) && Object.prototype.toString.call(obj) !== '[object Array]';
     },
 
-    isArray(array) {
+    isArray(array: any): array is Array<any> {
         return Array.isArray(array);
     },
 
-    isJson(string) {
+    isJson(string: any): boolean {
         try {
             return !!JSON.parse(string);
         } catch (ex) {
@@ -38,29 +38,29 @@ const utils = {
         }
     },
 
-    isBoolean(bool) {
+    isBoolean(bool: any): bool is boolean {
         return typeof bool === 'boolean';
     },
 
-    isBigNumber(number) {
+    isBigNumber(number: any): number is BigNumber {
         return number && (number instanceof BigNumber || (number.constructor && number.constructor.name === 'BigNumber'));
     },
 
-    isString(string) {
+    isString(string: any): string is string {
         return typeof string === 'string' || (string && string.constructor && string.constructor.name === 'String');
     },
 
-    isFunction(obj) {
+    isFunction(obj: any): obj is Function {
         return typeof obj === 'function';
     },
 
-    isHex(string) {
+    isHex(string: any): boolean {
         return (typeof string === 'string'
             && !isNaN(parseInt(string, 16))
             && /^(0x|)[a-fA-F0-9]+$/.test(string));
     },
 
-    isInteger(number) {
+    isInteger(number: any): number is number {
         if (number === null)
             return false
         return Number.isInteger(
@@ -68,42 +68,42 @@ const utils = {
         );
     },
 
-    hasProperty(obj, property) {
+    hasProperty(obj: any, property: string): boolean {
         return Object.prototype.hasOwnProperty.call(obj, property);
     },
 
-    hasProperties(obj, ...properties) {
-        return properties.length && !properties.map(property => {
+    hasProperties(obj: any, ...properties: string[]): boolean {
+        return !!properties.length && !properties.map(property => {
             return this.hasProperty(obj, property)
         }).includes(false);
     },
 
-    mapEvent(event) {
-        let data = {
+    // FIXME: need a structure
+    mapEvent(event: any): any {
+        const data = {
             block: event.block_number,
             timestamp: event.block_timestamp,
             contract: event.contract_address,
             name: event.event_name,
             transaction: event.transaction_id,
             result: event.result,
-            resourceNode: event.resource_Node || (event._unconfirmed ? 'fullNode' : 'solidityNode')
-        };
-        if (event._unconfirmed) {
-            data.unconfirmed = event._unconfirmed
-        }
-        if (event._fingerprint) {
+            resourceNode: event.resource_Node || (event._unconfirmed ? 'fullNode' : 'solidityNode'),
+        } as any;
+        if (event._unconfirmed)
+            data.unconfirmed = event._unconfirmed;
+        if (event._fingerprint)
             data.fingerprint = event._fingerprint;
-        }
         return data;
     },
 
-    parseEvent(event, {inputs: abi}) {
+    // FIXME: need a structure
+    parseEvent(event: any, {inputs: abi}: {inputs: any[]}): any {
         if (!event.result)
             return event;
 
         if (this.isObject(event.result)) {
-            for (var i = 0; i < abi.length; i++) {
-                let obj = abi[i];
+            for (let i = 0; i < abi.length; i++) {
+                const obj = abi[i];
                 if (obj.type == 'address' && obj.name in event.result)
                     event.result[obj.name] = ADDRESS_PREFIX + event.result[obj.name].substr(2).toLowerCase();
             }
@@ -126,7 +126,7 @@ const utils = {
         return event;
     },
 
-    padLeft(input, padding, amount) {
+    padLeft(input: any, padding: string, amount: number): string {
         let res = input.toString();
 
         while (res.length < amount)
@@ -135,13 +135,13 @@ const utils = {
         return res;
     },
 
-    isNotNullOrUndefined(val) {
+    isNotNullOrUndefined(val: any): val is Exclude<Exclude<typeof val, null>, undefined> {
         return val !== null && typeof val !== 'undefined';
     },
 
-    async sleep(millis = 1000){
+    async sleep(millis = 1000): Promise<never> {
         return new Promise(resolve => setTimeout(resolve, millis));
-    }
+    },
 }
 
 export default {

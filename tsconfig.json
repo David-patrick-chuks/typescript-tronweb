@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "module": "amd",
+        "moduleResolution": "node",
+        "target": "es5",
+        "outFile": "dist/app.js",
+        "strict": true,
+        "noImplicitAny": false,  // FIXME: only during migration
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+    },
+    "include": [
+        "src/**/*"
+    ]
+}

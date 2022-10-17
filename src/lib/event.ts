@@ -1,19 +1,42 @@
-import TronWeb from 'index';
-import utils from 'utils';
+import TronWeb from '..';
+import utils from '../utils';
 import providers from "./providers";
 import querystring from "querystring";
 import injectpromise from 'injectpromise';
 
-export default class Event {
 
-    constructor(tronWeb = false) {
+interface ContractOptions {
+    sinceTimestamp?: number
+    since?: any
+    fromTimestamp?: number
+    eventName?: string
+    blockNumber?: number
+    size?: number
+    page?: number
+    onlyConfirmed?: any
+    onlyUnconfirmed?: any
+    previousLastEventFingerprint?: any
+    previousFingerprint?: any
+    fingerprint?: any
+    rawResponse?: boolean
+    sort?: boolean
+    filters?: Object | Object[]
+}
+
+type _CallbackT<Out> = (err: string | null, data?: Object[]) => Out;
+
+export default class Event {
+    tronWeb: TronWeb;
+    injectPromise: injectpromise;
+
+    constructor(tronWeb: TronWeb) {
         if (!tronWeb || !(tronWeb instanceof TronWeb))
             throw new Error('Expected instance of TronWeb');
         this.tronWeb = tronWeb;
         this.injectPromise = injectpromise(this);
     }
 
-    setServer(eventServer = false, healthcheck = 'healthcheck') {
+    setServer(eventServer: string | providers.HttpProvider, healthcheck: string = 'healthcheck'): void {
         if (!eventServer)
             return this.tronWeb.eventServer = false;
 
@@ -27,7 +50,9 @@ export default class Event {
         this.tronWeb.eventServer.isConnected = () => this.tronWeb.eventServer.request(healthcheck).then(() => true).catch(() => false);
     }
 
-    getEventsByContractAddress(contractAddress = false, options = {}, callback = false) {
+    getEventsByContractAddress(contractAddress: string, options: ContractOptions): Promise<any>;
+    getEventsByContractAddress<Out>(contractAddress: string, options: ContractOptions, callback?: _CallbackT<Out>): Promise<Out>;
+    getEventsByContractAddress<Out>(contractAddress: string, options: ContractOptions = {}, callback?: _CallbackT<Out>): Out | Promise<Out | any> {
 
         let {
             sinceTimestamp,
@@ -51,7 +76,7 @@ export default class Event {
             blockNumber: false,
             size: 20,
             page: 1
-        }, options)
+        }, options) as ContractOptions
 
         if (!callback)
             return this.injectPromise(this.getEventsByContractAddress, contractAddress, options);
@@ -95,18 +120,16 @@ export default class Event {
         if (blockNumber)
             routeParams.push(blockNumber);
 
-        const qs = {
+        const qs: any = {
             size,
             page
         }
 
-        if (typeof filters === 'object' && Object.keys(filters).length > 0) {
+        if (typeof filters === 'object' && Object.keys(filters).length > 0)
             qs.filters = JSON.stringify(filters);
-        }
 
-        if (fromTimestamp) {
+        if (fromTimestamp)
             qs.fromTimestamp = qs.since = fromTimestamp;
-        }
 
         if (onlyConfirmed)
             qs.only_confirmed = onlyConfirmed
@@ -121,45 +144,50 @@ export default class Event {
         if (fingerprint)
             qs.fingerprint = fingerprint
 
-        return this.tronWeb.eventServer.request(`event/contract/${routeParams.join('/')}?${querystring.stringify(qs)}`).then((data = false) => {
+        return this.tronWeb.eventServer.request(`event/contract/${routeParams.join('/')}?${querystring.stringify(qs)}`).then((data: any) => {
             if (!data)
                 return callback('Unknown error occurred');
 
             if (!utils.isArray(data))
                 return callback(data);
 
-            return callback(null,
-                rawResponse === true ? data : data.map(event => utils.mapEvent(event))
+            return callback(
+                null,
+                rawResponse === true ? data : (data as Array<any>).map(event => utils.mapEvent(event))
             );
-        }).catch(err => callback((err.response && err.response.data) || err));
+        }).catch((err: any) => callback((err.response && err.response.data) || err));
     }
 
 
-    getEventsByTransactionID(transactionID = false, options = {}, callback = false) {
-
+    getEventsByTransactionID(transactionID: string, options: {rawResponse?: boolean}): Promise<any>;
+    getEventsByTransactionID<Out>(transactionID: string, options: {rawResponse?: boolean}, callback?: _CallbackT<Out>): Out | Promise<Out>;
+    getEventsByTransactionID<Out>(transactionID: string, options: {rawResponse?: boolean} | _CallbackT<Out> = {}, callback?: _CallbackT<Out>): Out | Promise<Out | any> {
         if (utils.isFunction(options)) {
             callback = options;
             options = {};
         }
+        const actualOptions = options as {rawResponse?: boolean};
 
-        if (!callback)
-            return this.injectPromise(this.getEventsByTransactionID, transactionID, options);
+        if (!callback || !utils.isFunction(callback))
+            return this.injectPromise(this.getEventsByTransactionID, transactionID, actualOptions);
 
         if (!this.tronWeb.eventServer)
             return callback('No event server configured');
 
-        return this.tronWeb.eventServer.request(`event/transaction/${transactionID}`).then((data = false) => {
+        return this.tronWeb.eventServer.request(`event/transaction/${transactionID}`).then((data: any) => {
+            if (!callback)
+                return null
+
             if (!data)
                 return callback('Unknown error occurred');
 
             if (!utils.isArray(data))
                 return callback(data);
 
-            return callback(null,
-                options.rawResponse === true ? data : data.map(event => utils.mapEvent(event))
+            return callback(
+                null,
+                actualOptions.rawResponse === true ? data : (data as Array<any>).map(event => utils.mapEvent(event))
             );
-        }).catch(err => callback((err.response && err.response.data) || err));
+        }).catch((err: any) => callback && callback((err.response && err.response.data) || err));
     }
-
 }
-

@@ -6,23 +6,29 @@ import { deepCopy, defineReadOnly, shallowCopy } from "@ethersproject/properties
 import { toUtf8Bytes } from "@ethersproject/strings";
 import { Logger } from "@ethersproject/logger";
 import TronWeb from 'index';
+
 const version = "tronweb/hash/5.4.0";
 const logger = new Logger(version);
+
 function getAddress(address) {
     return TronWeb.address.toHex(address).replace(ADDRESS_PREFIX_REGEX, '0x');
 };
+
 function getTronAddress(address) {
     return TronWeb.address.toHex(address);
 };
+
 function id(text) {
     return keccak256(toUtf8Bytes(text));
 }
+
 const padding = new Uint8Array(32);
 padding.fill(0);
 const NegativeOne = BigNumber.from(-1);
 const Zero = BigNumber.from(0);
 const One = BigNumber.from(1);
 const MaxUint256 = BigNumber.from("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+
 function hexPadRight(value) {
     const bytes = arrayify(value);
     const padOffset = bytes.length % 32;
@@ -31,6 +37,7 @@ function hexPadRight(value) {
     }
     return hexlify(bytes);
 }
+
 const hexTrue = hexZeroPad(One.toHexString(), 32);
 const hexFalse = hexZeroPad(Zero.toHexString(), 32);
 const domainFieldTypes = {
@@ -43,6 +50,7 @@ const domainFieldTypes = {
 const domainFieldNames = [
     "name", "version", "chainId", "verifyingContract", "salt"
 ];
+
 function checkString(key) {
     return function (value) {
         if (typeof (value) !== "string") {
@@ -51,6 +59,7 @@ function checkString(key) {
         return value;
     };
 }
+
 const domainChecks = {
     name: checkString("name"),
     version: checkString("version"),
@@ -80,6 +89,7 @@ const domainChecks = {
         return logger.throwArgumentError(`invalid domain value "salt"`, "domain.salt", value);
     }
 };
+
 function getBaseEncoder(type) {
     // intXX and uintXX
     {
@@ -135,9 +145,11 @@ function getBaseEncoder(type) {
     }
     return null;
 }
+
 function encodeType(name, fields) {
     return `${name}(${fields.map(({ name, type }) => (type + " " + name)).join(",")})`;
 }
+
 export class TypedDataEncoder {
     constructor(types) {
         defineReadOnly(this, "types", Object.freeze(deepCopy(types)));
