@@ -61,6 +61,7 @@ const utils = {
         );
     },
 
+    // eslint-disable-next-line @typescript-eslint/ban-types
     isFunction(obj: any): obj is Function {
         return typeof obj === 'function';
     },
@@ -118,16 +119,17 @@ const utils = {
         if (this.isObject(event.result)) {
             for (let i = 0; i < abi.length; i++) {
                 const obj = abi[i];
-                if (obj.type == 'address' && obj.name in event.result)
+                if (obj.type === 'address' && obj.name in event.result) {
                     event.result[obj.name] =
                         ADDRESS_PREFIX +
                         event.result[obj.name].substr(2).toLowerCase();
+                }
             }
         } else if (this.isArray(event.result)) {
             event.result = event.result.reduce((obj, result, index) => {
                 const { name, type } = abi[index];
 
-                if (type == 'address')
+                if (type === 'address')
                     result = ADDRESS_PREFIX + result.substr(2).toLowerCase();
 
                 obj[name] = result;
@@ -148,7 +150,7 @@ const utils = {
     },
 
     isNotNullOrUndefined(
-        val: any
+        val: any,
     ): val is Exclude<Exclude<typeof val, null>, undefined> {
         return val !== null && typeof val !== 'undefined';
     },

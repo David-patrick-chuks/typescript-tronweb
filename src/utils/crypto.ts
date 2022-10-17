@@ -4,14 +4,14 @@ import { base64DecodeFromString, hexStr2byteArray } from './code';
 import { encode58, decode58 } from './base58';
 import { byte2hexStr, byteArray2hexStr } from './bytes';
 import { ec as EC } from 'elliptic';
-import { keccak256, sha256, SigningKey } from './ethersUtils';
+import { keccak256, sha256 as ethSha256, SigningKey } from './ethersUtils';
 import { TypedDataEncoder } from './typedData';
 
 export { byteArray2hexStr } from './bytes';
 
 export function getBase58CheckAddress(addressBytes) {
-    const hash0 = SHA256(addressBytes);
-    const hash1 = SHA256(hash0);
+    const hash0 = sha256(addressBytes);
+    const hash1 = sha256(hash0);
 
     let checkSum = hash1.slice(0, 4);
     checkSum = addressBytes.concat(checkSum);
@@ -28,23 +28,14 @@ export function decodeBase58Address(base58Sting) {
 
     if (base58Sting.length <= 4) return false;
 
-    const len = address.length;
-    const offset = len - 4;
-    const checkSum = address.slice(offset);
+    const checkSum = address.slice(-4);
 
-    address = address.slice(0, offset);
+    address = address.slice(0, -4);
 
-    const hash0 = SHA256(address);
-    const hash1 = SHA256(hash0);
-    const checkSum1 = hash1.slice(0, 4);
+    const hash = sha256(sha256(address));
+    const checkSum1 = hash.slice(0, 4);
 
-    if (
-        checkSum[0] == checkSum1[0] &&
-        checkSum[1] == checkSum1[1] &&
-        checkSum[2] == checkSum1[2] &&
-        checkSum[3] == checkSum1[3]
-    )
-        return address;
+    if (checkSum === checkSum1) return address;
 
     throw new Error('Invalid address provided');
 }
@@ -54,7 +45,7 @@ export function signTransaction(priKeyBytes, transaction) {
         priKeyBytes = hexStr2byteArray(priKeyBytes);
 
     const txID = transaction.txID;
-    const signature = ECKeySign(hexStr2byteArray(txID), priKeyBytes);
+    const signature = getECKeySig(hexStr2byteArray(txID), priKeyBytes);
 
     if (Array.isArray(transaction.signature)) {
         if (!transaction.signature.includes(signature))
@@ -73,8 +64,8 @@ export function signBytes(privateKey, contents) {
     if (typeof privateKey === 'string')
         privateKey = hexStr2byteArray(privateKey);
 
-    const hashBytes = SHA256(contents);
-    const signBytes = ECKeySign(hashBytes, privateKey);
+    const hashBytes = sha256(contents);
+    const signBytes = getECKeySig(hashBytes, privateKey);
 
     return signBytes;
 }
@@ -103,8 +94,8 @@ export function _signTypedData(domain, types, value, privateKey) {
 export function getRowBytesFromTransactionBase64(base64Data) {
     const bytesDecode = base64DecodeFromString(base64Data);
     // FIXME: what the hell is it?
-    // @ts-ignore
     const transaction =
+        // @ts-ignore
         proto.protocol.Transaction.deserializeBinary(bytesDecode);
     const raw = transaction.getRawData();
 
@@ -141,18 +132,12 @@ export function decode58Check(addressStr) {
     const decodeCheck = decode58(addressStr);
 
     if (decodeCheck.length <= 4) return false;
+    const checkSum = decodeCheck.slice(-4);
 
     const decodeData = decodeCheck.slice(0, decodeCheck.length - 4);
-    const hash0 = SHA256(decodeData);
-    const hash1 = SHA256(hash0);
+    const hash = sha256(sha256(decodeData));
 
-    if (
-        hash1[0] === decodeCheck[decodeData.length] &&
-        hash1[1] === decodeCheck[decodeData.length + 1] &&
-        hash1[2] === decodeCheck[decodeData.length + 2] &&
-        hash1[3] === decodeCheck[decodeData.length + 3]
-    )
-        return decodeData;
+    if (hash.slice(0, 4) === checkSum) return decodeData;
 
     return false;
 }
@@ -171,23 +156,14 @@ export function isAddressValid(base58Str) {
     const checkSum = address.slice(21);
     address = address.slice(0, 21);
 
-    const hash0 = SHA256(address);
-    const hash1 = SHA256(hash0);
-    const checkSum1 = hash1.slice(0, 4);
+    const hash = sha256(sha256(address));
+    const checkSum1 = hash.slice(0, 4);
 
-    if (
-        checkSum[0] == checkSum1[0] &&
-        checkSum[1] == checkSum1[1] &&
-        checkSum[2] == checkSum1[2] &&
-        checkSum[3] == checkSum1[3]
-    )
-        return true;
-
-    return false;
+    return checkSum === checkSum1;
 }
 
 export function getBase58CheckAddressFromPriKeyBase64String(
-    priKeyBase64String
+    priKeyBase64String,
 ) {
     const priKeyBytes = base64DecodeFromString(priKeyBase64String);
     const pubBytes = getPubKeyFromPriKey(priKeyBytes);
@@ -235,7 +211,7 @@ export function getPubKeyFromPriKey(priKeyBytes) {
     return pubkeyBytes;
 }
 
-export function ECKeySign(hashBytes, priKeyBytes) {
+export function getECKeySig(hashBytes, priKeyBytes) {
     const ec = new EC('secp256k1');
     const key = ec.keyFromPrivate(priKeyBytes, 'bytes');
     const signature = key.sign(hashBytes);
@@ -256,12 +232,15 @@ export function ECKeySign(hashBytes, priKeyBytes) {
 
     return signHex;
 }
+export const ECKeySign = getECKeySig; // backwards-compatible alias
 
-export function SHA256(msgBytes) {
+export function sha256(msgBytes) {
     const msgHex = byteArray2hexStr(msgBytes);
-    const hashHex = sha256('0x' + msgHex).replace(/^0x/, '');
+    const hashHex = ethSha256('0x' + msgHex).replace(/^0x/, '');
     return hexStr2byteArray(hashHex);
 }
+
+export const SHA256 = sha256; // backwards-compatible alias
 
 export function passwordToAddress(password) {
     const com_priKeyBytes = base64DecodeFromString(password);

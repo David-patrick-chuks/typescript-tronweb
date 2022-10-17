@@ -12,7 +12,7 @@ export const bin2String = bytesToString;
 export function arrayEquals(
     array1: any[],
     array2: any[],
-    strict: boolean
+    strict: boolean,
 ): boolean {
     if (array1.length !== array2.length) return false;
 
@@ -90,7 +90,8 @@ export function isHexChar(c) {
     return 0;
 }
 
-// set strict as true: if the length of str is odd, add 0 before the str to make its length as even
+// set strict as true: if the length of str is odd,
+// add 0 before the str to make its length as even
 export function hexStr2byteArray(str, strict = false) {
     if (typeof str !== 'string')
         throw new Error('The passed string is not a string');
@@ -166,7 +167,7 @@ export function getStringType(str: string): 1 | 2 | 3 | -1 {
 
     if (typeof str != 'string') return -1;
 
-    if (str.length === 0 || str == '') return -1;
+    if (!str || str.length === 0 || str === '') return -1;
 
     let i = 0;
 
@@ -179,23 +180,17 @@ export function getStringType(str: string): 1 | 2 | 3 | -1 {
     //             break;
     //     }
     // } else
-    if (str.length === 40) {
-        for (; i < 40; i++) {
-            if (!isHexChar(str.charAt(i))) break;
-        }
-    }
+    if (str.length === 40)
+        for (; i < 40; i++) if (!isHexChar(str.charAt(i))) break;
 
     if (i === 40) return 1; //40 Hex, Address
 
-    for (i = 0; i < str.length; i++) {
-        if (!isNumber(str.charAt(i))) break;
-    }
+    for (i = 0; i < str.length; i++) if (!isNumber(str.charAt(i))) break;
 
     if (i === str.length) return 2; // All Decimal number, BlockNumber
 
-    for (i = 0; i < str.length; i++) {
-        if (str.charAt(i) > ' ') return 3; // At least one visible character
-    }
+    // At least one visible character
+    for (i = 0; i < str.length; i++) if (str.charAt(i) > ' ') return 3;
 
     return -1;
 }

@@ -20,7 +20,7 @@ export function hashMessage(message: string | Uint8Array): string {
             toUtf8Bytes(TRON_MESSAGE_PREFIX),
             toUtf8Bytes(String(message.length)),
             message,
-        ])
+        ]),
     );
 }
 
@@ -39,7 +39,7 @@ export function verifyMessage(message: string, signature: string): string {
 
     const recovered = recoverAddress(hashMessage(message), signature);
     const base58Address = getBase58CheckAddress(
-        hexStr2byteArray(recovered.replace(/^0x/, ADDRESS_PREFIX))
+        hexStr2byteArray(recovered.replace(/^0x/, ADDRESS_PREFIX)),
     );
 
     return base58Address;

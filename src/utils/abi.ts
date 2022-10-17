@@ -17,11 +17,12 @@ function deepCopy<T>(target: T): T {
 
     const newTarget = (Array.isArray(target) ? [] : {}) as typeof target;
 
-    for (const key in target)
+    for (const key in target) {
         newTarget[key] =
             target[key] instanceof Object && !target[key]['_isBigNumber']
                 ? deepCopy(target[key])
                 : target[key];
+    }
 
     return newTarget;
 }
@@ -29,19 +30,19 @@ function deepCopy<T>(target: T): T {
 export function decodeParams(
     names_: string[],
     types_: string,
-    output_: boolean
+    output_: boolean,
 ): any[];
 export function decodeParams(
     names_: string[],
     types_: string[] | string,
     output_: string | boolean,
-    ignoreMethodHash_: boolean
+    ignoreMethodHash_: boolean,
 ): any[];
 export function decodeParams(
     names_: string[],
     types_: string[] | string,
     output_: string | boolean,
-    ignoreMethodHash_?: boolean
+    ignoreMethodHash_?: boolean,
 ): any[] {
     let ignoreMethodHash: boolean;
     let output: string;
@@ -66,10 +67,11 @@ export function decodeParams(
     if (ignoreMethodHash && output.replace(/^0x/, '').length % 64 === 8)
         output = '0x' + output.replace(/^0x/, '').substring(8);
 
-    if (output.replace(/^0x/, '').length % 64)
+    if (output.replace(/^0x/, '').length % 64) {
         throw new Error(
-            'The encoded string is not valid. Its length must be a multiple of 64.'
+            'The encoded string is not valid. Its length must be a multiple of 64.',
         );
+    }
 
     // workaround for unsupported trcToken type
     types = types.map((type) => {
@@ -80,7 +82,7 @@ export function decodeParams(
 
     return abiCoder.decode(types, output).reduce(
         (obj, arg, index) => {
-            if (types[index] == 'address')
+            if (types[index] === 'address')
                 arg = ADDRESS_PREFIX + arg.substr(2).toLowerCase();
 
             if (names.length) obj[names[index]] = arg;
@@ -88,16 +90,17 @@ export function decodeParams(
 
             return obj;
         },
-        names.length ? {} : []
+        names.length ? {} : [],
     );
 }
 
 export function encodeParams(types: string[], values: any[]): string {
     for (let i = 0; i < types.length; i++) {
-        if (types[i] === 'address')
+        if (types[i] === 'address') {
             values[i] = TronWeb.address
                 .toHex(values[i])
                 .replace(ADDRESS_PREFIX_REGEX, '0x');
+        }
     }
 
     return abiCoder.encode(types, values);
@@ -214,7 +217,7 @@ export function encodeParamsV2ByABI(funABI: IFunABI, args) {
             types.push(
                 type.indexOf('tuple') === 0
                     ? buildFullTypeDefinition(funABI.inputs[i])
-                    : type
+                    : type,
             );
             if (args.length < types.length) args.push('');
         }
@@ -273,7 +276,7 @@ export function decodeParamsV2ByABI(funABI: IFunABI, data) {
                 return buildFullTypeNameDefinition(innerType);
             });
             return `tuple(${innerTypes.join(',')})${extractSize(
-                typeDef.type
+                typeDef.type,
             )}${name}`;
         }
         if (/trcToken/.test(typeDef.type))
@@ -284,7 +287,7 @@ export function decodeParamsV2ByABI(funABI: IFunABI, data) {
 
     const decodeResult = (
         outputs: IFieldABI[] = [],
-        result: Object | Object[]
+        result: { [key: number | string]: any },
     ) => {
         if (outputs.length) {
             outputs.forEach((output, i) => {
@@ -326,7 +329,7 @@ export function decodeParamsV2ByABI(funABI: IFunABI, data) {
             outputTypes.push(
                 type.indexOf('tuple') === 0
                     ? buildFullTypeNameDefinition(funABI.outputs[i])
-                    : type + name
+                    : type + name,
             );
         }
         convertTypeNames(outputTypes);

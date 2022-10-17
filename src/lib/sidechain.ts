@@ -6,7 +6,7 @@ export default class SideChain {
         sideOptions,
         TronWeb = false,
         mainchain = false,
-        privateKey = false
+        privateKey = false,
     ) {
         this.mainchain = mainchain;
         const {
@@ -22,7 +22,7 @@ export default class SideChain {
             fullHost || fullNode,
             fullHost || solidityNode,
             fullHost || eventServer,
-            privateKey
+            privateKey,
         );
         this.isAddress = this.mainchain.isAddress;
         this.utils = this.mainchain.utils;
@@ -69,9 +69,10 @@ export default class SideChain {
             .concat(chainIdByteArr);
         const byteArrHash = this.sidechain.utils.ethersUtils.sha256(byteArr);
 
+        // eslint-disable-next-line new-cap
         const signature = this.utils.crypto.ECKeySign(
             this.utils.code.hexStr2byteArray(byteArrHash.replace(/^0x/, '')),
-            priKeyBytes
+            priKeyBytes,
         );
 
         if (Array.isArray(transaction.signature)) {
@@ -87,7 +88,7 @@ export default class SideChain {
         transaction = false,
         privateKey = this.sidechain.defaultPrivateKey,
         permissionId = false,
-        callback = false
+        callback = false,
     ) {
         if (this.utils.isFunction(permissionId)) {
             callback = permissionId;
@@ -100,13 +101,14 @@ export default class SideChain {
             permissionId = 0;
         }
 
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.multiSign,
                 transaction,
                 privateKey,
-                permissionId
+                permissionId,
             );
+        }
 
         if (
             !this.utils.isObject(transaction) ||
@@ -128,7 +130,7 @@ export default class SideChain {
                 .toLowerCase();
             const signWeight = await this.sidechain.trx.getSignWeight(
                 transaction,
-                permissionId
+                permissionId,
             );
 
             if (signWeight.result.code === 'PERMISSION_ERROR')
@@ -144,7 +146,7 @@ export default class SideChain {
 
             if (
                 signWeight.approved_list &&
-                signWeight.approved_list.indexOf(address) != -1
+                signWeight.approved_list.indexOf(address) !== -1
             )
                 return callback(privateKey + ' already sign transaction');
 
@@ -160,7 +162,7 @@ export default class SideChain {
         try {
             return callback(
                 null,
-                this.signTransaction(privateKey, transaction)
+                this.signTransaction(privateKey, transaction),
             );
         } catch (ex) {
             callback(ex);
@@ -172,7 +174,7 @@ export default class SideChain {
         privateKey = this.sidechain.defaultPrivateKey,
         useTronHeader = true,
         multisig = false,
-        callback = false
+        callback = false,
     ) {
         if (this.utils.isFunction(multisig)) {
             callback = multisig;
@@ -192,14 +194,15 @@ export default class SideChain {
             multisig = false;
         }
 
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.sign,
                 transaction,
                 privateKey,
                 useTronHeader,
-                multisig
+                multisig,
             );
+        }
 
         // Message signing
         if (this.utils.isString(transaction)) {
@@ -210,7 +213,7 @@ export default class SideChain {
                 const signatureHex = this.sidechain.trx.signString(
                     transaction,
                     privateKey,
-                    useTronHeader
+                    useTronHeader,
                 );
                 return callback(null, signatureHex);
             } catch (ex) {
@@ -233,16 +236,17 @@ export default class SideChain {
                     address !==
                     this.sidechain.address.toHex(
                         transaction.raw_data.contract[0].parameter.value
-                            .owner_address
+                            .owner_address,
                     )
-                )
+                ) {
                     return callback(
-                        'Private key does not match address in transaction'
+                        'Private key does not match address in transaction',
                     );
+                }
             }
             return callback(
                 null,
-                this.signTransaction(privateKey, transaction)
+                this.signTransaction(privateKey, transaction),
             );
         } catch (ex) {
             callback(ex);
@@ -258,7 +262,7 @@ export default class SideChain {
         feeLimit,
         options = {},
         privateKey = this.mainchain.defaultPrivateKey,
-        callback = false
+        callback = false,
     ) {
         if (this.utils.isFunction(privateKey)) {
             callback = privateKey;
@@ -268,15 +272,16 @@ export default class SideChain {
             callback = options;
             options = {};
         }
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.depositTrx,
                 callValue,
                 depositFee,
                 feeLimit,
                 options,
-                privateKey
+                privateKey,
             );
+        }
 
         if (
             this.validator.notValid(
@@ -300,7 +305,7 @@ export default class SideChain {
                         gte: 0,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -330,7 +335,7 @@ export default class SideChain {
         feeLimit,
         options = {},
         privateKey = this.mainchain.defaultPrivateKey,
-        callback = false
+        callback = false,
     ) {
         if (this.utils.isFunction(privateKey)) {
             callback = privateKey;
@@ -340,7 +345,7 @@ export default class SideChain {
             callback = options;
             options = {};
         }
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.depositTrc10,
                 tokenId,
@@ -348,8 +353,9 @@ export default class SideChain {
                 depositFee,
                 feeLimit,
                 options,
-                privateKey
+                privateKey,
             );
+        }
 
         if (
             this.validator.notValid(
@@ -379,7 +385,7 @@ export default class SideChain {
                         gte: 0,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -412,7 +418,7 @@ export default class SideChain {
         contractAddress,
         options = {},
         privateKey = this.mainchain.defaultPrivateKey,
-        callback = false
+        callback = false,
     ) {
         if (this.utils.isFunction(privateKey)) {
             callback = privateKey;
@@ -422,7 +428,7 @@ export default class SideChain {
             callback = options;
             options = {};
         }
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.depositTrc,
                 functionSelector,
@@ -431,8 +437,9 @@ export default class SideChain {
                 feeLimit,
                 contractAddress,
                 options,
-                privateKey
+                privateKey,
             );
+        }
 
         if (
             this.validator.notValid(
@@ -466,7 +473,7 @@ export default class SideChain {
                         value: contractAddress,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -528,7 +535,7 @@ export default class SideChain {
         contractAddress,
         options = {},
         privateKey = this.mainchain.defaultPrivateKey,
-        callback = false
+        callback = false,
     ) {
         const functionSelector = 'approve';
         return this.depositTrc(
@@ -539,7 +546,7 @@ export default class SideChain {
             contractAddress,
             options,
             privateKey,
-            callback
+            callback,
         );
     }
 
@@ -549,7 +556,7 @@ export default class SideChain {
         contractAddress,
         options = {},
         privateKey = this.mainchain.defaultPrivateKey,
-        callback = false
+        callback = false,
     ) {
         const functionSelector = 'approve';
         return this.depositTrc(
@@ -560,7 +567,7 @@ export default class SideChain {
             contractAddress,
             options,
             privateKey,
-            callback
+            callback,
         );
     }
 
@@ -571,7 +578,7 @@ export default class SideChain {
         contractAddress,
         options = {},
         privateKey = this.mainchain.defaultPrivateKey,
-        callback = false
+        callback = false,
     ) {
         const functionSelector = 'depositTRC20';
         return this.depositTrc(
@@ -582,7 +589,7 @@ export default class SideChain {
             contractAddress,
             options,
             privateKey,
-            callback
+            callback,
         );
     }
 
@@ -593,7 +600,7 @@ export default class SideChain {
         contractAddress,
         options = {},
         privateKey = this.mainchain.defaultPrivateKey,
-        callback = false
+        callback = false,
     ) {
         const functionSelector = 'depositTRC721';
         return this.depositTrc(
@@ -604,7 +611,7 @@ export default class SideChain {
             contractAddress,
             options,
             privateKey,
-            callback
+            callback,
         );
     }
 
@@ -618,7 +625,7 @@ export default class SideChain {
         functionSelector,
         options = {},
         privateKey = this.mainchain.defaultPrivateKey,
-        callback
+        callback,
     ) {
         if (this.utils.isFunction(privateKey)) {
             callback = privateKey;
@@ -628,7 +635,7 @@ export default class SideChain {
             callback = options;
             options = {};
         }
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.mappingTrc,
                 trxHash,
@@ -636,8 +643,9 @@ export default class SideChain {
                 feeLimit,
                 functionSelector,
                 options,
-                privateKey
+                privateKey,
             );
+        }
 
         if (
             this.validator.notValid(
@@ -660,7 +668,7 @@ export default class SideChain {
                         gte: 0,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -676,15 +684,17 @@ export default class SideChain {
                 .contract()
                 .at(this.mainGatewayAddress);
             let result = null;
-            if (functionSelector === 'mappingTRC20')
+            if (functionSelector === 'mappingTRC20') {
                 result = await contractInstance
                     .mappingTRC20(trxHash)
                     .send(options, privateKey);
-            else if (functionSelector === 'mappingTRC721')
+            } else if (functionSelector === 'mappingTRC721') {
                 result = await contractInstance
                     .mappingTRC721(trxHash)
                     .send(options, privateKey);
-            else callback(new Error('type must be trc20 or trc721'));
+            } else {
+                callback(new Error('type must be trc20 or trc721'));
+            }
 
             callback(null, result);
         } catch (ex) {
@@ -698,7 +708,7 @@ export default class SideChain {
         feeLimit,
         options = {},
         privateKey = this.mainchain.defaultPrivateKey,
-        callback = false
+        callback = false,
     ) {
         const functionSelector = 'mappingTRC20';
         return this.mappingTrc(
@@ -708,7 +718,7 @@ export default class SideChain {
             functionSelector,
             options,
             privateKey,
-            callback
+            callback,
         );
     }
 
@@ -718,7 +728,7 @@ export default class SideChain {
         feeLimit,
         options = {},
         privateKey = this.mainchain.defaultPrivateKey,
-        callback = false
+        callback = false,
     ) {
         const functionSelector = 'mappingTRC721';
         return this.mappingTrc(
@@ -728,7 +738,7 @@ export default class SideChain {
             functionSelector,
             options,
             privateKey,
-            callback
+            callback,
         );
     }
 
@@ -741,7 +751,7 @@ export default class SideChain {
         feeLimit,
         options = {},
         privateKey = this.mainchain.defaultPrivateKey,
-        callback = false
+        callback = false,
     ) {
         if (this.utils.isFunction(privateKey)) {
             callback = privateKey;
@@ -751,15 +761,16 @@ export default class SideChain {
             callback = options;
             options = {};
         }
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.withdrawTrx,
                 callValue,
                 withdrawFee,
                 feeLimit,
                 options,
-                privateKey
+                privateKey,
             );
+        }
 
         if (
             this.validator.notValid(
@@ -783,7 +794,7 @@ export default class SideChain {
                         gte: 0,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -813,7 +824,7 @@ export default class SideChain {
         feeLimit,
         options = {},
         privateKey = this.mainchain.defaultPrivateKey,
-        callback = false
+        callback = false,
     ) {
         if (this.utils.isFunction(privateKey)) {
             callback = privateKey;
@@ -823,7 +834,7 @@ export default class SideChain {
             callback = options;
             options = {};
         }
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.withdrawTrc10,
                 tokenId,
@@ -831,8 +842,9 @@ export default class SideChain {
                 withdrawFee,
                 feeLimit,
                 options,
-                privateKey
+                privateKey,
             );
+        }
 
         if (
             this.validator.notValid(
@@ -862,7 +874,7 @@ export default class SideChain {
                         gte: 0,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -895,7 +907,7 @@ export default class SideChain {
         contractAddress,
         options = {},
         privateKey = this.mainchain.defaultPrivateKey,
-        callback = false
+        callback = false,
     ) {
         if (this.utils.isFunction(privateKey)) {
             callback = privateKey;
@@ -905,7 +917,7 @@ export default class SideChain {
             callback = options;
             options = {};
         }
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.withdrawTrc,
                 functionSelector,
@@ -914,8 +926,9 @@ export default class SideChain {
                 feeLimit,
                 contractAddress,
                 options,
-                privateKey
+                privateKey,
             );
+        }
 
         if (
             this.validator.notValid(
@@ -949,7 +962,7 @@ export default class SideChain {
                         value: contractAddress,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -976,17 +989,18 @@ export default class SideChain {
                     functionSelector,
                     options,
                     parameters,
-                    this.sidechain.address.toHex(address)
+                    this.sidechain.address.toHex(address),
                 );
-            if (!transaction.result || !transaction.result.result)
+            if (!transaction.result || !transaction.result.result) {
                 return callback(
                     'Unknown error: ' +
-                        JSON.stringify(transaction.transaction, null, 2)
+                        JSON.stringify(transaction.transaction, null, 2),
                 );
+            }
 
             const signedTransaction = await this.sidechain.trx.sign(
                 transaction.transaction,
-                privateKey
+                privateKey,
             );
 
             if (!signedTransaction.signature) {
@@ -997,7 +1011,7 @@ export default class SideChain {
             }
 
             const broadcast = await this.sidechain.trx.sendRawTransaction(
-                signedTransaction
+                signedTransaction,
             );
             if (broadcast.code) {
                 const err = {
@@ -1013,7 +1027,7 @@ export default class SideChain {
                 return callback(null, signedTransaction.txID);
 
             const checkResult = async (index = 0) => {
-                if (index == 20) {
+                if (index === 20) {
                     return callback({
                         error: 'Cannot find result in solidity node',
                         transaction: signedTransaction,
@@ -1021,7 +1035,7 @@ export default class SideChain {
                 }
 
                 const output = await this.sidechain.trx.getTransactionInfo(
-                    signedTransaction.txID
+                    signedTransaction.txID,
                 );
 
                 if (!Object.keys(output).length) {
@@ -1030,7 +1044,7 @@ export default class SideChain {
                     }, 3000);
                 }
 
-                if (output.result && output.result == 'FAILED') {
+                if (output.result && output.result === 'FAILED') {
                     return callback({
                         error: this.sidechain.toUtf8(output.resMessage),
                         transaction: signedTransaction,
@@ -1052,7 +1066,7 @@ export default class SideChain {
 
                 let decoded = decodeOutput(
                     this.outputs,
-                    '0x' + output.contractResult[0]
+                    '0x' + output.contractResult[0],
                 );
 
                 if (decoded.length === 1) decoded = decoded[0];
@@ -1073,7 +1087,7 @@ export default class SideChain {
         contractAddress,
         options,
         privateKey = this.mainchain.defaultPrivateKey,
-        callback = false
+        callback = false,
     ) {
         const functionSelector = 'withdrawal(uint256)';
         return this.withdrawTrc(
@@ -1084,7 +1098,7 @@ export default class SideChain {
             contractAddress,
             options,
             privateKey,
-            callback
+            callback,
         );
     }
 
@@ -1095,7 +1109,7 @@ export default class SideChain {
         contractAddress,
         options,
         privateKey = this.mainchain.defaultPrivateKey,
-        callback = false
+        callback = false,
     ) {
         const functionSelector = 'withdrawal(uint256)';
         return this.withdrawTrc(
@@ -1106,7 +1120,7 @@ export default class SideChain {
             contractAddress,
             options,
             privateKey,
-            callback
+            callback,
         );
     }
 
@@ -1115,7 +1129,7 @@ export default class SideChain {
         feeLimit,
         options,
         privateKey = this.mainchain.defaultPrivateKey,
-        callback = false
+        callback = false,
     ) {
         if (this.utils.isFunction(privateKey)) {
             callback = privateKey;
@@ -1126,14 +1140,15 @@ export default class SideChain {
             callback = options;
             options = {};
         }
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.injectFund,
                 num,
                 feeLimit,
                 options,
-                privateKey
+                privateKey,
             );
+        }
 
         if (
             this.validator.notValid(
@@ -1151,7 +1166,7 @@ export default class SideChain {
                         gte: 0,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -1165,12 +1180,12 @@ export default class SideChain {
                     owner_address: hexAddress,
                     amount: num,
                 },
-                'post'
+                'post',
             );
 
             const signedTransaction = await this.sidechain.trx.sign(
                 transaction,
-                privateKey
+                privateKey,
             );
 
             if (!signedTransaction.signature) {
@@ -1181,7 +1196,7 @@ export default class SideChain {
             }
 
             const broadcast = await this.sidechain.trx.sendRawTransaction(
-                signedTransaction
+                signedTransaction,
             );
             if (broadcast.code) {
                 const err = {
@@ -1204,7 +1219,7 @@ export default class SideChain {
         feeLimit,
         options = {},
         privateKey = this.sidechain.defaultPrivateKey,
-        callback = false
+        callback = false,
     ) {
         const functionSelector = 'retryWithdraw(uint256)';
         return this.withdrawTrc(
@@ -1215,7 +1230,7 @@ export default class SideChain {
             this.sideGatewayAddress,
             options,
             privateKey,
-            callback
+            callback,
         );
     }
 
@@ -1225,7 +1240,7 @@ export default class SideChain {
         feeLimit,
         options = {},
         privateKey = this.mainchain.defaultPrivateKey,
-        callback = false
+        callback = false,
     ) {
         const functionSelector = 'retryDeposit';
         return this.depositTrc(
@@ -1236,7 +1251,7 @@ export default class SideChain {
             this.mainGatewayAddress,
             options,
             privateKey,
-            callback
+            callback,
         );
     }
 
@@ -1246,7 +1261,7 @@ export default class SideChain {
         feeLimit,
         options = {},
         privateKey = this.mainchain.defaultPrivateKey,
-        callback = false
+        callback = false,
     ) {
         const functionSelector = 'retryMapping';
         return this.depositTrc(
@@ -1257,7 +1272,7 @@ export default class SideChain {
             this.mainGatewayAddress,
             options,
             privateKey,
-            callback
+            callback,
         );
     }
 }

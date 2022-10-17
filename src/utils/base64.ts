@@ -83,7 +83,7 @@ export class Base64 {
         let enc4;
         let i = 0;
 
-        input = input.replace(/[^A-Za-z0-9\+\/\=]/g, '');
+        input = input.replace(/[^A-Za-z0-9+/=]/g, '');
 
         while (i < input.length) {
             enc1 = this._keyStr.indexOf(input.charAt(i++));
@@ -97,9 +97,9 @@ export class Base64 {
 
             output = output + String.fromCharCode(chr1);
 
-            if (enc3 != 64) output = output + String.fromCharCode(chr2);
+            if (enc3 !== 64) output = output + String.fromCharCode(chr2);
 
-            if (enc4 != 64) output = output + String.fromCharCode(chr3);
+            if (enc4 !== 64) output = output + String.fromCharCode(chr3);
         }
 
         return this._utf8_decode(output);
@@ -116,7 +116,7 @@ export class Base64 {
         let enc4;
         let i = 0;
 
-        input = input.replace(/[^A-Za-z0-9\+\/\=]/g, '');
+        input = input.replace(/[^A-Za-z0-9+/=]/g, '');
 
         while (i < input.length) {
             enc1 = this._keyStr.indexOf(input.charAt(i++));
@@ -130,9 +130,9 @@ export class Base64 {
 
             output = output + String.fromCharCode(chr1);
 
-            if (enc3 != 64) output = output + String.fromCharCode(chr2);
+            if (enc3 !== 64) output = output + String.fromCharCode(chr2);
 
-            if (enc4 != 64) output = output + String.fromCharCode(chr3);
+            if (enc4 !== 64) output = output + String.fromCharCode(chr3);
         }
 
         return this._out2ByteArray(output);
@@ -197,7 +197,7 @@ export class Base64 {
                 c3 = utftext.charCodeAt(i + 2);
 
                 string += String.fromCharCode(
-                    ((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63)
+                    ((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63),
                 );
 
                 i += 3;

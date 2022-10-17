@@ -44,7 +44,13 @@ export default class Plugin {
             } else {
                 // plug methods into a class, like trx
                 for (const component in pluginInterface.components) {
-                    if (!this.tronWeb.hasOwnProperty(component)) continue;
+                    if (
+                        !Object.prototype.hasOwnProperty.call(
+                            this.tronWeb,
+                            component,
+                        )
+                    )
+                        continue;
 
                     const methods = pluginInterface.components[component];
                     const pluginNoOverride =
@@ -53,14 +59,16 @@ export default class Plugin {
                         if (
                             method === 'constructor' ||
                             (this.tronWeb[component][method] &&
-                                (pluginNoOverride.includes(method) || // blacklisted methods
-                                    /^_/.test(method))) // private methods
+                                // blacklisted methods
+                                (pluginNoOverride.includes(method) ||
+                                    // private methods
+                                    /^_/.test(method)))
                         ) {
                             result.skipped.push(method);
                             continue;
                         }
                         this.tronWeb[component][method] = methods[method].bind(
-                            this.tronWeb[component]
+                            this.tronWeb[component],
                         );
                         result.plugged.push(method);
                     }
@@ -68,7 +76,7 @@ export default class Plugin {
             }
         } else {
             throw new Error(
-                'The plugin is not compatible with this version of TronWeb'
+                'The plugin is not compatible with this version of TronWeb',
             );
         }
         return result;

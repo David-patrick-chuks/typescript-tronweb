@@ -28,11 +28,13 @@ export default class Validator {
         );
     }
 
+    // FIXME: complexity
+    // eslint-disable-next-line complexity
     notValid(params = [], callback = new Function()) {
         const normalized = {};
         let no = false;
         for (const param of params) {
-            const { name, names, value, type, gt, lt, gte, lte, se, optional } =
+            const { name, names, value, type, gt, lt, gte, lte, optional } =
                 param;
             if (
                 optional &&

@@ -19,10 +19,10 @@ interface ContractOptions {
     fingerprint?: any;
     rawResponse?: boolean;
     sort?: boolean;
-    filters?: Object | Object[];
+    filters?: unknown | unknown[];
 }
 
-type _CallbackT<Out> = (err: string | null, data?: Object[]) => Out;
+type _CallbackT<Out> = (err: string | null, data?: unknown[]) => Out;
 
 export default class Event {
     tronWeb: TronWeb;
@@ -37,7 +37,7 @@ export default class Event {
 
     setServer(
         eventServer: string | providers.HttpProvider,
-        healthcheck = 'healthcheck'
+        healthcheck = 'healthcheck',
     ): void {
         if (!eventServer) return (this.tronWeb.eventServer = false);
 
@@ -57,18 +57,19 @@ export default class Event {
 
     getEventsByContractAddress(
         contractAddress: string,
-        options: ContractOptions
+        options: ContractOptions,
     ): Promise<any>;
     getEventsByContractAddress<Out>(
         contractAddress: string,
         options: ContractOptions,
-        callback?: _CallbackT<Out>
+        callback?: _CallbackT<Out>,
     ): Promise<Out>;
     getEventsByContractAddress<Out>(
         contractAddress: string,
         options: ContractOptions = {},
-        callback?: _CallbackT<Out>
+        callback?: _CallbackT<Out>,
     ): Out | Promise<Out | any> {
+        /* eslint-disable prefer-const */
         let {
             sinceTimestamp,
             since,
@@ -93,15 +94,17 @@ export default class Event {
                 size: 20,
                 page: 1,
             },
-            options
+            options,
         ) as ContractOptions;
+        /* eslint-enable prefer-const */
 
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.getEventsByContractAddress,
                 contractAddress,
-                options
+                options,
             );
+        }
 
         fromTimestamp = fromTimestamp || sinceTimestamp || since;
 
@@ -113,10 +116,11 @@ export default class Event {
         if (!this.tronWeb.isAddress(contractAddress))
             return callback('Invalid contract address provided');
 
-        if (eventName && !contractAddress)
+        if (eventName && !contractAddress) {
             return callback(
-                'Usage of event name filtering requires a contract address'
+                'Usage of event name filtering requires a contract address',
             );
+        }
 
         if (
             typeof fromTimestamp !== 'undefined' &&
@@ -133,10 +137,11 @@ export default class Event {
 
         if (!utils.isInteger(page)) return callback('Invalid page provided');
 
-        if (blockNumber && !eventName)
+        if (blockNumber && !eventName) {
             return callback(
-                'Usage of block number filtering requires an event name'
+                'Usage of block number filtering requires an event name',
             );
+        }
 
         if (contractAddress)
             routeParams.push(this.tronWeb.address.fromHex(contractAddress));
@@ -169,8 +174,8 @@ export default class Event {
         return this.tronWeb.eventServer
             .request(
                 `event/contract/${routeParams.join(
-                    '/'
-                )}?${querystring.stringify(qs)}`
+                    '/',
+                )}?${querystring.stringify(qs)}`,
             )
             .then((data: any) => {
                 if (!data) return callback('Unknown error occurred');
@@ -182,28 +187,28 @@ export default class Event {
                     rawResponse === true
                         ? data
                         : (data as Array<any>).map((event) =>
-                              utils.mapEvent(event)
-                          )
+                                utils.mapEvent(event),
+                            ),
                 );
             })
             .catch((err: any) =>
-                callback((err.response && err.response.data) || err)
+                callback((err.response && err.response.data) || err),
             );
     }
 
     getEventsByTransactionID(
         transactionID: string,
-        options: { rawResponse?: boolean }
+        options: { rawResponse?: boolean },
     ): Promise<any>;
     getEventsByTransactionID<Out>(
         transactionID: string,
         options: { rawResponse?: boolean },
-        callback?: _CallbackT<Out>
+        callback?: _CallbackT<Out>,
     ): Out | Promise<Out>;
     getEventsByTransactionID<Out>(
         transactionID: string,
         options: { rawResponse?: boolean } | _CallbackT<Out> = {},
-        callback?: _CallbackT<Out>
+        callback?: _CallbackT<Out>,
     ): Out | Promise<Out | any> {
         if (utils.isFunction(options)) {
             callback = options;
@@ -211,12 +216,13 @@ export default class Event {
         }
         const actualOptions = options as { rawResponse?: boolean };
 
-        if (!callback || !utils.isFunction(callback))
+        if (!callback || !utils.isFunction(callback)) {
             return this.injectPromise(
                 this.getEventsByTransactionID,
                 transactionID,
-                actualOptions
+                actualOptions,
             );
+        }
 
         if (!this.tronWeb.eventServer)
             return callback('No event server configured');
@@ -235,14 +241,14 @@ export default class Event {
                     actualOptions.rawResponse === true
                         ? data
                         : (data as Array<any>).map((event) =>
-                              utils.mapEvent(event)
-                          )
+                                utils.mapEvent(event),
+                            ),
                 );
             })
             .catch(
                 (err: any) =>
                     callback &&
-                    callback((err.response && err.response.data) || err)
+                    callback((err.response && err.response.data) || err),
             );
     }
 }

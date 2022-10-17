@@ -6,6 +6,8 @@ import { ADDRESS_PREFIX_REGEX } from 'utils/address';
 import injectpromise from 'injectpromise';
 import { encodeParamsV2ByABI } from 'utils/abi';
 
+const INVALID_RESOURCE_MESSAGE =
+    'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY';
 let self;
 
 //helpers
@@ -21,9 +23,8 @@ function fromUtf8(value) {
 function resultManager(transaction, callback) {
     if (transaction.Error) return callback(transaction.Error);
 
-    if (transaction.result && transaction.result.message) {
+    if (transaction.result && transaction.result.message)
         return callback(self.tronWeb.toUtf8(transaction.result.message));
-    }
 
     return callback(null, transaction);
 }
@@ -43,7 +44,7 @@ export default class TransactionBuilder {
         amount = 0,
         from = this.tronWeb.defaultAddress.hex,
         options,
-        callback = false
+        callback = false,
     ) {
         if (utils.isFunction(options)) {
             callback = options;
@@ -89,7 +90,7 @@ export default class TransactionBuilder {
                         value: amount,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -115,7 +116,7 @@ export default class TransactionBuilder {
         tokenID = false,
         from = this.tronWeb.defaultAddress.hex,
         options,
-        callback = false
+        callback = false,
     ) {
         if (utils.isFunction(options)) {
             callback = options;
@@ -130,15 +131,16 @@ export default class TransactionBuilder {
             from = this.tronWeb.defaultAddress.hex;
         }
 
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.sendToken,
                 to,
                 amount,
                 tokenID,
                 from,
-                options
+                options,
             );
+        }
 
         amount = parseInt(amount);
         if (
@@ -171,7 +173,7 @@ export default class TransactionBuilder {
                         value: tokenID,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -198,7 +200,7 @@ export default class TransactionBuilder {
         amount = 0,
         buyer = this.tronWeb.defaultAddress.hex,
         options,
-        callback = false
+        callback = false,
     ) {
         if (utils.isFunction(options)) {
             callback = options;
@@ -213,15 +215,16 @@ export default class TransactionBuilder {
             buyer = this.tronWeb.defaultAddress.hex;
         }
 
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.purchaseToken,
                 issuerAddress,
                 tokenID,
                 amount,
                 buyer,
-                options
+                options,
             );
+        }
 
         if (
             this.validator.notValid(
@@ -253,7 +256,7 @@ export default class TransactionBuilder {
                         value: tokenID,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -281,7 +284,7 @@ export default class TransactionBuilder {
         address = this.tronWeb.defaultAddress.hex,
         receiverAddress = undefined,
         options,
-        callback = false
+        callback = false,
     ) {
         if (utils.isFunction(options)) {
             callback = options;
@@ -314,7 +317,7 @@ export default class TransactionBuilder {
             resource = 'BANDWIDTH';
         }
 
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.freezeBalance,
                 amount,
@@ -322,8 +325,9 @@ export default class TransactionBuilder {
                 resource,
                 address,
                 receiverAddress,
-                options
+                options,
             );
+        }
 
         if (
             this.validator.notValid(
@@ -355,10 +359,10 @@ export default class TransactionBuilder {
                         name: 'resource',
                         type: 'resource',
                         value: resource,
-                        msg: 'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY',
+                        msg: INVALID_RESOURCE_MESSAGE,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -390,7 +394,7 @@ export default class TransactionBuilder {
         address = this.tronWeb.defaultAddress.hex,
         receiverAddress = undefined,
         options,
-        callback = false
+        callback = false,
     ) {
         if (utils.isFunction(options)) {
             callback = options;
@@ -418,14 +422,15 @@ export default class TransactionBuilder {
             resource = 'BANDWIDTH';
         }
 
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.unfreezeBalance,
                 resource,
                 address,
                 receiverAddress,
-                options
+                options,
             );
+        }
 
         if (
             this.validator.notValid(
@@ -445,10 +450,10 @@ export default class TransactionBuilder {
                         name: 'resource',
                         type: 'resource',
                         value: resource,
-                        msg: 'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY',
+                        msg: INVALID_RESOURCE_MESSAGE,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -476,7 +481,7 @@ export default class TransactionBuilder {
     withdrawBlockRewards(
         address = this.tronWeb.defaultAddress.hex,
         options,
-        callback = false
+        callback = false,
     ) {
         if (utils.isFunction(options)) {
             callback = options;
@@ -491,12 +496,13 @@ export default class TransactionBuilder {
             address = this.tronWeb.defaultAddress.hex;
         }
 
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.withdrawBlockRewards,
                 address,
-                options
+                options,
             );
+        }
 
         if (
             this.validator.notValid(
@@ -507,7 +513,7 @@ export default class TransactionBuilder {
                         value: address,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -529,7 +535,7 @@ export default class TransactionBuilder {
         address = this.tronWeb.defaultAddress.hex,
         url = false,
         options,
-        callback = false
+        callback = false,
     ) {
         if (utils.isFunction(options)) {
             callback = options;
@@ -559,7 +565,7 @@ export default class TransactionBuilder {
                         msg: 'Invalid url provided',
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -582,7 +588,7 @@ export default class TransactionBuilder {
         votes = {},
         voterAddress = this.tronWeb.defaultAddress.hex,
         options,
-        callback = false
+        callback = false,
     ) {
         if (utils.isFunction(options)) {
             callback = options;
@@ -614,7 +620,7 @@ export default class TransactionBuilder {
                         value: votes,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -667,19 +673,20 @@ export default class TransactionBuilder {
     createSmartContract(
         options = {},
         issuerAddress = this.tronWeb.defaultAddress.hex,
-        callback = false
+        callback = false,
     ) {
         if (utils.isFunction(issuerAddress)) {
             callback = issuerAddress;
             issuerAddress = this.tronWeb.defaultAddress.hex;
         }
 
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.createSmartContract,
                 options,
-                issuerAddress
+                issuerAddress,
             );
+        }
 
         const feeLimit = options.feeLimit || this.tronWeb.feeLimit;
         let userFeePercentage = options.userFeePercentage;
@@ -691,12 +698,14 @@ export default class TransactionBuilder {
         const tokenValue = options.tokenValue;
         const tokenId = options.tokenId || options.token_id;
 
+        /* eslint-disable prefer-const */
         let {
             abi = false,
             bytecode = false,
             parameters = [],
             name = '',
         } = options;
+        /* eslint-enable prefer-const */
 
         if (abi && utils.isString(abi)) {
             try {
@@ -777,27 +786,31 @@ export default class TransactionBuilder {
                         optional: true,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
 
-        if (payable && callValue == 0 && tokenValue == 0)
+        if (payable && callValue === 0 && tokenValue === 0) {
             return callback(
-                'When contract is payable, options.callValue or options.tokenValue must be a positive integer'
+                'When contract is payable, options.callValue or options.tokenValue' +
+                    ' must be a positive integer',
             );
+        }
 
-        if (!payable && (callValue > 0 || tokenValue > 0))
+        if (!payable && (callValue > 0 || tokenValue > 0)) {
             return callback(
-                'When contract is not payable, options.callValue and options.tokenValue must be 0'
+                'When contract is not payable, options.callValue' +
+                    ' and options.tokenValue must be 0',
             );
+        }
 
         if (options.rawParameter && utils.isString(options.rawParameter)) {
             parameters = options.rawParameter.replace(/^(0x)/, '');
         } else if (options.funcABIV2) {
             parameters = encodeParamsV2ByABI(
                 options.funcABIV2,
-                options.parametersV2
+                options.parametersV2,
             ).replace(/^(0x)/, '');
         } else {
             let constructorParams = abi.find((it) => {
@@ -810,33 +823,37 @@ export default class TransactionBuilder {
                 const values = [];
                 constructorParams = constructorParams.inputs;
 
-                if (parameters.length != constructorParams.length)
+                if (parameters.length !== constructorParams.length) {
                     return callback(
-                        `constructor needs ${constructorParams.length} but ${parameters.length} provided`
+                        `constructor needs ${constructorParams.length}` +
+                            ` but ${parameters.length} provided`,
                     );
+                }
 
                 for (let i = 0; i < parameters.length; i++) {
                     let type = constructorParams[i].type;
                     let value = parameters[i];
 
-                    if (!type || !utils.isString(type) || !type.length)
+                    if (!type || !utils.isString(type) || !type.length) {
                         return callback(
-                            'Invalid parameter type provided: ' + type
+                            'Invalid parameter type provided: ' + type,
                         );
+                    }
 
-                    if (type === 'address')
+                    if (type === 'address') {
                         value = toHex(value).replace(
                             ADDRESS_PREFIX_REGEX,
-                            '0x'
+                            '0x',
                         );
-                    else if (
+                    } else if (
                         type.match(/^([^\x5b]*)(\x5b|$)/)[0] === 'address['
-                    )
+                    ) {
                         value = value.map((v) =>
-                            toHex(v).replace(ADDRESS_PREFIX_REGEX, '0x')
+                            toHex(v).replace(ADDRESS_PREFIX_REGEX, '0x'),
                         );
-                    else if (/trcToken/.test(type))
+                    } else if (/trcToken/.test(type)) {
                         type = type.replace(/trcToken/, 'uint256');
+                    }
 
                     types.push(type);
                     values.push(value);
@@ -866,7 +883,9 @@ export default class TransactionBuilder {
             name,
         };
 
-        // tokenValue and tokenId can cause errors if provided when the trx10 proposal has not been approved yet. So we set them only if they are passed to the method.
+        // tokenValue and tokenId can cause errors if provided
+        // when the trx10 proposal has not been approved yet.
+        // So we set them only if they are passed to the method.
         if (utils.isNotNullOrUndefined(tokenValue))
             args.call_token_value = parseInt(tokenValue);
         if (utils.isNotNullOrUndefined(tokenId))
@@ -908,7 +927,7 @@ export default class TransactionBuilder {
         options = {},
         parameters = [],
         issuerAddress = this.tronWeb.defaultAddress.hex,
-        callback = false
+        callback = false,
     ) {
         if (utils.isFunction(issuerAddress)) {
             callback = issuerAddress;
@@ -927,7 +946,7 @@ export default class TransactionBuilder {
                 functionSelector,
                 options,
                 parameters,
-                issuerAddress
+                issuerAddress,
             );
         }
 
@@ -936,7 +955,7 @@ export default class TransactionBuilder {
                 callValue: 0,
                 feeLimit: this.tronWeb.feeLimit,
             },
-            options
+            options,
         );
 
         if (
@@ -985,7 +1004,7 @@ export default class TransactionBuilder {
                         optional: true,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -1003,24 +1022,27 @@ export default class TransactionBuilder {
                 const values = [];
 
                 for (let i = 0; i < parameters.length; i++) {
+                    // eslint-disable-next-line prefer-const
                     let { type, value } = parameters[i];
 
-                    if (!type || !utils.isString(type) || !type.length)
+                    if (!type || !utils.isString(type) || !type.length) {
                         return callback(
-                            'Invalid parameter type provided: ' + type
+                            'Invalid parameter type provided: ' + type,
                         );
+                    }
 
-                    if (type === 'address')
+                    if (type === 'address') {
                         value = toHex(value).replace(
                             ADDRESS_PREFIX_REGEX,
-                            '0x'
+                            '0x',
                         );
-                    else if (
+                    } else if (
                         type.match(/^([^\x5b]*)(\x5b|$)/)[0] === 'address['
-                    )
+                    ) {
                         value = value.map((v) =>
-                            toHex(v).replace(ADDRESS_PREFIX_REGEX, '0x')
+                            toHex(v).replace(ADDRESS_PREFIX_REGEX, '0x'),
                         );
+                    }
 
                     types.push(type);
                     values.push(value);
@@ -1046,11 +1068,12 @@ export default class TransactionBuilder {
             }
 
             // work for abiv2 if passed the function abi in options
-            if (options.funcABIV2)
+            if (options.funcABIV2) {
                 parameters = encodeParamsV2ByABI(
                     options.funcABIV2,
-                    options.parametersV2
+                    options.parametersV2,
                 ).replace(/^(0x)/, '');
+            }
 
             if (
                 options.shieldedParameter &&
@@ -1081,7 +1104,7 @@ export default class TransactionBuilder {
                     options._isConstant ? 'constant' : 'smart'
                 }contract`,
                 args,
-                'post'
+                'post',
             )
             .then((transaction) => resultManager(transaction, callback))
             .catch((err) => callback(err));
@@ -1090,14 +1113,15 @@ export default class TransactionBuilder {
     clearABI(
         contractAddress,
         ownerAddress = this.tronWeb.defaultAddress.hex,
-        callback = false
+        callback = false,
     ) {
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.clearABI,
                 contractAddress,
-                ownerAddress
+                ownerAddress,
             );
+        }
 
         if (!this.tronWeb.isAddress(contractAddress))
             return callback('Invalid contract address provided');
@@ -1122,14 +1146,15 @@ export default class TransactionBuilder {
     updateBrokerage(
         brokerage,
         ownerAddress = this.tronWeb.defaultAddress.hex,
-        callback = false
+        callback = false,
     ) {
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.updateBrokerage,
                 brokerage,
-                ownerAddress
+                ownerAddress,
             );
+        }
 
         if (!utils.isNotNullOrUndefined(brokerage))
             return callback('Invalid brokerage provided');
@@ -1154,7 +1179,7 @@ export default class TransactionBuilder {
     createToken(
         options = {},
         issuerAddress = this.tronWeb.defaultAddress.hex,
-        callback = false
+        callback = false,
     ) {
         if (utils.isFunction(issuerAddress)) {
             callback = issuerAddress;
@@ -1170,12 +1195,16 @@ export default class TransactionBuilder {
             description = false,
             url = false,
             totalSupply = 0,
-            trxRatio = 1, // How much TRX will `tokenRatio` cost?
-            tokenRatio = 1, // How many tokens will `trxRatio` afford?
+            // How much TRX will `tokenRatio` cost?
+            trxRatio = 1,
+            // How many tokens will `trxRatio` afford?
+            tokenRatio = 1,
             saleStart = Date.now(),
             saleEnd = false,
-            freeBandwidth = 0, // The creator's "donated" bandwidth for use by token holders
-            freeBandwidthLimit = 0, // Out of `totalFreeBandwidth`, the amount each token holder get
+            // The creator's "donated" bandwidth for use by token holders
+            freeBandwidth = 0,
+            // Out of `totalFreeBandwidth`, the amount each token holder get
+            freeBandwidthLimit = 0,
             frozenAmount = 0,
             frozenDuration = 0,
             // for now there is no default for the following values
@@ -1263,7 +1292,7 @@ export default class TransactionBuilder {
                         gte: 0,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -1271,18 +1300,20 @@ export default class TransactionBuilder {
         if (
             utils.isNotNullOrUndefined(voteScore) &&
             (!utils.isInteger(voteScore) || voteScore <= 0)
-        )
+        ) {
             return callback(
-                'voteScore must be a positive integer greater than 0'
+                'voteScore must be a positive integer greater than 0',
             );
+        }
 
         if (
             utils.isNotNullOrUndefined(precision) &&
             (!utils.isInteger(precision) || precision < 0 || precision > 6)
-        )
+        ) {
             return callback(
-                'precision must be a positive integer >= 0 and <= 6'
+                'precision must be a positive integer >= 0 and <= 6',
             );
+        }
 
         const data = {
             owner_address: toHex(issuerAddress),
@@ -1323,7 +1354,7 @@ export default class TransactionBuilder {
         accountName = false,
         address = this.tronWeb.defaultAddress.hex,
         options,
-        callback = false
+        callback = false,
     ) {
         if (utils.isFunction(options)) {
             callback = options;
@@ -1338,13 +1369,14 @@ export default class TransactionBuilder {
             address = this.tronWeb.defaultAddress.hex;
         }
 
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.updateAccount,
                 accountName,
                 address,
-                options
+                options,
             );
+        }
 
         if (
             this.validator.notValid(
@@ -1360,7 +1392,7 @@ export default class TransactionBuilder {
                         value: address,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -1382,7 +1414,7 @@ export default class TransactionBuilder {
     setAccountId(
         accountId,
         address = this.tronWeb.defaultAddress.hex,
-        callback = false
+        callback = false,
     ) {
         if (utils.isFunction(address)) {
             callback = address;
@@ -1420,7 +1452,7 @@ export default class TransactionBuilder {
                         value: address,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -1432,7 +1464,7 @@ export default class TransactionBuilder {
                     account_id: accountId,
                     owner_address: toHex(address),
                 },
-                'post'
+                'post',
             )
             .then((transaction) => resultManager(transaction, callback))
             .catch((err) => callback(err));
@@ -1441,7 +1473,7 @@ export default class TransactionBuilder {
     updateToken(
         options = {},
         issuerAddress = this.tronWeb.defaultAddress.hex,
-        callback = false
+        callback = false,
     ) {
         if (utils.isFunction(issuerAddress)) {
             callback = issuerAddress;
@@ -1457,8 +1489,10 @@ export default class TransactionBuilder {
         const {
             description = false,
             url = false,
-            freeBandwidth = 0, // The creator's "donated" bandwidth for use by token holders
-            freeBandwidthLimit = 0, // Out of `totalFreeBandwidth`, the amount each token holder get
+            // The creator's "donated" bandwidth for use by token holders
+            freeBandwidth = 0,
+            // Out of `totalFreeBandwidth`, the amount each token holder get
+            freeBandwidthLimit = 0,
         } = options;
 
         if (
@@ -1490,7 +1524,7 @@ export default class TransactionBuilder {
                         value: freeBandwidthLimit,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -1536,7 +1570,7 @@ export default class TransactionBuilder {
         parameters = false,
         issuerAddress = this.tronWeb.defaultAddress.hex,
         options,
-        callback = false
+        callback = false,
     ) {
         if (utils.isFunction(options)) {
             callback = options;
@@ -1551,13 +1585,14 @@ export default class TransactionBuilder {
             issuerAddress = this.tronWeb.defaultAddress.hex;
         }
 
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.createProposal,
                 parameters,
                 issuerAddress,
-                options
+                options,
             );
+        }
 
         if (
             this.validator.notValid(
@@ -1568,7 +1603,7 @@ export default class TransactionBuilder {
                         value: issuerAddress,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -1579,9 +1614,8 @@ export default class TransactionBuilder {
 
         if (!utils.isArray(parameters)) parameters = [parameters];
 
-        for (const parameter of parameters) {
+        for (const parameter of parameters)
             if (!utils.isObject(parameter)) return callback(invalid);
-        }
 
         const data = {
             owner_address: toHex(issuerAddress),
@@ -1605,7 +1639,7 @@ export default class TransactionBuilder {
         proposalID = false,
         issuerAddress = this.tronWeb.defaultAddress.hex,
         options,
-        callback = false
+        callback = false,
     ) {
         if (utils.isFunction(options)) {
             callback = options;
@@ -1620,13 +1654,14 @@ export default class TransactionBuilder {
             issuerAddress = this.tronWeb.defaultAddress.hex;
         }
 
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.deleteProposal,
                 proposalID,
                 issuerAddress,
-                options
+                options,
             );
+        }
 
         if (
             this.validator.notValid(
@@ -1643,7 +1678,7 @@ export default class TransactionBuilder {
                         gte: 0,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -1671,7 +1706,7 @@ export default class TransactionBuilder {
         isApproval = false,
         voterAddress = this.tronWeb.defaultAddress.hex,
         options,
-        callback = false
+        callback = false,
     ) {
         if (utils.isFunction(options)) {
             callback = options;
@@ -1686,14 +1721,15 @@ export default class TransactionBuilder {
             voterAddress = this.tronWeb.defaultAddress.hex;
         }
 
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.voteProposal,
                 proposalID,
                 isApproval,
                 voterAddress,
-                options
+                options,
             );
+        }
 
         if (
             this.validator.notValid(
@@ -1715,7 +1751,7 @@ export default class TransactionBuilder {
                         value: isApproval,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -1746,7 +1782,7 @@ export default class TransactionBuilder {
         trxBalance,
         ownerAddress = this.tronWeb.defaultAddress.hex,
         options,
-        callback = false
+        callback = false,
     ) {
         if (utils.isFunction(options)) {
             callback = options;
@@ -1761,15 +1797,16 @@ export default class TransactionBuilder {
             ownerAddress = this.tronWeb.defaultAddress.hex;
         }
 
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.createTRXExchange,
                 tokenName,
                 tokenBalance,
                 trxBalance,
                 ownerAddress,
-                options
+                options,
             );
+        }
 
         if (
             this.validator.notValid(
@@ -1795,7 +1832,7 @@ export default class TransactionBuilder {
                         value: trxBalance,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -1832,7 +1869,7 @@ export default class TransactionBuilder {
         secondTokenBalance,
         ownerAddress = this.tronWeb.defaultAddress.hex,
         options,
-        callback = false
+        callback = false,
     ) {
         if (utils.isFunction(options)) {
             callback = options;
@@ -1847,7 +1884,7 @@ export default class TransactionBuilder {
             ownerAddress = this.tronWeb.defaultAddress.hex;
         }
 
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.createTokenExchange,
                 firstTokenName,
@@ -1855,8 +1892,9 @@ export default class TransactionBuilder {
                 secondTokenName,
                 secondTokenBalance,
                 ownerAddress,
-                options
+                options,
             );
+        }
 
         if (
             this.validator.notValid(
@@ -1887,7 +1925,7 @@ export default class TransactionBuilder {
                         value: secondTokenBalance,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -1922,7 +1960,7 @@ export default class TransactionBuilder {
         tokenAmount = 0,
         ownerAddress = this.tronWeb.defaultAddress.hex,
         options,
-        callback = false
+        callback = false,
     ) {
         if (utils.isFunction(options)) {
             callback = options;
@@ -1937,15 +1975,16 @@ export default class TransactionBuilder {
             ownerAddress = this.tronWeb.defaultAddress.hex;
         }
 
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.injectExchangeTokens,
                 exchangeID,
                 tokenName,
                 tokenAmount,
                 ownerAddress,
-                options
+                options,
             );
+        }
 
         if (
             this.validator.notValid(
@@ -1973,7 +2012,7 @@ export default class TransactionBuilder {
                         gte: 0,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -2005,7 +2044,7 @@ export default class TransactionBuilder {
         tokenAmount = 0,
         ownerAddress = this.tronWeb.defaultAddress.hex,
         options,
-        callback = false
+        callback = false,
     ) {
         if (utils.isFunction(options)) {
             callback = options;
@@ -2020,15 +2059,16 @@ export default class TransactionBuilder {
             ownerAddress = this.tronWeb.defaultAddress.hex;
         }
 
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.withdrawExchangeTokens,
                 exchangeID,
                 tokenName,
                 tokenAmount,
                 ownerAddress,
-                options
+                options,
             );
+        }
 
         if (
             this.validator.notValid(
@@ -2056,7 +2096,7 @@ export default class TransactionBuilder {
                         gte: 0,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -2089,7 +2129,7 @@ export default class TransactionBuilder {
         tokenAmountExpected = 0,
         ownerAddress = this.tronWeb.defaultAddress.hex,
         options,
-        callback = false
+        callback = false,
     ) {
         if (utils.isFunction(options)) {
             callback = options;
@@ -2104,7 +2144,7 @@ export default class TransactionBuilder {
             ownerAddress = this.tronWeb.defaultAddress.hex;
         }
 
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.tradeExchangeTokens,
                 exchangeID,
@@ -2112,8 +2152,9 @@ export default class TransactionBuilder {
                 tokenAmountSold,
                 tokenAmountExpected,
                 ownerAddress,
-                options
+                options,
             );
+        }
 
         if (
             this.validator.notValid(
@@ -2147,7 +2188,7 @@ export default class TransactionBuilder {
                         gte: 0,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -2177,7 +2218,7 @@ export default class TransactionBuilder {
         userFeePercentage = false,
         ownerAddress = this.tronWeb.defaultAddress.hex,
         options,
-        callback = false
+        callback = false,
     ) {
         if (utils.isFunction(options)) {
             callback = options;
@@ -2192,14 +2233,15 @@ export default class TransactionBuilder {
             ownerAddress = this.tronWeb.defaultAddress.hex;
         }
 
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.updateSetting,
                 contractAddress,
                 userFeePercentage,
                 ownerAddress,
-                options
+                options,
             );
+        }
 
         if (
             this.validator.notValid(
@@ -2222,7 +2264,7 @@ export default class TransactionBuilder {
                         lte: 100,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -2250,7 +2292,7 @@ export default class TransactionBuilder {
         originEnergyLimit = false,
         ownerAddress = this.tronWeb.defaultAddress.hex,
         options,
-        callback = false
+        callback = false,
     ) {
         if (utils.isFunction(options)) {
             callback = options;
@@ -2265,14 +2307,15 @@ export default class TransactionBuilder {
             ownerAddress = this.tronWeb.defaultAddress.hex;
         }
 
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.updateEnergyLimit,
                 contractAddress,
                 originEnergyLimit,
                 ownerAddress,
-                options
+                options,
             );
+        }
 
         if (
             this.validator.notValid(
@@ -2295,7 +2338,7 @@ export default class TransactionBuilder {
                         lte: 10_000_000,
                     },
                 ],
-                callback
+                callback,
             )
         )
             return;
@@ -2346,7 +2389,7 @@ export default class TransactionBuilder {
         ownerPermissions = false,
         witnessPermissions = false,
         activesPermissions = false,
-        callback = false
+        callback = false,
     ) {
         if (utils.isFunction(activesPermissions)) {
             callback = activesPermissions;
@@ -2363,14 +2406,15 @@ export default class TransactionBuilder {
             ownerPermissions = witnessPermissions = activesPermissions = false;
         }
 
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.updateAccountPermissions,
                 ownerAddress,
                 ownerPermissions,
                 witnessPermissions,
-                activesPermissions
+                activesPermissions,
             );
+        }
 
         if (!this.tronWeb.isAddress(ownerAddress))
             return callback('Invalid ownerAddress provided');
@@ -2396,11 +2440,12 @@ export default class TransactionBuilder {
 
         if (witnessPermissions) data.witness = witnessPermissions;
 
-        if (activesPermissions)
+        if (activesPermissions) {
             data.actives =
                 activesPermissions.length === 1
                     ? activesPermissions[0]
                     : activesPermissions;
+        }
 
         this.tronWeb.fullNode
             .request('wallet/accountpermissionupdate', data, 'post')
@@ -2420,21 +2465,23 @@ export default class TransactionBuilder {
 
                 callback(null, newTransaction);
             })
-            .catch((err) => callback('Error generating a new transaction id.'));
+            .catch(() => callback('Error generating a new transaction id.'));
     }
 
     async alterTransaction(transaction, options = {}, callback = false) {
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.alterTransaction,
                 transaction,
-                options
+                options,
             );
+        }
 
-        if (transaction.signature)
+        if (transaction.signature) {
             return callback(
-                'You can not extend the expiration of a signed transaction.'
+                'You can not extend the expiration of a signed transaction.',
             );
+        }
 
         if (options.data) {
             if (options.dataFormat !== 'hex')
@@ -2460,12 +2507,13 @@ export default class TransactionBuilder {
     }
 
     async extendExpiration(transaction, extension, callback = false) {
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.extendExpiration,
                 transaction,
-                extension
+                extension,
             );
+        }
 
         this.alterTransaction(transaction, { extension }, callback);
     }
@@ -2474,20 +2522,21 @@ export default class TransactionBuilder {
         transaction,
         data,
         dataFormat = 'utf8',
-        callback = false
+        callback = false,
     ) {
         if (utils.isFunction(dataFormat)) {
             callback = dataFormat;
             dataFormat = 'utf8';
         }
 
-        if (!callback)
+        if (!callback) {
             return this.injectPromise(
                 this.addUpdateData,
                 transaction,
                 data,
-                dataFormat
+                dataFormat,
             );
+        }
 
         this.alterTransaction(transaction, { data, dataFormat }, callback);
     }

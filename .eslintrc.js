@@ -10,7 +10,11 @@ module.exports = {
         ApexCharts: 'readonly',
         moment: 'readonly',
     },
-    extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
+    extends: [
+        'eslint:recommended',
+        'plugin:@typescript-eslint/recommended',
+        'prettier',
+    ],
     root: true,
     parserOptions: {
         ecmaVersion: 13,
@@ -41,7 +45,6 @@ module.exports = {
         'max-depth': [2, 7],
         'max-statements': [2, 133],
         complexity: [2, 45],
-        'no-unused-vars': 2,
         'no-eval': 2,
         'no-underscore-dangle': 0,
         'no-loop-func': 2,
@@ -52,9 +55,13 @@ module.exports = {
         'space-infix-ops': 2,
         'comma-dangle': [2, 'always-multiline'],
         curly: [2, 'multi-or-nest', 'consistent'],
+        'no-unused-vars': 0,
         // ts
+        '@typescript-eslint/no-unused-vars': 2,
         '@typescript-eslint/ban-ts-comment': 0,
         '@typescript-eslint/no-non-null-assertion': 0,
         '@typescript-eslint/no-explicit-any': 0,
+        // FIXME: only temporary
+        '@typescript-eslint/no-this-alias': 0,
     },
 };

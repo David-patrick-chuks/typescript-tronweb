@@ -47,8 +47,7 @@ export function generateRandom(options?: {
     if (!utils.isObject(options)) options = {};
     if (!options.path) options.path = TRON_BIP39_PATH_INDEX_0;
 
-    // FIXME: no escape neeed here and below for singlequote
-    if (!String(options.path).match(/^m\/44\'\/195\'/))
+    if (!String(options.path).match(/^m\/44'\/195'/))
         throw new Error(INVALID_TRON_PATH_ERROR_MSG);
 
     const account = ethersWallet.createRandom(options);
@@ -66,11 +65,11 @@ export function generateRandom(options?: {
 export function generateAccountWithMnemonic(
     mnemonic: string,
     path: string,
-    wordlist: string | Wordlist = 'en'
+    wordlist: string | Wordlist = 'en',
 ): IAccountWithMnemonic {
     if (!path) path = TRON_BIP39_PATH_INDEX_0;
 
-    if (!String(path).match(/^m\/44\'\/195\'/))
+    if (!String(path).match(/^m\/44'\/195'/))
         throw new Error(INVALID_TRON_PATH_ERROR_MSG);
 
     // FIXME: remove, if merged https://github.com/ethers-io/ethers.js/pull/3440
