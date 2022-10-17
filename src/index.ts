@@ -36,7 +36,7 @@ export default class TronWeb extends EventEmitter {
         solidityNode = false,
         eventServer = false,
         sideOptions = false,
-        privateKey = false
+        privateKey = false,
     ) {
         super();
 
@@ -112,14 +112,16 @@ export default class TronWeb extends EventEmitter {
         if (
             typeof sideOptions === 'object' &&
             (sideOptions.fullNode || sideOptions.fullHost)
-        )
+        ) {
             this.sidechain = new SideChain(
                 sideOptions,
                 TronWeb,
                 this,
-                privateKey
+                privateKey,
             );
-        else privateKey = privateKey || sideOptions;
+        } else {
+            privateKey = privateKey || sideOptions;
+        }
 
         if (privateKey) this.setPrivateKey(privateKey);
         this.fullnodeVersion = DEFAULT_VERSION;
@@ -190,7 +192,7 @@ export default class TronWeb extends EventEmitter {
 
     isValidProvider(provider) {
         return Object.values(providers).some(
-            (knownProvider) => provider instanceof knownProvider
+            (knownProvider) => provider instanceof knownProvider,
         );
     }
 
@@ -228,21 +230,21 @@ export default class TronWeb extends EventEmitter {
             30000,
             false,
             false,
-            headers
+            headers,
         );
         const solidityNode = new providers.HttpProvider(
             this.solidityNode.host,
             30000,
             false,
             false,
-            headers
+            headers,
         );
         const eventServer = new providers.HttpProvider(
             this.eventServer.host,
             30000,
             false,
             false,
-            headers
+            headers,
         );
 
         this.setFullNode(fullNode);
@@ -256,14 +258,14 @@ export default class TronWeb extends EventEmitter {
             30000,
             false,
             false,
-            headers
+            headers,
         );
         const solidityNode = new providers.HttpProvider(
             this.solidityNode.host,
             30000,
             false,
             false,
-            headers
+            headers,
         );
 
         this.setFullNode(fullNode);
@@ -276,7 +278,7 @@ export default class TronWeb extends EventEmitter {
             30000,
             false,
             false,
-            headers
+            headers,
         );
         this.setEventServer(eventServer);
     }
@@ -335,8 +337,8 @@ export default class TronWeb extends EventEmitter {
 
                 return utils.crypto.getBase58CheckAddress(
                     utils.code.hexStr2byteArray(
-                        address.replace(/^0x/, ADDRESS_PREFIX)
-                    )
+                        address.replace(/^0x/, ADDRESS_PREFIX),
+                    ),
                 );
             },
             toHex(address) {
@@ -356,12 +358,18 @@ export default class TronWeb extends EventEmitter {
             },
         };
     }
+    get address() {
+        return TronWeb.address;
+    }
 
     static sha3(string, prefix = true) {
         return (
             (prefix ? '0x' : '') +
             keccak256(Buffer.from(string, 'utf-8')).toString().substring(2)
         );
+    }
+    sha3(string, prefix = true) {
+        return TronWeb.sha3(string, prefix);
     }
 
     static toHex(val) {
@@ -380,11 +388,16 @@ export default class TronWeb extends EventEmitter {
         }
 
         const result = TronWeb.fromDecimal(val);
-        if (result === '0xNaN')
+        if (result === '0xNaN') {
             throw new Error(
-                'The passed value is not convertible to a hex string'
+                'The passed value is not convertible to a hex string',
             );
-        else return result;
+        } else {
+            return result;
+        }
+    }
+    toHex(val) {
+        return TronWeb.toHex(val);
     }
 
     static toUtf8(hex) {
@@ -395,6 +408,9 @@ export default class TronWeb extends EventEmitter {
             throw new Error('The passed value is not a valid hex string');
         }
     }
+    toUtf8(hex) {
+        return TronWeb.toUtf8(hex);
+    }
 
     static fromUtf8(string) {
         if (!utils.isString(string))
@@ -402,15 +418,16 @@ export default class TronWeb extends EventEmitter {
 
         return '0x' + Buffer.from(string, 'utf8').toString('hex');
     }
+    fromUtf8(string) {
+        return TronWeb.fromUtf8(string);
+    }
 
     static toAscii(hex) {
         if (utils.isHex(hex)) {
             let str = '';
-            let i = 0,
-                l = hex.length;
-            if (hex.substring(0, 2) === '0x') i = 2;
+            let i = hex.substring(0, 2) === '0x' ? 2 : 0;
 
-            for (; i < l; i += 2) {
+            for (; i < hex.length; i += 2) {
                 const code = parseInt(hex.substr(i, 2), 16);
                 str += String.fromCharCode(code);
             }
@@ -418,6 +435,9 @@ export default class TronWeb extends EventEmitter {
         } else {
             throw new Error('The passed value is not a valid hex string');
         }
+    }
+    toAscii(hex) {
+        return TronWeb.toAscii(hex);
     }
 
     static fromAscii(string, padding) {
@@ -429,9 +449,15 @@ export default class TronWeb extends EventEmitter {
             Buffer.from(string, 'ascii').toString('hex').padEnd(padding, '0')
         );
     }
+    fromAscii(string, padding) {
+        return TronWeb.fromAscii(string, padding);
+    }
 
     static toDecimal(value) {
         return TronWeb.toBigNumber(value).toNumber();
+    }
+    toDecimal(value) {
+        return TronWeb.toDecimal(value);
     }
 
     static fromDecimal(value) {
@@ -440,15 +466,24 @@ export default class TronWeb extends EventEmitter {
 
         return number.isLessThan(0) ? '-0x' + result.substr(1) : '0x' + result;
     }
+    fromDecimal(value) {
+        return TronWeb.fromDecimal(value);
+    }
 
     static fromSun(sun) {
         const trx = TronWeb.toBigNumber(sun).div(1_000_000);
         return utils.isBigNumber(sun) ? trx : trx.toString(10);
     }
+    fromSun(sun) {
+        return TronWeb.fromSun(sun);
+    }
 
     static toSun(trx) {
         const sun = TronWeb.toBigNumber(trx).times(1_000_000);
         return utils.isBigNumber(trx) ? sun : sun.toString(10);
+    }
+    toSun(trx) {
+        return TronWeb.toSun(trx);
     }
 
     static toBigNumber(amount = 0) {
@@ -459,6 +494,9 @@ export default class TronWeb extends EventEmitter {
 
         return new BigNumber(amount.toString(10), 10);
     }
+    toBigNumber(amount = 0) {
+        return TronWeb.toBigNumber(amount);
+    }
 
     static isAddress(address = false) {
         if (!utils.isString(address)) return false;
@@ -468,8 +506,9 @@ export default class TronWeb extends EventEmitter {
             try {
                 return TronWeb.isAddress(
                     utils.crypto.getBase58CheckAddress(
-                        utils.code.hexStr2byteArray(address) // it throws an error if the address starts with 0x
-                    )
+                        // it throws an error if the address starts with 0x
+                        utils.code.hexStr2byteArray(address),
+                    ),
                 );
             } catch (err) {
                 return false;
@@ -481,31 +520,39 @@ export default class TronWeb extends EventEmitter {
             return false;
         }
     }
+    isAddress(address = false) {
+        return TronWeb.isAddress(address);
+    }
 
     static async createAccount() {
-        const account = utils.accounts.generateAccount();
-
-        return account;
+        return utils.accounts.generateAccount();
+    }
+    async createAccount() {
+        return TronWeb.createAccount();
     }
 
     static createRandom(options) {
-        const account = utils.accounts.generateRandom(options);
-
-        return account;
+        return utils.accounts.generateRandom(options);
+    }
+    createRandom(options) {
+        return TronWeb.createRandom(options);
     }
 
     static fromMnemonic(
         mnemonic,
         path = TRON_BIP39_PATH_INDEX_0,
-        wordlist = 'en'
+        wordlist = 'en',
     ) {
         const account = utils.accounts.generateAccountWithMnemonic(
             mnemonic,
             path,
-            wordlist
+            wordlist,
         );
 
         return account;
+    }
+    fromMnemonic(mnemonic, path = TRON_BIP39_PATH_INDEX_0, wordlist = 'en') {
+        return TronWeb.fromMnemonic(mnemonic, path, wordlist);
     }
 
     async isConnected(callback = false) {

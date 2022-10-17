@@ -1,3 +1,6 @@
+// FIXME: verify that it works after conversion
+// May need static modifiers
+
 export class Base64 {
     private _keyStr =
         'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
