@@ -2,7 +2,6 @@ import TronWeb from 'index';
 import utils from 'utils';
 
 export default class Validator {
-
     constructor(tronWeb = false) {
         if (!tronWeb || !tronWeb instanceof TronWeb)
             throw new Error('Expected instance of TronWeb');
@@ -10,7 +9,12 @@ export default class Validator {
     }
 
     invalid(param) {
-        return param.msg || `Invalid ${param.name}${param.type === 'address' ? ' address' : ''} provided`;
+        return (
+            param.msg ||
+            `Invalid ${param.name}${
+                param.type === 'address' ? ' address' : ''
+            } provided`
+        );
     }
 
     notPositive(param) {
@@ -18,49 +22,42 @@ export default class Validator {
     }
 
     notEqual(param) {
-        return param.msg || `${param.names[0]} can not be equal to ${param.names[1]}`;
+        return (
+            param.msg ||
+            `${param.names[0]} can not be equal to ${param.names[1]}`
+        );
     }
 
-    notValid(params = [], callback = new Function) {
-
-        let normalized = {};
+    notValid(params = [], callback = new Function()) {
+        const normalized = {};
         let no = false;
         for (const param of params) {
-            let {
-                name,
-                names,
-                value,
-                type,
-                gt,
-                lt,
-                gte,
-                lte,
-                se,
-                optional
-            } = param;
-            if (optional && (
-                !utils.isNotNullOrUndefined(value)
-                || (type !== 'boolean' && value === false)))
+            const { name, names, value, type, gt, lt, gte, lte, se, optional } =
+                param;
+            if (
+                optional &&
+                (!utils.isNotNullOrUndefined(value) ||
+                    (type !== 'boolean' && value === false))
+            )
                 continue;
             normalized[param.name] = param.value;
             switch (type) {
-
                 case 'address':
-                    if (!this.tronWeb.isAddress(value)) {
-                        no = true;
-                    } else {
-                        normalized[name] = this.tronWeb.address.toHex(value);
-                    }
+                    if (!this.tronWeb.isAddress(value)) no = true;
+                    else normalized[name] = this.tronWeb.address.toHex(value);
+
                     break;
 
                 case 'integer':
-                    if (!utils.isInteger(value) ||
+                    if (
+                        !utils.isInteger(value) ||
                         (typeof gt === 'number' && value <= param.gt) ||
                         (typeof lt === 'number' && value >= param.lt) ||
                         (typeof gte === 'number' && value < param.gte) ||
-                        (typeof lte === 'number' && value > param.lte)) {
+                        (typeof lte === 'number' && value > param.lte)
+                    )
                         no = true;
-                    }
+
                     break;
 
                 case 'positive-integer':
@@ -71,15 +68,14 @@ export default class Validator {
                     break;
 
                 case 'tokenId':
-                    if (!utils.isString(value) || !value.length) {
-                        no = true;
-                    }
+                    if (!utils.isString(value) || !value.length) no = true;
+
                     break;
 
                 case 'notEmptyObject':
-                    if (!utils.isObject(value) || !Object.keys(value).length) {
+                    if (!utils.isObject(value) || !Object.keys(value).length)
                         no = true;
-                    }
+
                     break;
 
                 case 'notEqual':
@@ -90,48 +86,44 @@ export default class Validator {
                     break;
 
                 case 'resource':
-                    if (!['BANDWIDTH', 'ENERGY'].includes(value)) {
-                        no = true;
-                    }
+                    if (!['BANDWIDTH', 'ENERGY'].includes(value)) no = true;
+
                     break;
 
                 case 'url':
-                    if (!utils.isValidURL(value)) {
-                        no = true;
-                    }
+                    if (!utils.isValidURL(value)) no = true;
+
                     break;
 
                 case 'hex':
-                    if (!utils.isHex(value)) {
-                        no = true;
-                    }
+                    if (!utils.isHex(value)) no = true;
+
                     break;
 
                 case 'array':
-                    if (!Array.isArray(value)) {
-                        no = true;
-                    }
+                    if (!Array.isArray(value)) no = true;
+
                     break;
 
                 case 'not-empty-string':
-                    if (!utils.isString(value) || !value.length) {
-                        no = true;
-                    }
+                    if (!utils.isString(value) || !value.length) no = true;
+
                     break;
 
                 case 'boolean':
-                    if (!utils.isBoolean(value)) {
-                        no = true;
-                    }
+                    if (!utils.isBoolean(value)) no = true;
+
                     break;
                 case 'string':
-                    if (!utils.isString(value) ||
+                    if (
+                        !utils.isString(value) ||
                         (typeof gt === 'number' && value.length <= param.gt) ||
                         (typeof lt === 'number' && value.length >= param.lt) ||
                         (typeof gte === 'number' && value.length < param.gte) ||
-                        (typeof lte === 'number' && value.length > param.lte)) {
+                        (typeof lte === 'number' && value.length > param.lte)
+                    )
                         no = true;
-                    }
+
                     break;
             }
             if (no) {
@@ -142,4 +134,3 @@ export default class Validator {
         return false;
     }
 }
-

@@ -1,3 +1,1 @@
-export interface AbiType {
-
-}
+export interface AbiType {}

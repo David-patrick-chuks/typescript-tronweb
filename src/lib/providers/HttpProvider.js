@@ -27,7 +27,7 @@ export default class HttpProvider {
             headers: headers,
             auth: user && {
                 user,
-                password
+                password,
             },
         });
     }
@@ -49,7 +49,7 @@ export default class HttpProvider {
             data: method == 'post' && Object.keys(payload).length ? payload : null,
             params: method == 'get' && payload,
             url,
-            method
+            method,
         }).then(({data}) => data);
     }
-};
+}

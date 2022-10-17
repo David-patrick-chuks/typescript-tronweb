@@ -6,16 +6,16 @@ import injectpromise from 'injectpromise';
 const getFunctionSelector = abi => {
     abi.stateMutability = abi.stateMutability ? abi.stateMutability.toLowerCase() : 'nonpayable';
     abi.type = abi.type ? abi.type.toLowerCase() : '';
-    if(abi.type === 'fallback' || abi.type === 'receive') return '0x';
+    if (abi.type === 'fallback' || abi.type === 'receive') return '0x';
     let iface = new utils.ethersUtils.Interface([abi]);
-    if(abi.type === 'event') {
-      return iface.getEvent(abi.name).format(utils.ethersUtils.FormatTypes.sighash);
-    }
-    return iface.getFunction(abi.name).format(utils.ethersUtils.FormatTypes.sighash)
-}
+    if (abi.type === 'event')
+        return iface.getEvent(abi.name).format(utils.ethersUtils.FormatTypes.sighash);
+
+    return iface.getFunction(abi.name).format(utils.ethersUtils.FormatTypes.sighash);
+};
 
 const decodeOutput = (abi, output) => {
-    return decodeParamsV2ByABI(abi, output)
+    return decodeParamsV2ByABI(abi, output);
 };
 
 export default class Method {
@@ -37,7 +37,7 @@ export default class Method {
             feeLimit: this.tronWeb.feeLimit,
             callValue: 0,
             userFeePercentage: 100,
-            shouldPollResponse: false // Only used for sign()
+            shouldPollResponse: false, // Only used for sign()
         };
     }
 
@@ -46,41 +46,41 @@ export default class Method {
     }
 
     onMethod(...args) {
-      let rawParameter = '';
-      if(this.abi && !/event/i.test(this.abi.type)) {
-          rawParameter = encodeParamsV2ByABI(this.abi, args);
-      }
-      return {
-          call: (options = {}, callback = false) => {
-              if (utils.isFunction(options)) {
-                  callback = options;
-                  options = {};
-              }
-              options = {
-                ...options,
-                rawParameter
-              };
+        let rawParameter = '';
+        if (this.abi && !/event/i.test(this.abi.type))
+            rawParameter = encodeParamsV2ByABI(this.abi, args);
 
-              return this._call([], [], options, callback);
-          },
-          send: (options = {}, privateKey = this.tronWeb.defaultPrivateKey, callback = false) => {
-              if (utils.isFunction(privateKey)) {
-                  callback = privateKey;
-                  privateKey = this.tronWeb.defaultPrivateKey;
-              }
-              if (utils.isFunction(options)) {
-                callback = options;
-                options = {};
-              }
-              options = {
-                ...options,
-                rawParameter
-              };
+        return {
+            call: (options = {}, callback = false) => {
+                if (utils.isFunction(options)) {
+                    callback = options;
+                    options = {};
+                }
+                options = {
+                    ...options,
+                    rawParameter,
+                };
 
-              return this._send([], [], options, privateKey, callback);
-          },
-          watch: (...methodArgs) => this._watch(...methodArgs)
-      }
+                return this._call([], [], options, callback);
+            },
+            send: (options = {}, privateKey = this.tronWeb.defaultPrivateKey, callback = false) => {
+                if (utils.isFunction(privateKey)) {
+                    callback = privateKey;
+                    privateKey = this.tronWeb.defaultPrivateKey;
+                }
+                if (utils.isFunction(options)) {
+                    callback = options;
+                    options = {};
+                }
+                options = {
+                    ...options,
+                    rawParameter,
+                };
+
+                return this._send([], [], options, privateKey, callback);
+            },
+            watch: (...methodArgs) => this._watch(...methodArgs),
+        };
     }
 
     async _call(types, args, options = {}, callback = false) {
@@ -110,12 +110,12 @@ export default class Method {
             ...this.defaultOptions,
             from: this.tronWeb.defaultAddress.hex,
             ...options,
-            _isConstant: true
+            _isConstant: true,
         };
 
         const parameters = args.map((value, index) => ({
             type: types[index],
-            value
+            value,
         }));
 
         this.tronWeb.transactionBuilder.triggerSmartContract(
@@ -133,26 +133,26 @@ export default class Method {
 
                 try {
 
-                    const len = transaction.constant_result[0].length
+                    const len = transaction.constant_result[0].length;
                     if (len === 0 || len % 64 === 8) {
-                        let msg = 'The call has been reverted or has thrown an error.'
+                        let msg = 'The call has been reverted or has thrown an error.';
                         if (len !== 0) {
-                            msg += ' Error message: '
-                            let msg2 = ''
-                            let chunk = transaction.constant_result[0].substring(8)
-                            for (let i = 0; i < len - 8; i += 64) {
-                                msg2 += this.tronWeb.toUtf8(chunk.substring(i, i + 64))
-                            }
+                            msg += ' Error message: ';
+                            let msg2 = '';
+                            let chunk = transaction.constant_result[0].substring(8);
+                            for (let i = 0; i < len - 8; i += 64)
+                                msg2 += this.tronWeb.toUtf8(chunk.substring(i, i + 64));
+
                             msg += msg2.replace(/(\u0000|\u000b|\f)+/g, ' ').replace(/ +/g, ' ').replace(/\s+$/g, '');
                         }
-                        return callback(msg)
+                        return callback(msg);
                     }
 
                     let output = decodeOutput(this.abi, '0x' + transaction.constant_result[0]);
 
-                    if (output.length === 1 && Object.keys(output).length === 1) {
+                    if (output.length === 1 && Object.keys(output).length === 1)
                         output = output[0];
-                    }
+
 
                     return callback(null, output);
                 } catch (ex) {
@@ -201,7 +201,7 @@ export default class Method {
 
         const parameters = args.map((value, index) => ({
             type: types[index],
-            value
+            value,
         }));
 
         try {
@@ -211,7 +211,7 @@ export default class Method {
                 this.functionSelector,
                 options,
                 parameters,
-                this.tronWeb.address.toHex(address)
+                this.tronWeb.address.toHex(address),
             );
 
             if (!transaction.result || !transaction.result.result)
@@ -232,11 +232,11 @@ export default class Method {
             if (broadcast.code) {
                 const err = {
                     error: broadcast.code,
-                    message: broadcast.code
+                    message: broadcast.code,
                 };
                 if (broadcast.message)
                     err.message = this.tronWeb.toUtf8(broadcast.message);
-                return callback(err)
+                return callback(err);
             }
 
             if (!options.shouldPollResponse)
@@ -246,7 +246,7 @@ export default class Method {
                 if (index === 20) {
                     return callback({
                         error: 'Cannot find result in solidity node',
-                        transaction: signedTransaction
+                        transaction: signedTransaction,
                     });
                 }
 
@@ -262,7 +262,7 @@ export default class Method {
                     return callback({
                         error: this.tronWeb.toUtf8(output.resMessage),
                         transaction: signedTransaction,
-                        output
+                        output,
                     });
                 }
 
@@ -270,7 +270,7 @@ export default class Method {
                     return callback({
                         error: 'Failed to execute: ' + JSON.stringify(output, null, 2),
                         transaction: signedTransaction,
-                        output
+                        output,
                     });
                 }
 
@@ -279,16 +279,16 @@ export default class Method {
 
                 let decoded = decodeOutput(this.abi, '0x' + output.contractResult[0]);
 
-                if (decoded.length === 1 && Object.keys(decoded).length === 1) {
+                if (decoded.length === 1 && Object.keys(decoded).length === 1)
                     decoded = decoded[0];
-                }
 
-                if (options.keepTxID) {
+
+                if (options.keepTxID)
                     return callback(null, [signedTransaction.txID, decoded]);
-                }
+
 
                 return callback(null, decoded);
-            }
+            };
 
             checkResult();
         } catch (ex) {
@@ -326,18 +326,18 @@ export default class Method {
                     eventName: this.name,
                     sort: 'block_timestamp',
                     blockNumber: 'latest',
-                    filters: options.filters
-                }
+                    filters: options.filters,
+                };
 
-                if(options.size) {
+                if (options.size)
                     params.size = options.size;
-                }
-                
+
+
                 if (options.resourceNode) {
                     if (/full/i.test(options.resourceNode))
-                        params.onlyUnconfirmed = true
+                        params.onlyUnconfirmed = true;
                     else
-                        params.onlyConfirmed = true
+                        params.onlyConfirmed = true;
                 }
 
                 const events = await this.tronWeb.event.getEventsByContractAddress(this.contract.address, params);
@@ -345,9 +345,9 @@ export default class Method {
                 const newEvents = events.filter((event, index) => {
 
                     if (options.resourceNode && event.resourceNode &&
-                        options.resourceNode.toLowerCase() !== event.resourceNode.toLowerCase()) {
-                        return false
-                    }
+                        options.resourceNode.toLowerCase() !== event.resourceNode.toLowerCase())
+                        return false;
+
 
                     const duplicate = events.slice(0, index).some(priorEvent => (
                         JSON.stringify(priorEvent) == JSON.stringify(event)
@@ -378,7 +378,7 @@ export default class Method {
 
             listener = setInterval(() => {
                 getEvents().then(events => events.forEach(event => {
-                    callback(null, utils.parseEvent(event, this.abi))
+                    callback(null, utils.parseEvent(event, this.abi));
                 })).catch(err => callback(err));
             }, 3000);
         };
@@ -394,7 +394,7 @@ export default class Method {
 
                 clearInterval(listener);
                 listener = false;
-            }
-        }
+            },
+        };
     }
 }

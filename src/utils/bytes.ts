@@ -1,11 +1,9 @@
-import {Base64} from './base64';
+import { Base64 } from './base64';
 
 export function byte2hexStr(byte) {
-    if (typeof byte !== 'number')
-        throw new Error('Input must be a number');
+    if (typeof byte !== 'number') throw new Error('Input must be a number');
 
-    if (byte < 0 || byte > 255)
-        throw new Error('Input must be a byte');
+    if (byte < 0 || byte > 255) throw new Error('Input must be a byte');
 
     const hexByteMap = '0123456789ABCDEF';
 
@@ -17,8 +15,7 @@ export function byte2hexStr(byte) {
 }
 
 export function bytesToString(arr) {
-    if (typeof arr === 'string')
-        return arr;
+    if (typeof arr === 'string') return arr;
 
     let str = '';
 
@@ -48,7 +45,9 @@ export function hextoString(hex) {
     let out = '';
 
     for (let i = 0; i < arr.length / 2; i++) {
-        let tmp = `0x${arr[i * 2]}${arr[i * 2 + 1]}`;
+        const tmp = `0x${arr[i * 2]}${arr[i * 2 + 1]}`;
+        // FIXME: this should be equal to 16*arr[i*2] + arr[i*2 + 1]
+        // @ts-ignore
         out += String.fromCharCode(tmp);
     }
 
@@ -58,8 +57,7 @@ export function hextoString(hex) {
 export function byteArray2hexStr(byteArray) {
     let str = '';
 
-    for (let i = 0; i < (byteArray.length); i++)
-        str += byte2hexStr(byteArray[i]);
+    for (let i = 0; i < byteArray.length; i++) str += byte2hexStr(byteArray[i]);
 
     return str;
 }
@@ -72,6 +70,5 @@ export function base64EncodeToString(bytes) {
     const b = new Base64();
     const string64 = b.encodeIgnoreUtf8(bytes);
 
-    return string64
+    return string64;
 }
-

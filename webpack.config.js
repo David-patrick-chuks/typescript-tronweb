@@ -5,10 +5,10 @@ const basePlugins = [
     '@babel/plugin-proposal-numeric-separator',
     '@babel/plugin-proposal-class-properties',
     '@babel/plugin-transform-runtime',
-    '@babel/plugin-proposal-object-rest-spread'
+    '@babel/plugin-proposal-object-rest-spread',
 ];
 
-const mode = process.env.NODE_ENV || 'production'
+const mode = process.env.NODE_ENV || 'production';
 
 const baseConfig = {
     entry: path.resolve(__dirname, 'src', 'index.js'),
@@ -25,14 +25,14 @@ const baseConfig = {
                                 targets: {
                                     browsers: [
                                         '>0.25%',
-                                        'not dead'
-                                    ]
-                                }
-                            }]
+                                        'not dead',
+                                    ],
+                                },
+                            }],
                         ],
-                        plugins: basePlugins
-                    }
-                }
+                        plugins: basePlugins,
+                    },
+                },
             },
             {
                 test: /\.ts$/,
@@ -54,26 +54,26 @@ const baseConfig = {
                     },
                 },
             },
-        ]
+        ],
     },
     resolve: {
         modules: [
             'node_modules',
-            path.resolve(__dirname, 'src')
+            path.resolve(__dirname, 'src'),
         ],
         extensions: ['.ts', '.js'],
     },
     devtool: 'source-map',
-    mode
+    mode,
 };
 
 nodePlugins = [
-    ...basePlugins
-]
+    ...basePlugins,
+];
 
-if (mode === 'development') {
-    nodePlugins.push('source-map-support')
-}
+if (mode === 'development')
+    nodePlugins.push('source-map-support');
+
 
 module.exports = [
     {
@@ -82,7 +82,7 @@ module.exports = [
             path: path.resolve(__dirname, 'dist'),
             filename: 'TronWeb.node.js',
             libraryTarget: 'commonjs2',
-            libraryExport: 'default'
+            libraryExport: 'default',
         },
         module: {
             rules: [
@@ -95,19 +95,19 @@ module.exports = [
                             presets: [
                                 ['@babel/env', {
                                     targets: {
-                                        node: 6
+                                        node: 6,
                                     },
-                                    forceAllTransforms: true
-                                }]
+                                    forceAllTransforms: true,
+                                }],
                             ],
-                            plugins: nodePlugins
-                        }
-                    }
-                }
-            ]
+                            plugins: nodePlugins,
+                        },
+                    },
+                },
+            ],
         },
-        externals: [ externals() ],
-        target: 'node'
+        externals: [externals()],
+        target: 'node',
     },
     {
         ...baseConfig,
@@ -117,7 +117,7 @@ module.exports = [
             library: 'TronWeb',
             libraryTarget: 'umd',
             libraryExport: 'default',
-            umdNamedDefine: true
+            umdNamedDefine: true,
         },
-    }
+    },
 ];

@@ -36,9 +36,9 @@ export default class Contract {
         const newEvents = events.filter((event, index) => {
 
             if (options.resourceNode && event.resourceNode &&
-                options.resourceNode.toLowerCase() !== event.resourceNode.toLowerCase()) {
-                return false
-            }
+                options.resourceNode.toLowerCase() !== event.resourceNode.toLowerCase())
+                return false;
+
 
             const duplicate = events.slice(0, index).some(priorEvent => (
                 JSON.stringify(priorEvent) == JSON.stringify(event)
@@ -79,7 +79,7 @@ export default class Contract {
 
         this.eventListener = setInterval(() => {
             this._getEvents(options).then(newEvents => newEvents.forEach(event => {
-                this.eventCallback && this.eventCallback(event)
+                this.eventCallback && this.eventCallback(event);
             })).catch(err => {
                 console.error('Failed to get event list', err);
             });
@@ -116,7 +116,7 @@ export default class Contract {
             const {
                 name,
                 functionSelector,
-                signature
+                signature,
             } = method;
 
             this.methods[name] = methodCall;
@@ -150,14 +150,14 @@ export default class Contract {
         const inputData = data.substring(8);
 
         if (!this.methodInstances[methodName])
-            throw new Error('Contract method ' + methodName + " not found");
+            throw new Error('Contract method ' + methodName + ' not found');
 
         const methodInstance = this.methodInstances[methodName];
 
         return {
             name: methodInstance.name,
             params: this.methodInstances[methodName].decodeInput(inputData),
-        }
+        };
     }
 
     async new(options, privateKey = this.tronWeb.defaultPrivateKey, callback = false) {
@@ -176,10 +176,10 @@ export default class Contract {
             const contract = await this.tronWeb.trx.sendRawTransaction(signedTransaction);
 
             if (contract.code)
-                return callback({
-                    error: contract.code,
-                    message: this.tronWeb.toUtf8(contract.message)
-                })
+            {return callback({
+                error: contract.code,
+                message: this.tronWeb.toUtf8(contract.message),
+            });}
 
             await utils.sleep(3000);
             return this.at(signedTransaction.contract_address, callback);
@@ -234,14 +234,14 @@ export default class Contract {
                 self._startEventListener(options, callback).then(() => {
                     startCallback();
                 }).catch(err => {
-                    startCallback(err)
+                    startCallback(err);
                 });
 
                 return this;
             },
             stop() {
                 self._stopEventListener();
-            }
+            },
         };
     }
 }

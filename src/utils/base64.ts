@@ -1,8 +1,9 @@
-export function Base64() {
-    this._keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+export class Base64 {
+    private _keyStr =
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
 
-    this.encode = input => {
-        let output = "";
+    encode(input) {
+        let output = '';
         let chr1;
         let chr2;
         let chr3;
@@ -22,21 +23,22 @@ export function Base64() {
             enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
             enc4 = chr3 & 63;
 
-            if (isNaN(chr2))
-                enc3 = enc4 = 64;
-            else if (isNaN(chr3))
-                enc4 = 64;
+            if (isNaN(chr2)) enc3 = enc4 = 64;
+            else if (isNaN(chr3)) enc4 = 64;
 
-            output = output +
-                this._keyStr.charAt(enc1) + this._keyStr.charAt(enc2) +
-                this._keyStr.charAt(enc3) + this._keyStr.charAt(enc4);
+            output =
+                output +
+                this._keyStr.charAt(enc1) +
+                this._keyStr.charAt(enc2) +
+                this._keyStr.charAt(enc3) +
+                this._keyStr.charAt(enc4);
         }
 
         return output;
     }
 
-    this.encodeIgnoreUtf8 = inputBytes => {
-        let output = "";
+    encodeIgnoreUtf8(inputBytes) {
+        let output = '';
         let chr1;
         let chr2;
         let chr3;
@@ -56,21 +58,22 @@ export function Base64() {
             enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
             enc4 = chr3 & 63;
 
-            if (isNaN(chr2))
-                enc3 = enc4 = 64;
-            else if (isNaN(chr3))
-                enc4 = 64;
+            if (isNaN(chr2)) enc3 = enc4 = 64;
+            else if (isNaN(chr3)) enc4 = 64;
 
-            output = output +
-                this._keyStr.charAt(enc1) + this._keyStr.charAt(enc2) +
-                this._keyStr.charAt(enc3) + this._keyStr.charAt(enc4);
+            output =
+                output +
+                this._keyStr.charAt(enc1) +
+                this._keyStr.charAt(enc2) +
+                this._keyStr.charAt(enc3) +
+                this._keyStr.charAt(enc4);
         }
 
         return output;
     }
 
-    this.decode = input => {
-        let output = "";
+    decode(input) {
+        let output = '';
         let chr1;
         let chr2;
         let chr3;
@@ -80,7 +83,7 @@ export function Base64() {
         let enc4;
         let i = 0;
 
-        input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+        input = input.replace(/[^A-Za-z0-9\+\/\=]/g, '');
 
         while (i < input.length) {
             enc1 = this._keyStr.indexOf(input.charAt(i++));
@@ -94,18 +97,16 @@ export function Base64() {
 
             output = output + String.fromCharCode(chr1);
 
-            if (enc3 != 64)
-                output = output + String.fromCharCode(chr2);
+            if (enc3 != 64) output = output + String.fromCharCode(chr2);
 
-            if (enc4 != 64)
-                output = output + String.fromCharCode(chr3);
+            if (enc4 != 64) output = output + String.fromCharCode(chr3);
         }
 
         return this._utf8_decode(output);
     }
 
-    this.decodeToByteArray = input => {
-        let output = "";
+    decodeToByteArray(input: string): number[] {
+        let output = '';
         let chr1;
         let chr2;
         let chr3;
@@ -115,7 +116,7 @@ export function Base64() {
         let enc4;
         let i = 0;
 
-        input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+        input = input.replace(/[^A-Za-z0-9\+\/\=]/g, '');
 
         while (i < input.length) {
             enc1 = this._keyStr.indexOf(input.charAt(i++));
@@ -129,17 +130,15 @@ export function Base64() {
 
             output = output + String.fromCharCode(chr1);
 
-            if (enc3 != 64)
-                output = output + String.fromCharCode(chr2);
+            if (enc3 != 64) output = output + String.fromCharCode(chr2);
 
-            if (enc4 != 64)
-                output = output + String.fromCharCode(chr3);
+            if (enc4 != 64) output = output + String.fromCharCode(chr3);
         }
 
         return this._out2ByteArray(output);
     }
 
-    this._out2ByteArray = utftext => {
+    private _out2ByteArray(utftext: string): number[] {
         const byteArray = new Array(utftext.length);
 
         let i = 0;
@@ -154,16 +153,16 @@ export function Base64() {
         return byteArray;
     }
 
-    this._utf8_encode = string => {
-        string = string.replace(/\r\n/g, "\n");
-        let utftext = "";
+    private _utf8_encode(string: string): string {
+        string = string.replace(/\r\n/g, '\n');
+        let utftext = '';
 
         for (let n = 0; n < string.length; n++) {
             const c = string.charCodeAt(n);
 
             if (c < 128) {
                 utftext += String.fromCharCode(c);
-            } else if ((c > 127) && (c < 2048)) {
+            } else if (c > 127 && c < 2048) {
                 utftext += String.fromCharCode((c >> 6) | 192);
                 utftext += String.fromCharCode((c & 63) | 128);
             } else {
@@ -176,8 +175,8 @@ export function Base64() {
         return utftext;
     }
 
-    this._utf8_decode = utftext => {
-        let string = "";
+    private _utf8_decode(utftext: string): string {
+        let string = '';
         let i = 0;
         let c = 0;
         let c2 = 0;
@@ -189,7 +188,7 @@ export function Base64() {
             if (c < 128) {
                 string += String.fromCharCode(c);
                 i++;
-            } else if ((c > 191) && (c < 224)) {
+            } else if (c > 191 && c < 224) {
                 c2 = utftext.charCodeAt(i + 1);
                 string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
                 i += 2;
@@ -197,7 +196,9 @@ export function Base64() {
                 c2 = utftext.charCodeAt(i + 1);
                 c3 = utftext.charCodeAt(i + 2);
 
-                string += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
+                string += String.fromCharCode(
+                    ((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63)
+                );
 
                 i += 3;
             }

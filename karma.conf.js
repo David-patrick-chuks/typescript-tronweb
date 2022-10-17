@@ -8,35 +8,35 @@ const basePlugins = [
     '@babel/plugin-proposal-class-properties',
     '@babel/plugin-transform-runtime',
     '@babel/plugin-proposal-object-rest-spread',
-    'source-map-support'
+    'source-map-support',
 ];
 
-const files = globby.sync([ 'test/**/*.test.js', '!test/**/abi.test.js', '!test/**/typedData.test.js' ]);
+const files = globby.sync(['test/**/*.test.js', '!test/**/abi.test.js', '!test/**/typedData.test.js']);
 
 module.exports = function (config) {
     config.set({
-        frameworks: [ 'mocha' ],
-        browsers : [ 'ChromeHeadless', /* 'Firefox'  , 'Edge' */ ],
+        frameworks: ['mocha'],
+        browsers : ['ChromeHeadless'],
         preprocessors: {
-            'test/**/*.test.js': [ 'webpack', 'sourcemap' ]
+            'test/**/*.test.js': ['webpack', 'sourcemap'],
         },
-        reporters: [ 'spec', 'coverage' ],
+        reporters: ['spec', 'coverage'],
         coverageReporter: {
             dir: 'coverage/',
             reporters: [
                 { type: 'html' },
                 { type: 'text' },
-                { type: 'text-summary' }
+                { type: 'text-summary' },
             ],
             instrumenterOptions: {
-                istanbul: { noCompact: true }
-            }
+                istanbul: { noCompact: true },
+            },
         },
         webpack: {
             output: {
                 libraryTarget: 'umd',
                 libraryExport: 'default',
-                umdNamedDefine: true
+                umdNamedDefine: true,
             },
             devtool: 'inline-source-map',
             module: {
@@ -51,47 +51,47 @@ module.exports = function (config) {
                                     targets: {
                                         browsers: [
                                             '>0.25%',
-                                            'not dead'
-                                        ]
-                                    }
-                                }]
+                                            'not dead',
+                                        ],
+                                    },
+                                }],
                             ],
                             plugins: [
                                 ...basePlugins,
-                                "istanbul"
-                            ]
+                                'istanbul',
+                            ],
                         },
-                    }
-                ]
+                    },
+                ],
             },
             resolve: {
                 modules: [
                     'node_modules',
-                    'src'
+                    'src',
                 ],
             },
             mode: process.env.NODE_ENV || 'development',
             target: 'web',
             node: {
-                fs: "empty",
-                module: "empty"
-            }
+                fs: 'empty',
+                module: 'empty',
+            },
         },
         webpackMiddleware: {
-            noInfo: true
+            noInfo: true,
         },
         plugins: [
-            require("karma-webpack"),
-            require("istanbul-instrumenter-loader"),
-            require("karma-mocha"),
-            require("karma-coverage"),
-            require("karma-chrome-launcher"),
-            require("karma-spec-reporter"),
+            require('karma-webpack'),
+            require('istanbul-instrumenter-loader'),
+            require('karma-mocha'),
+            require('karma-coverage'),
+            require('karma-chrome-launcher'),
+            require('karma-spec-reporter'),
             require('karma-sourcemap-loader'),
             require('karma-coverage-istanbul-reporter'),
             require('karma-firefox-launcher'),
-            require('karma-edge-launcher')
+            require('karma-edge-launcher'),
         ],
-        files
+        files,
     });
 };

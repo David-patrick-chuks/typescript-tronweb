@@ -4,87 +4,88 @@ import {
     hextoString,
     byteArray2hexStr,
     base64DecodeFromString,
-    base64EncodeToString
+    base64EncodeToString,
 } from './bytes';
 
-export function bin2String(array) {
-    // TODO Do we need this alias?
-    return bytesToString(array);
-}
+export const bin2String = bytesToString;
 
-export function arrayEquals(array1, array2, strict) {
-    if (array1.length != array2.length)
-        return false;
+export function arrayEquals(
+    array1: any[],
+    array2: any[],
+    strict: boolean
+): boolean {
+    if (array1.length !== array2.length) return false;
 
     let i;
 
     for (i = 0; i < array1.length; i++) {
         if (strict) {
-            if (array1[i] != array2[i])
-                return false;
-        } else if (JSON.stringify(array1[i]) != JSON.stringify(array2[i]))
+            if (array1[i] !== array2[i]) return false;
+        } else if (JSON.stringify(array1[i]) !== JSON.stringify(array2[i])) {
             return false;
+        }
     }
-
     return true;
 }
 
-export function stringToBytes(str) {
-
+export function stringToBytes(str: string): number[] {
     if (typeof str !== 'string')
-        throw new Error('The passed string is not a string')
+        throw new Error('The passed string is not a string');
 
-    const bytes = new Array();
-    let len;
+    const bytes: number[] = [];
+    const len = str.length;
     let c;
-
-    len = str.length;
 
     for (let i = 0; i < len; i++) {
         c = str.charCodeAt(i);
 
-        if (c >= 0x010000 && c <= 0x10FFFF) {
-            bytes.push(((c >> 18) & 0x07) | 0xF0);
-            bytes.push(((c >> 12) & 0x3F) | 0x80);
-            bytes.push(((c >> 6) & 0x3F) | 0x80);
-            bytes.push((c & 0x3F) | 0x80);
-        } else if (c >= 0x000800 && c <= 0x00FFFF) {
-            bytes.push(((c >> 12) & 0x0F) | 0xE0);
-            bytes.push(((c >> 6) & 0x3F) | 0x80);
-            bytes.push((c & 0x3F) | 0x80);
-        } else if (c >= 0x000080 && c <= 0x0007FF) {
-            bytes.push(((c >> 6) & 0x1F) | 0xC0);
-            bytes.push((c & 0x3F) | 0x80);
-        } else bytes.push(c & 0xFF);
+        if (c >= 0x010000 && c <= 0x10ffff) {
+            bytes.push(((c >> 18) & 0x07) | 0xf0);
+            bytes.push(((c >> 12) & 0x3f) | 0x80);
+            bytes.push(((c >> 6) & 0x3f) | 0x80);
+            bytes.push((c & 0x3f) | 0x80);
+        } else if (c >= 0x000800 && c <= 0x00ffff) {
+            bytes.push(((c >> 12) & 0x0f) | 0xe0);
+            bytes.push(((c >> 6) & 0x3f) | 0x80);
+            bytes.push((c & 0x3f) | 0x80);
+        } else if (c >= 0x000080 && c <= 0x0007ff) {
+            bytes.push(((c >> 6) & 0x1f) | 0xc0);
+            bytes.push((c & 0x3f) | 0x80);
+        } else {
+            bytes.push(c & 0xff);
+        }
     }
 
     return bytes;
 }
 
-export {byte2hexStr, bytesToString, hextoString, byteArray2hexStr, base64DecodeFromString, base64EncodeToString}
+export {
+    byte2hexStr,
+    bytesToString,
+    hextoString,
+    byteArray2hexStr,
+    base64DecodeFromString,
+    base64EncodeToString,
+};
 
-export function hexChar2byte(c) {
+export function hexChar2byte(c: string): number {
     let d;
 
-    if (c >= 'A' && c <= 'F')
-        d = c.charCodeAt(0) - 'A'.charCodeAt(0) + 10;
-    else if (c >= 'a' && c <= 'f')
-        d = c.charCodeAt(0) - 'a'.charCodeAt(0) + 10;
-    else if (c >= '0' && c <= '9')
-        d = c.charCodeAt(0) - '0'.charCodeAt(0);
+    if (c >= 'A' && c <= 'F') d = c.charCodeAt(0) - 'A'.charCodeAt(0) + 10;
+    else if (c >= 'a' && c <= 'f') d = c.charCodeAt(0) - 'a'.charCodeAt(0) + 10;
+    else if (c >= '0' && c <= '9') d = c.charCodeAt(0) - '0'.charCodeAt(0);
 
-    if (typeof d === 'number')
-        return d;
-    else
-        throw new Error('The passed hex char is not a valid hex char');
+    if (typeof d === 'number') return d;
+    else throw new Error('The passed hex char is not a valid hex char');
 }
 
 export function isHexChar(c) {
-    if ((c >= 'A' && c <= 'F') ||
+    if (
+        (c >= 'A' && c <= 'F') ||
         (c >= 'a' && c <= 'f') ||
-        (c >= '0' && c <= '9')) {
+        (c >= '0' && c <= '9')
+    )
         return 1;
-    }
 
     return 0;
 }
@@ -92,7 +93,7 @@ export function isHexChar(c) {
 // set strict as true: if the length of str is odd, add 0 before the str to make its length as even
 export function hexStr2byteArray(str, strict = false) {
     if (typeof str !== 'string')
-        throw new Error('The passed string is not a string')
+        throw new Error('The passed string is not a string');
 
     let len = str.length;
 
@@ -102,7 +103,7 @@ export function hexStr2byteArray(str, strict = false) {
             len++;
         }
     }
-    const byteArray = Array();
+    const byteArray: number[] = [];
     let d = 0;
     let j = 0;
     let k = 0;
@@ -115,12 +116,13 @@ export function hexStr2byteArray(str, strict = false) {
             d += hexChar2byte(c);
             j++;
 
-            if (0 === (j % 2)) {
+            if (0 === j % 2) {
                 byteArray[k++] = d;
                 d = 0;
             }
-        } else
-            throw new Error('The passed hex char is not a valid hex string')
+        } else {
+            throw new Error('The passed hex char is not a valid hex string');
+        }
     }
 
     return byteArray;
@@ -128,18 +130,17 @@ export function hexStr2byteArray(str, strict = false) {
 
 //yyyy-MM-DD HH-mm-ss
 export function strToDate(str) {
-
     if (!/^\d{4}-\d{2}-\d{2}( \d{2}-\d{2}-\d{2}|)/.test(str))
-        throw new Error('The passed date string is not valid')
+        throw new Error('The passed date string is not valid');
 
-    const tempStrs = str.split(" ");
-    const dateStrs = tempStrs[0].split("-");
+    const tempStrs = str.split(' ');
+    const dateStrs = tempStrs[0].split('-');
     const year = parseInt(dateStrs[0], 10);
     const month = parseInt(dateStrs[1], 10) - 1;
     const day = parseInt(dateStrs[2], 10);
 
     if (tempStrs.length > 1) {
-        const timeStrs = tempStrs[1].split("-");
+        const timeStrs = tempStrs[1].split('-');
         const hour = parseInt(timeStrs[0], 10);
         const minute = parseInt(timeStrs[1], 10);
         const second = parseInt(timeStrs[2], 10);
@@ -151,8 +152,7 @@ export function strToDate(str) {
 }
 
 export function isNumber(c) {
-    if (c >= '0' && c <= '9')
-        return 1;
+    if (c >= '0' && c <= '9') return 1;
 
     return 0;
 }
@@ -161,15 +161,12 @@ export function isNumber(c) {
 //return 2: blockNumber ------ Decimal number
 //return 3: assetName ------ String
 //return other: error
-export function getStringType(str) {
-    if (null == str)
-        return -1;
+export function getStringType(str: string): 1 | 2 | 3 | -1 {
+    if (null == str) return -1;
 
-    if (typeof (str) != 'string')
-        return -1;
+    if (typeof str != 'string') return -1;
 
-    if (str.length == 0 || str == "")
-        return -1;
+    if (str.length === 0 || str == '') return -1;
 
     let i = 0;
 
@@ -182,33 +179,22 @@ export function getStringType(str) {
     //             break;
     //     }
     // } else
-    if (str.length == 40) {
+    if (str.length === 40) {
         for (; i < 40; i++) {
-            var c = str.charAt(i);
-
-            if (!isHexChar(c))
-                break;
+            if (!isHexChar(str.charAt(i))) break;
         }
     }
 
-    if (i == 40)
-        return 1; //40 Hex, Address
+    if (i === 40) return 1; //40 Hex, Address
 
     for (i = 0; i < str.length; i++) {
-        var c = str.charAt(i);
-
-        if (!isNumber(c))
-            break;
+        if (!isNumber(str.charAt(i))) break;
     }
 
-    if (i == str.length)
-        return 2; // All Decimal number, BlockNumber
+    if (i === str.length) return 2; // All Decimal number, BlockNumber
 
     for (i = 0; i < str.length; i++) {
-        var c = str.charAt(i);
-
-        if (c > ' ')
-            return 3; // At least one visible character
+        if (str.charAt(i) > ' ') return 3; // At least one visible character
     }
 
     return -1;
