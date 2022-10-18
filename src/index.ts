@@ -30,6 +30,27 @@ export default class TronWeb extends EventEmitter {
     static version = version;
     static utils = utils;
 
+    providers = providers;
+    utils = utils;
+    BigNumber = BigNumber;
+
+    event: Event;
+    transactionBuilder: TransactionBuilder;
+    trx: Trx;
+    plugin: Plugin;
+    sidechain?: SideChain;
+
+    fullNode: HttpProvider;
+    solidityNode: HttpProvider;
+    eventServer: HttpProvider;
+
+    defaultBlock: any;
+    defaultPrivateKey: any;
+    defaultAddress: any;
+    fullnodeVersion = DEFAULT_VERSION;
+    feeLimit = FEE_LIMIT;
+    // injectPromise = injectpromise(this);
+
     constructor(
         options = false,
         // for retro-compatibility:
@@ -71,14 +92,14 @@ export default class TronWeb extends EventEmitter {
         this.transactionBuilder = new TransactionBuilder(this);
         this.trx = new Trx(this);
         this.plugin = new Plugin(this, options);
-        this.utils = utils;
+        // this.utils = utils;
 
         this.setFullNode(fullNode);
         this.setSolidityNode(solidityNode);
         this.setEventServer(eventServer);
 
-        this.providers = providers;
-        this.BigNumber = BigNumber;
+        // this.providers = providers;
+        // this.BigNumber = BigNumber;
 
         this.defaultBlock = false;
         this.defaultPrivateKey = false;
@@ -87,27 +108,29 @@ export default class TronWeb extends EventEmitter {
             base58: false,
         };
 
-        [
-            'sha3',
-            'toHex',
-            'toUtf8',
-            'fromUtf8',
-            'toAscii',
-            'fromAscii',
-            'toDecimal',
-            'fromDecimal',
-            'toSun',
-            'fromSun',
-            'toBigNumber',
-            'isAddress',
-            'createAccount',
-            'address',
-            'version',
-            'createRandom',
-            'fromMnemonic',
-        ].forEach((key) => {
-            this[key] = TronWeb[key];
-        });
+        // Done after defns?
+        // [
+        //     'sha3',
+        //     'toHex',
+        //     'toUtf8',
+        //     'fromUtf8',
+        //     'toAscii',
+        //     'fromAscii',
+        //     'toDecimal',
+        //     'fromDecimal',
+        //     'toSun',
+        //     'fromSun',
+        //     'toBigNumber',
+        //     'isAddress',
+        //     'createAccount',
+        //     'address',
+        //     'version',
+        //     'createRandom',
+        //     'fromMnemonic',
+        // ].forEach((key) => {
+        //     this[key] = TronWeb[key];
+        // });
+
         // for sidechain
         if (
             typeof sideOptions === 'object' &&
@@ -124,8 +147,8 @@ export default class TronWeb extends EventEmitter {
         }
 
         if (privateKey) this.setPrivateKey(privateKey);
-        this.fullnodeVersion = DEFAULT_VERSION;
-        this.feeLimit = FEE_LIMIT;
+        // this.fullnodeVersion = DEFAULT_VERSION;
+        // this.feeLimit = FEE_LIMIT;
         this.injectPromise = injectpromise(this);
 
         if (headers) this.setFullNodeHeader(headers);
@@ -498,7 +521,7 @@ export default class TronWeb extends EventEmitter {
         return TronWeb.toBigNumber(amount);
     }
 
-    static isAddress(address = false) {
+    static isAddress(address: unknown): address is string {
         if (!utils.isString(address)) return false;
 
         // Convert HEX to Base58
@@ -520,7 +543,7 @@ export default class TronWeb extends EventEmitter {
             return false;
         }
     }
-    isAddress(address = false) {
+    isAddress(address: unknown): address is string {
         return TronWeb.isAddress(address);
     }
 

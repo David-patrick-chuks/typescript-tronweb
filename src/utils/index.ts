@@ -66,7 +66,7 @@ const utils = {
         return typeof obj === 'function';
     },
 
-    isHex(string: any): boolean {
+    isHex(string: any): string is string {
         return (
             typeof string === 'string' &&
             !isNaN(parseInt(string, 16)) &&

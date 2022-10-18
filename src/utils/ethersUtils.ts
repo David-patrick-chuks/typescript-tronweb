@@ -1,4 +1,5 @@
-import { utils, Wallet as ethersWallet, Wordlist } from 'ethers';
+import { utils, BytesLike } from 'ethers';
+export { Wallet as ethersWallet, Wordlist, Bytes, BytesLike } from 'ethers';
 export { Mnemonic } from '@ethersproject/hdnode';
 
 const {
@@ -7,7 +8,7 @@ const {
     toUtf8Bytes,
     toUtf8String,
     recoverAddress,
-    SigningKey,
+    SigningKey: SigningKey_,
     AbiCoder,
     Interface,
     FormatTypes,
@@ -19,22 +20,30 @@ const {
     isValidMnemonic,
 } = utils;
 
+/**
+ * Allow passing less precise values to constructor, because they work
+ */
+export class SigningKey extends SigningKey_ {
+    constructor(
+        privateKey: BytesLike | { value: string; toHexString: () => string },
+    ) {
+        super(privateKey as BytesLike);
+    }
+}
+
 export {
     keccak256,
     sha256,
     toUtf8Bytes,
     toUtf8String,
     recoverAddress,
-    SigningKey,
     AbiCoder,
     Interface,
     FormatTypes,
     splitSignature,
     joinSignature,
     arrayify,
-    ethersWallet,
     concat,
     id,
     isValidMnemonic,
-    Wordlist,
 };

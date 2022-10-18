@@ -77,7 +77,6 @@ export function _signTypedData(domain, types, value, privateKey) {
         },
         value: privateKey,
     };
-    // @ts-ignore
     const signingKey = new SigningKey(key);
 
     const messageDigest = TypedDataEncoder.hash(domain, types, value);
