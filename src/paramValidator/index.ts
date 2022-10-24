@@ -2,13 +2,14 @@ import TronWeb from '..';
 import utils from '../utils';
 
 interface IOperatorBase {
-    name: string;
+    msg?: string;
     value?: any;
     optional?: boolean;
 }
-export type IOperator = IOperatorBase &
+export type IUnaryOperator = IOperatorBase &
     (
         | {
+              name: string;
               type:
                   | 'address'
                   | 'positive-integer'
@@ -22,17 +23,20 @@ export type IOperator = IOperatorBase &
                   | 'boolean';
           }
         | {
+              name: string;
               type: 'integer' | 'string';
               gt?: number;
               lt?: number;
               gte?: number;
               lte?: number;
           }
-        | {
-              type: 'notEqual';
-              names: [string, string];
-          }
     );
+export type IBinaryOperator = IOperatorBase & {
+    msg: string;
+    type: 'notEqual';
+    names: [string, string];
+};
+export type IOperator = IUnaryOperator | IBinaryOperator;
 
 export default class Validator {
     tronWeb: TronWeb;
@@ -43,7 +47,9 @@ export default class Validator {
         this.tronWeb = tronWeb;
     }
 
-    invalid(param) {
+    invalid(param: IOperator): string {
+        if (!('name' in param)) return param.msg;
+
         return (
             param.msg ||
             `Invalid ${param.name}${
@@ -52,11 +58,11 @@ export default class Validator {
         );
     }
 
-    notPositive(param) {
+    notPositive(param: IUnaryOperator): string {
         return `${param.name} must be a positive integer`;
     }
 
-    notEqual(param) {
+    notEqual(param: IBinaryOperator): string {
         return (
             param.msg ||
             `${param.names[0]} can not be equal to ${param.names[1]}`
@@ -69,19 +75,24 @@ export default class Validator {
         const normalized: { [key: string]: any } = {};
         let no = false;
         for (const param of params) {
-            const { name, value, type, optional } = param;
+            const { value, type, optional } = param;
             if (
                 optional &&
                 (!utils.isNotNullOrUndefined(value) ||
                     (type !== 'boolean' && value === false))
             )
                 continue;
-            normalized[name] = value;
+
+            if ('name' in param) normalized[param.name] = value;
 
             switch (param.type) {
                 case 'address':
-                    if (!this.tronWeb.isAddress(value)) no = true;
-                    else normalized[name] = this.tronWeb.address.toHex(value);
+                    if (!this.tronWeb.isAddress(value)) {
+                        no = true;
+                    } else {
+                        normalized[param.name] =
+                            this.tronWeb.address.toHex(value);
+                    }
                     break;
 
                 case 'integer': {

@@ -207,10 +207,10 @@ function encodeType(name, fields) {
 }
 
 export class TypedDataEncoder {
-    readonly types: { [key: string]: IField[] } = {};
-    readonly primaryType: string = '';
-    readonly _types: { [key: string]: string } = {};
-    readonly _encoderCache: { [key: string]: (__v: unknown) => string } = {};
+    readonly types!: { [key: string]: IField[] };
+    readonly primaryType!: string;
+    readonly _types!: { [key: string]: string };
+    readonly _encoderCache!: { [key: string]: (__v: unknown) => string };
 
     constructor(types) {
         defineReadOnly(this, 'types', Object.freeze(deepCopy(types)));

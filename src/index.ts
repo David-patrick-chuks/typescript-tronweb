@@ -463,7 +463,7 @@ export default class TronWeb extends EventEmitter {
         return TronWeb.toAscii(hex);
     }
 
-    static fromAscii(string, padding) {
+    static fromAscii(string: string, padding = 0) {
         if (!utils.isString(string))
             throw new Error('The passed value is not a valid utf-8 string');
 
@@ -472,7 +472,7 @@ export default class TronWeb extends EventEmitter {
             Buffer.from(string, 'ascii').toString('hex').padEnd(padding, '0')
         );
     }
-    fromAscii(string, padding) {
+    fromAscii(string: string, padding = 0) {
         return TronWeb.fromAscii(string, padding);
     }
 
@@ -509,7 +509,7 @@ export default class TronWeb extends EventEmitter {
         return TronWeb.toSun(trx);
     }
 
-    static toBigNumber(amount = 0) {
+    static toBigNumber(amount = 0): BigNumber {
         if (utils.isBigNumber(amount)) return amount;
 
         if (utils.isString(amount) && /^(-|)0x/.test(amount))
@@ -517,7 +517,7 @@ export default class TronWeb extends EventEmitter {
 
         return new BigNumber(amount.toString(10), 10);
     }
-    toBigNumber(amount = 0) {
+    toBigNumber(amount = 0): BigNumber {
         return TronWeb.toBigNumber(amount);
     }
 
