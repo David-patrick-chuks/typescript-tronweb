@@ -1,23 +1,35 @@
-import providers from 'lib/providers';
-import utils from 'utils';
+import providers from './lib/providers';
+import { HttpProvider } from './lib/providers';
+import utils from './utils';
 import BigNumber from 'bignumber.js';
 import EventEmitter from 'eventemitter3';
 import { version } from '../package.json';
 import semver from 'semver';
 import injectpromise from 'injectpromise';
 
-import TransactionBuilder from 'lib/transactionBuilder';
-import Trx from 'lib/trx';
-import Contract from 'lib/contract';
-import Plugin from 'lib/plugin';
-import Event from 'lib/event';
-import SideChain from 'lib/sidechain';
-import { keccak256 } from 'utils/ethersUtils';
-import { ADDRESS_PREFIX, TRON_BIP39_PATH_INDEX_0 } from 'utils/address';
+import TransactionBuilder from './lib/transactionBuilder';
+import Trx from './lib/trx';
+import Contract from './lib/contract';
+import Plugin from './lib/plugin';
+import Event from './lib/event';
+import SideChain from './lib/sidechain';
+import { keccak256 } from './utils/ethersUtils';
+import { ADDRESS_PREFIX, TRON_BIP39_PATH_INDEX_0 } from './utils/address';
 
 const DEFAULT_VERSION = '3.5.0';
 
 const FEE_LIMIT = 150000000;
+
+export type ITronWebOptions = {
+    fullHost?: string;
+    fullNode?: string | HttpProvider;
+    solidityNode?: string | HttpProvider;
+    eventServer?: string | HttpProvider;
+
+    headers?: string[];
+    eventHeaders?: string[];
+    privateKey?: string;
+};
 
 export default class TronWeb extends EventEmitter {
     static providers = providers;
@@ -33,6 +45,7 @@ export default class TronWeb extends EventEmitter {
     providers = providers;
     utils = utils;
     BigNumber = BigNumber;
+    injectPromise: injectpromise;
 
     event: Event;
     transactionBuilder: TransactionBuilder;
@@ -52,12 +65,12 @@ export default class TronWeb extends EventEmitter {
     // injectPromise = injectpromise(this);
 
     constructor(
-        options = false,
+        options: ITronWebOptions,
         // for retro-compatibility:
-        solidityNode = false,
-        eventServer = false,
-        sideOptions = false,
-        privateKey = false,
+        solidityNode: string | HttpProvider = '',
+        eventServer: string | HttpProvider = '',
+        sideOptions = '',
+        privateKey = '',
     ) {
         super();
 
@@ -79,14 +92,13 @@ export default class TronWeb extends EventEmitter {
         } else {
             fullNode = options;
         }
-        if (utils.isString(fullNode))
-            fullNode = new providers.HttpProvider(fullNode);
+        if (utils.isString(fullNode)) fullNode = new HttpProvider(fullNode);
 
         if (utils.isString(solidityNode))
-            solidityNode = new providers.HttpProvider(solidityNode);
+            solidityNode = new HttpProvider(solidityNode);
 
         if (utils.isString(eventServer))
-            eventServer = new providers.HttpProvider(eventServer);
+            eventServer = new HttpProvider(eventServer);
 
         this.event = new Event(this);
         this.transactionBuilder = new TransactionBuilder(this);
@@ -220,8 +232,7 @@ export default class TronWeb extends EventEmitter {
     }
 
     setFullNode(fullNode) {
-        if (utils.isString(fullNode))
-            fullNode = new providers.HttpProvider(fullNode);
+        if (utils.isString(fullNode)) fullNode = new HttpProvider(fullNode);
 
         if (!this.isValidProvider(fullNode))
             throw new Error('Invalid full node provided');
@@ -234,7 +245,7 @@ export default class TronWeb extends EventEmitter {
 
     setSolidityNode(solidityNode) {
         if (utils.isString(solidityNode))
-            solidityNode = new providers.HttpProvider(solidityNode);
+            solidityNode = new HttpProvider(solidityNode);
 
         if (!this.isValidProvider(solidityNode))
             throw new Error('Invalid solidity node provided');
@@ -248,21 +259,21 @@ export default class TronWeb extends EventEmitter {
     }
 
     setHeader(headers = {}) {
-        const fullNode = new providers.HttpProvider(
+        const fullNode = new HttpProvider(
             this.fullNode.host,
             30000,
             false,
             false,
             headers,
         );
-        const solidityNode = new providers.HttpProvider(
+        const solidityNode = new HttpProvider(
             this.solidityNode.host,
             30000,
             false,
             false,
             headers,
         );
-        const eventServer = new providers.HttpProvider(
+        const eventServer = new HttpProvider(
             this.eventServer.host,
             30000,
             false,
@@ -276,14 +287,14 @@ export default class TronWeb extends EventEmitter {
     }
 
     setFullNodeHeader(headers = {}) {
-        const fullNode = new providers.HttpProvider(
+        const fullNode = new HttpProvider(
             this.fullNode.host,
             30000,
             false,
             false,
             headers,
         );
-        const solidityNode = new providers.HttpProvider(
+        const solidityNode = new HttpProvider(
             this.solidityNode.host,
             30000,
             false,
@@ -296,7 +307,7 @@ export default class TronWeb extends EventEmitter {
     }
 
     setEventHeader(headers = {}) {
-        const eventServer = new providers.HttpProvider(
+        const eventServer = new HttpProvider(
             this.eventServer.host,
             30000,
             false,

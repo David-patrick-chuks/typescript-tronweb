@@ -8,6 +8,7 @@ import {
 } from '../utils/ethersUtils';
 import { ADDRESS_PREFIX } from '../utils/address';
 import Validator from '../paramValidator';
+import { ITransaction } from './transactionBuilder';
 import injectpromise from 'injectpromise';
 
 const TRX_MESSAGE_HEADER = '\x19TRON Signed Message:\n32';
@@ -15,8 +16,7 @@ const TRX_MESSAGE_HEADER = '\x19TRON Signed Message:\n32';
 const ETH_MESSAGE_HEADER = '\x19Ethereum Signed Message:\n32';
 
 // FIXME: more generic or not generic at all
-type _CallbackT<Out> = ((err: unknown) => Out) &
-    ((err: null, data: any) => Out);
+type _CallbackT<In> = ((err: unknown) => any) & ((err: null, data: In) => any);
 export declare type BlockT = number | 'latest' | 'earliest' | string;
 export declare type ResourceT = 'BANDWIDTH' | 'ENERGY';
 // FIXME: All interfaces here should be generated from protobuf instead.
@@ -24,20 +24,48 @@ export interface IBlock {
     number: number;
     transactions: ITransaction[];
 }
-export interface ITransaction {
-    number: number;
-    hash: string;
-    direction: 'to' | 'from' | 'all';
-    signature?: string;
-    raw_data: {
-        timestamp: number;
-        contract: {
-            parameter: { value: { owner_address: string } };
-            Permission_id: number;
-        }[];
+
+export interface ITransactionInfo {
+    id: string;
+    fee: number;
+    blockNumber: number;
+    blockTimeStamp: number;
+    contractResult: string[];
+    contract_address: string;
+    receipt: {
+        origin_energy_usage: number;
+        energy_usage_total: number;
+        net_fee: number;
+        result: string; // FIXME: literal type
     };
-    // transactions: any[];
+    log: {
+        address: string;
+        topics: unknown[];
+        data: string;
+    }[];
+    internal_transactions: {
+        hash: string;
+        caller_address: string;
+        transferTo_address: string;
+        callValueInfo: unknown[];
+        note: string;
+    }[];
 }
+
+// export interface ITransaction {
+//     number: number;
+//     hash: string;
+//     direction: 'to' | 'from' | 'all';
+//     signature?: string;
+//     raw_data: {
+//         timestamp: number;
+//         contract: {
+//             parameter: { value: { owner_address: string } };
+//             Permission_id: number;
+//         }[];
+//     };
+//     // transactions: any[];
+// }
 export interface IAccount {
     balance: number;
 }
@@ -355,7 +383,7 @@ export default class Trx {
     getUnconfirmedTransaction(
         transactionID: string,
         callback?: undefined,
-    ): Promise<ITransaction>;
+    ): Promise<ITransactionInfo>;
     getUnconfirmedTransaction(
         transactionID: string,
         callback: _CallbackT<any>,
@@ -363,7 +391,7 @@ export default class Trx {
     getUnconfirmedTransaction(
         transactionID: string,
         callback?: _CallbackT<any>,
-    ): void | Promise<ITransaction> {
+    ): void | Promise<ITransactionInfo> {
         if (!callback) {
             return this._getTransactionInfoById(
                 transactionID,
@@ -381,12 +409,12 @@ export default class Trx {
     getTransactionInfo(
         transactionID: string,
         callback?: undefined,
-    ): Promise<ITransaction>;
+    ): Promise<ITransactionInfo>;
     getTransactionInfo(transactionID: string, callback: _CallbackT<any>): void;
     getTransactionInfo(
         transactionID: string,
         callback?: _CallbackT<any>,
-    ): void | Promise<ITransaction> {
+    ): void | Promise<ITransactionInfo> {
         if (!callback) {
             return this._getTransactionInfoById(
                 transactionID,
@@ -405,7 +433,7 @@ export default class Trx {
         transactionID: string,
         options: { confirmed: boolean },
         callback?: undefined,
-    ): Promise<ITransaction>;
+    ): Promise<ITransactionInfo>;
     _getTransactionInfoById(
         transactionID: string,
         options: { confirmed: boolean },
@@ -415,7 +443,7 @@ export default class Trx {
         transactionID: string,
         options: { confirmed: boolean },
         callback?: _CallbackT<any>,
-    ): void | Promise<ITransaction> {
+    ): void | Promise<ITransactionInfo> {
         if (!callback) {
             return this.injectPromise(
                 this._getTransactionInfoById,
@@ -559,13 +587,17 @@ export default class Trx {
         );
     }
 
-    async getTransactionsRelated(): Promise<ITransaction[]>;
-    async getTransactionsRelated(address: string): Promise<ITransaction[]>;
+    async getTransactionsRelated(): Promise<
+        (ITransaction & { direction: 'all' | 'to' | 'from' })[]
+    >;
+    async getTransactionsRelated(
+        address: string,
+    ): Promise<(ITransaction & { direction: 'all' | 'to' | 'from' })[]>;
     async getTransactionsRelated(address: _CallbackT<any>): Promise<void>;
     async getTransactionsRelated(
         address: string,
         direction: 'all' | 'to' | 'from',
-    ): Promise<ITransaction[]>;
+    ): Promise<(ITransaction & { direction: 'all' | 'to' | 'from' })[]>;
     async getTransactionsRelated(
         address: string,
         direction: _CallbackT<any>,
@@ -574,7 +606,7 @@ export default class Trx {
         address: string,
         direction: 'all' | 'to' | 'from',
         limit: number,
-    ): Promise<ITransaction[]>;
+    ): Promise<(ITransaction & { direction: 'all' | 'to' | 'from' })[]>;
     async getTransactionsRelated(
         address: string,
         direction: 'all' | 'to' | 'from',
@@ -585,7 +617,7 @@ export default class Trx {
         direction: 'all' | 'to' | 'from',
         limit: number,
         offset: number,
-    ): Promise<ITransaction[]>;
+    ): Promise<(ITransaction & { direction: 'all' | 'to' | 'from' })[]>;
     async getTransactionsRelated(
         address: string,
         direction: 'all' | 'to' | 'from',
@@ -605,7 +637,7 @@ export default class Trx {
         limit: number | _CallbackT<any> = 30,
         offset: number | _CallbackT<any> = 0,
         callback?: _CallbackT<any>,
-    ): Promise<void | ITransaction[]> {
+    ): Promise<void | (ITransaction & { direction: 'all' | 'to' | 'from' })[]> {
         if (utils.isFunction(offset)) {
             if (
                 utils.isFunction(limit) ||
@@ -1958,24 +1990,24 @@ export default class Trx {
 
     sendRawTransaction(
         signedTransaction: ITransaction,
-        options?: _CallbackT<any>,
+        options?: _PureObject,
+        callback?: undefined,
+    ): Promise<{ code: string; message: string }>;
+    sendRawTransaction(
+        signedTransaction: ITransaction,
+        options?: _CallbackT<{ code: string; message: string }>,
         callback?: undefined,
     ): void;
     sendRawTransaction(
         signedTransaction: ITransaction,
-        options?: _PureObject,
-        callback?: undefined,
-    ): Promise<any>;
-    sendRawTransaction(
-        signedTransaction: ITransaction,
         options: _PureObject | undefined,
-        callback?: _CallbackT<any>,
+        callback?: _CallbackT<{ code: string; message: string }>,
     ): void;
     sendRawTransaction(
         signedTransaction: ITransaction,
         options?: _PureObject | _CallbackT<any>,
-        callback?: _CallbackT<any>,
-    ): void | Promise<any> {
+        callback?: _CallbackT<{ code: string; message: string }>,
+    ): void | Promise<{ code: string; message: string }> {
         if (utils.isFunction(options))
             return this.sendRawTransaction(signedTransaction, {}, options);
 
@@ -2120,9 +2152,11 @@ export default class Trx {
         }
 
         try {
-            const address = options2.privateKey
-                ? this.tronWeb.address.fromPrivateKey(options2.privateKey)
-                : options2.address;
+            const address = (
+                options2.privateKey
+                    ? this.tronWeb.address.fromPrivateKey(options2.privateKey)
+                    : options2.address
+            ) as string;
             const transaction = await this.tronWeb.transactionBuilder.sendTrx(
                 to,
                 amount,
@@ -2209,9 +2243,11 @@ export default class Trx {
         }
 
         try {
-            const address = options2.privateKey
-                ? this.tronWeb.address.fromPrivateKey(options2.privateKey)
-                : options2.address;
+            const address = (
+                options2.privateKey
+                    ? this.tronWeb.address.fromPrivateKey(options2.privateKey)
+                    : options2.address
+            ) as string;
             const transaction = await this.tronWeb.transactionBuilder.sendToken(
                 to,
                 amount,
@@ -2390,9 +2426,11 @@ export default class Trx {
         }
 
         try {
-            const address = options2.privateKey
-                ? this.tronWeb.address.fromPrivateKey(options2.privateKey)
-                : options2.address;
+            const address = (
+                options2.privateKey
+                    ? this.tronWeb.address.fromPrivateKey(options2.privateKey)
+                    : options2.address
+            ) as string;
             const freezeBalance =
                 await this.tronWeb.transactionBuilder.freezeBalance(
                     amount,
@@ -2512,9 +2550,11 @@ export default class Trx {
         }
 
         try {
-            const address = options2.privateKey
-                ? this.tronWeb.address.fromPrivateKey(options2.privateKey)
-                : options2.address;
+            const address = (
+                options2.privateKey
+                    ? this.tronWeb.address.fromPrivateKey(options2.privateKey)
+                    : options2.address
+            ) as string;
             const unfreezeBalance =
                 await this.tronWeb.transactionBuilder.unfreezeBalance(
                     resource,
@@ -2589,9 +2629,11 @@ export default class Trx {
         }
 
         try {
-            const address = options2.privateKey
-                ? this.tronWeb.address.fromPrivateKey(options2.privateKey)
-                : options2.address;
+            const address = (
+                options2.privateKey
+                    ? this.tronWeb.address.fromPrivateKey(options2.privateKey)
+                    : options2.address
+            ) as string;
             const updateAccount =
                 await this.tronWeb.transactionBuilder.updateAccount(
                     accountName,

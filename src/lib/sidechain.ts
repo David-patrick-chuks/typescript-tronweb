@@ -1,12 +1,40 @@
 import injectpromise from 'injectpromise';
-import Validator from 'paramValidator';
+import Validator from '../paramValidator';
+import TronWeb from '..';
+import { HttpProvider } from './providers';
+import { ITransaction, ContractOptions } from './transactionBuilder';
 
-export default class SideChain {
+type _CallbackT<In> = ((err: unknown) => any) & ((err: null, data: In) => any);
+
+export interface IChainOptions {
+    fullHost: string;
+    fullNode: HttpProvider | string;
+    solidityNode: HttpProvider | string;
+    eventServer: HttpProvider | string;
+    mainGatewayAddress: string;
+    sideGatewayAddress: string;
+    sideChainId: string;
+}
+export type IDepositTrc = any;
+export type IMappingTrc = any;
+
+export default class SideChain<T extends TronWeb> {
+    mainchain: T;
+    sidechain: TronWeb;
+    isAddress: TronWeb['isAddress'];
+    utils: TronWeb['utils'];
+    injectPromise: injectpromise;
+    validator: Validator;
+
+    mainGatewayAddress!: string;
+    sideGatewayAddress!: string;
+    chainId!: string;
+
     constructor(
-        sideOptions,
-        TronWeb = false,
-        mainchain = false,
-        privateKey = false,
+        sideOptions: IChainOptions,
+        TronWebCls: typeof TronWeb,
+        mainchain: T,
+        privateKey: string,
     ) {
         this.mainchain = mainchain;
         const {
@@ -18,7 +46,7 @@ export default class SideChain {
             sideGatewayAddress,
             sideChainId,
         } = sideOptions;
-        this.sidechain = new TronWeb(
+        this.sidechain = new TronWebCls(
             fullHost || fullNode,
             fullHost || solidityNode,
             fullHost || eventServer,
@@ -33,13 +61,19 @@ export default class SideChain {
         this.validator = new Validator(this.sidechain);
 
         const self = this;
+        // @ts-ignore
         this.sidechain.trx.sign = (...args) => {
+            // @ts-ignore
             return self.sign(...args);
         };
+        // @ts-ignore
         this.sidechain.trx.multiSign = (...args) => {
+            // @ts-ignore
             return self.multiSign(...args);
         };
     }
+
+    // FIXME: this and two next must be setters
     setMainGatewayAddress(mainGatewayAddress) {
         if (!this.isAddress(mainGatewayAddress))
             throw new Error('Invalid main gateway address provided');
@@ -58,7 +92,10 @@ export default class SideChain {
         this.chainId = sideChainId;
     }
 
-    signTransaction(priKeyBytes, transaction) {
+    signTransaction(
+        priKeyBytes: string | number[],
+        transaction: ITransaction,
+    ): ITransaction {
         if (typeof priKeyBytes === 'string')
             priKeyBytes = this.utils.code.hexStr2byteArray(priKeyBytes);
 
@@ -85,21 +122,21 @@ export default class SideChain {
     }
 
     async multiSign(
-        transaction = false,
-        privateKey = this.sidechain.defaultPrivateKey,
-        permissionId = false,
-        callback = false,
-    ) {
-        if (this.utils.isFunction(permissionId)) {
-            callback = permissionId;
-            permissionId = 0;
-        }
+        transaction: ITransaction,
+        privateKey: string = this.sidechain.defaultPrivateKey,
+        permissionId: number,
+        callback?: _CallbackT<any>,
+    ): Promise<void | ITransaction> {
+        // if (this.utils.isFunction(permissionId)) {
+        //     callback = permissionId;
+        //     permissionId = 0;
+        // }
 
-        if (this.utils.isFunction(privateKey)) {
-            callback = privateKey;
-            privateKey = this.mainchain.defaultPrivateKey;
-            permissionId = 0;
-        }
+        // if (this.utils.isFunction(privateKey)) {
+        //     callback = privateKey;
+        //     privateKey = this.mainchain.defaultPrivateKey;
+        //     permissionId = 0;
+        // }
 
         if (!callback) {
             return this.injectPromise(
@@ -170,29 +207,29 @@ export default class SideChain {
     }
 
     async sign(
-        transaction = false,
-        privateKey = this.sidechain.defaultPrivateKey,
+        transaction: ITransaction,
+        privateKey: string = this.sidechain.defaultPrivateKey,
         useTronHeader = true,
         multisig = false,
-        callback = false,
-    ) {
-        if (this.utils.isFunction(multisig)) {
-            callback = multisig;
-            multisig = false;
-        }
+        callback?: _CallbackT<any>,
+    ): Promise<void | ITransaction> {
+        // if (this.utils.isFunction(multisig)) {
+        //     callback = multisig;
+        //     multisig = false;
+        // }
 
-        if (this.utils.isFunction(useTronHeader)) {
-            callback = useTronHeader;
-            useTronHeader = true;
-            multisig = false;
-        }
+        // if (this.utils.isFunction(useTronHeader)) {
+        //     callback = useTronHeader;
+        //     useTronHeader = true;
+        //     multisig = false;
+        // }
 
-        if (this.utils.isFunction(privateKey)) {
-            callback = privateKey;
-            privateKey = this.sidechain.defaultPrivateKey;
-            useTronHeader = true;
-            multisig = false;
-        }
+        // if (this.utils.isFunction(privateKey)) {
+        //     callback = privateKey;
+        //     privateKey = this.sidechain.defaultPrivateKey;
+        //     useTronHeader = true;
+        //     multisig = false;
+        // }
 
         if (!callback) {
             return this.injectPromise(
@@ -210,6 +247,8 @@ export default class SideChain {
                 return callback('Expected hex message input');
 
             try {
+                // FIXME: it's weird, .trx is an instance and signString is static
+                // @ts-ignore
                 const signatureHex = this.sidechain.trx.signString(
                     transaction,
                     privateKey,
@@ -257,21 +296,21 @@ export default class SideChain {
      * deposit asset to sidechain
      */
     async depositTrx(
-        callValue,
-        depositFee,
-        feeLimit,
-        options = {},
-        privateKey = this.mainchain.defaultPrivateKey,
-        callback = false,
-    ) {
-        if (this.utils.isFunction(privateKey)) {
-            callback = privateKey;
-            privateKey = this.mainchain.defaultPrivateKey;
-        }
-        if (this.utils.isFunction(options)) {
-            callback = options;
-            options = {};
-        }
+        callValue: number,
+        depositFee: number,
+        feeLimit: number,
+        options: Record<string, unknown> = {},
+        privateKey: string = this.mainchain.defaultPrivateKey,
+        callback?: _CallbackT<any>,
+    ): Promise<void | any> {
+        // if (this.utils.isFunction(privateKey)) {
+        //     callback = privateKey;
+        //     privateKey = this.mainchain.defaultPrivateKey;
+        // }
+        // if (this.utils.isFunction(options)) {
+        //     callback = options;
+        //     options = {};
+        // }
         if (!callback) {
             return this.injectPromise(
                 this.depositTrx,
@@ -329,22 +368,22 @@ export default class SideChain {
     }
 
     async depositTrc10(
-        tokenId,
-        tokenValue,
-        depositFee,
-        feeLimit,
-        options = {},
-        privateKey = this.mainchain.defaultPrivateKey,
-        callback = false,
-    ) {
-        if (this.utils.isFunction(privateKey)) {
-            callback = privateKey;
-            privateKey = this.mainchain.defaultPrivateKey;
-        }
-        if (this.utils.isFunction(options)) {
-            callback = options;
-            options = {};
-        }
+        tokenId: number,
+        tokenValue: number,
+        depositFee: number,
+        feeLimit: number,
+        options: Record<string, unknown> = {},
+        privateKey: string = this.mainchain.defaultPrivateKey,
+        callback?: _CallbackT<any>,
+    ): Promise<void | any> {
+        // if (this.utils.isFunction(privateKey)) {
+        //     callback = privateKey;
+        //     privateKey = this.mainchain.defaultPrivateKey;
+        // }
+        // if (this.utils.isFunction(options)) {
+        //     callback = options;
+        //     options = {};
+        // }
         if (!callback) {
             return this.injectPromise(
                 this.depositTrc10,
@@ -411,23 +450,23 @@ export default class SideChain {
     }
 
     async depositTrc(
-        functionSelector,
-        num,
-        fee,
-        feeLimit,
-        contractAddress,
-        options = {},
-        privateKey = this.mainchain.defaultPrivateKey,
-        callback = false,
-    ) {
-        if (this.utils.isFunction(privateKey)) {
-            callback = privateKey;
-            privateKey = this.mainchain.defaultPrivateKey;
-        }
-        if (this.utils.isFunction(options)) {
-            callback = options;
-            options = {};
-        }
+        functionSelector: string,
+        num: number,
+        fee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: Record<string, unknown> = {},
+        privateKey: string = this.mainchain.defaultPrivateKey,
+        callback?: _CallbackT<IDepositTrc>,
+    ): Promise<void | IDepositTrc> {
+        // if (this.utils.isFunction(privateKey)) {
+        //     callback = privateKey;
+        //     privateKey = this.mainchain.defaultPrivateKey;
+        // }
+        // if (this.utils.isFunction(options)) {
+        //     callback = options;
+        //     options = {};
+        // }
         if (!callback) {
             return this.injectPromise(
                 this.depositTrc,
@@ -530,13 +569,13 @@ export default class SideChain {
     }
 
     async approveTrc20(
-        num,
-        feeLimit,
-        contractAddress,
-        options = {},
-        privateKey = this.mainchain.defaultPrivateKey,
-        callback = false,
-    ) {
+        num: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: Record<string, unknown> = {},
+        privateKey: string = this.mainchain.defaultPrivateKey,
+        callback?: _CallbackT<IDepositTrc>,
+    ): Promise<void | IDepositTrc> {
         const functionSelector = 'approve';
         return this.depositTrc(
             functionSelector,
@@ -551,13 +590,13 @@ export default class SideChain {
     }
 
     async approveTrc721(
-        id,
-        feeLimit,
-        contractAddress,
-        options = {},
-        privateKey = this.mainchain.defaultPrivateKey,
-        callback = false,
-    ) {
+        id: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: Record<string, unknown> = {},
+        privateKey: string = this.mainchain.defaultPrivateKey,
+        callback?: _CallbackT<IDepositTrc>,
+    ): Promise<void | IDepositTrc> {
         const functionSelector = 'approve';
         return this.depositTrc(
             functionSelector,
@@ -572,14 +611,14 @@ export default class SideChain {
     }
 
     async depositTrc20(
-        num,
-        depositFee,
-        feeLimit,
-        contractAddress,
-        options = {},
-        privateKey = this.mainchain.defaultPrivateKey,
-        callback = false,
-    ) {
+        num: number,
+        depositFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: Record<string, unknown> = {},
+        privateKey: string = this.mainchain.defaultPrivateKey,
+        callback: _CallbackT<IDepositTrc>,
+    ): Promise<void | IDepositTrc> {
         const functionSelector = 'depositTRC20';
         return this.depositTrc(
             functionSelector,
@@ -594,14 +633,14 @@ export default class SideChain {
     }
 
     async depositTrc721(
-        id,
-        depositFee,
-        feeLimit,
-        contractAddress,
-        options = {},
-        privateKey = this.mainchain.defaultPrivateKey,
-        callback = false,
-    ) {
+        id: number,
+        depositFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: Record<string, unknown> = {},
+        privateKey: string = this.mainchain.defaultPrivateKey,
+        callback?: _CallbackT<IDepositTrc>,
+    ): Promise<void | IDepositTrc> {
         const functionSelector = 'depositTRC721';
         return this.depositTrc(
             functionSelector,
@@ -619,22 +658,22 @@ export default class SideChain {
      * mapping asset TRC20 or TRC721 to DAppChain
      */
     async mappingTrc(
-        trxHash,
-        mappingFee,
-        feeLimit,
-        functionSelector,
-        options = {},
-        privateKey = this.mainchain.defaultPrivateKey,
-        callback,
-    ) {
-        if (this.utils.isFunction(privateKey)) {
-            callback = privateKey;
-            privateKey = this.mainchain.defaultPrivateKey;
-        }
-        if (this.utils.isFunction(options)) {
-            callback = options;
-            options = {};
-        }
+        trxHash: string,
+        mappingFee: number,
+        feeLimit: number,
+        functionSelector: string,
+        options: Record<string, unknown> = {},
+        privateKey: string = this.mainchain.defaultPrivateKey,
+        callback?: _CallbackT<IMappingTrc>,
+    ): Promise<void | IMappingTrc> {
+        // if (this.utils.isFunction(privateKey)) {
+        //     callback = privateKey;
+        //     privateKey = this.mainchain.defaultPrivateKey;
+        // }
+        // if (this.utils.isFunction(options)) {
+        //     callback = options;
+        //     options = {};
+        // }
         if (!callback) {
             return this.injectPromise(
                 this.mappingTrc,
@@ -703,13 +742,13 @@ export default class SideChain {
     }
 
     async mappingTrc20(
-        trxHash,
-        mappingFee,
-        feeLimit,
-        options = {},
-        privateKey = this.mainchain.defaultPrivateKey,
-        callback = false,
-    ) {
+        trxHash: string,
+        mappingFee: number,
+        feeLimit: number,
+        options: Record<string, unknown> = {},
+        privateKey: string = this.mainchain.defaultPrivateKey,
+        callback?: _CallbackT<IMappingTrc>,
+    ): Promise<void | IMappingTrc> {
         const functionSelector = 'mappingTRC20';
         return this.mappingTrc(
             trxHash,
@@ -723,13 +762,13 @@ export default class SideChain {
     }
 
     async mappingTrc721(
-        trxHash,
-        mappingFee,
-        feeLimit,
-        options = {},
-        privateKey = this.mainchain.defaultPrivateKey,
-        callback = false,
-    ) {
+        trxHash: string,
+        mappingFee: number,
+        feeLimit: number,
+        options: Record<string, unknown> = {},
+        privateKey: string = this.mainchain.defaultPrivateKey,
+        callback?: _CallbackT<IMappingTrc>,
+    ): Promise<void | IMappingTrc> {
         const functionSelector = 'mappingTRC721';
         return this.mappingTrc(
             trxHash,
@@ -746,21 +785,21 @@ export default class SideChain {
      * withdraw trx from sidechain to mainchain
      */
     async withdrawTrx(
-        callValue,
-        withdrawFee,
-        feeLimit,
-        options = {},
-        privateKey = this.mainchain.defaultPrivateKey,
-        callback = false,
-    ) {
-        if (this.utils.isFunction(privateKey)) {
-            callback = privateKey;
-            privateKey = this.mainchain.defaultPrivateKey;
-        }
-        if (this.utils.isFunction(options)) {
-            callback = options;
-            options = {};
-        }
+        callValue: number,
+        withdrawFee: number,
+        feeLimit: number,
+        options: Record<string, unknown> = {},
+        privateKey: string = this.mainchain.defaultPrivateKey,
+        callback?: _CallbackT<any>,
+    ): Promise<void | any> {
+        // if (this.utils.isFunction(privateKey)) {
+        //     callback = privateKey;
+        //     privateKey = this.mainchain.defaultPrivateKey;
+        // }
+        // if (this.utils.isFunction(options)) {
+        //     callback = options;
+        //     options = {};
+        // }
         if (!callback) {
             return this.injectPromise(
                 this.withdrawTrx,
@@ -818,22 +857,22 @@ export default class SideChain {
     }
 
     async withdrawTrc10(
-        tokenId,
-        tokenValue,
-        withdrawFee,
-        feeLimit,
-        options = {},
-        privateKey = this.mainchain.defaultPrivateKey,
-        callback = false,
-    ) {
-        if (this.utils.isFunction(privateKey)) {
-            callback = privateKey;
-            privateKey = this.mainchain.defaultPrivateKey;
-        }
-        if (this.utils.isFunction(options)) {
-            callback = options;
-            options = {};
-        }
+        tokenId: number,
+        tokenValue: number,
+        withdrawFee: number,
+        feeLimit: number,
+        options: Record<string, unknown> = {},
+        privateKey: string = this.mainchain.defaultPrivateKey,
+        callback?: _CallbackT<any>,
+    ): Promise<void | any> {
+        // if (this.utils.isFunction(privateKey)) {
+        //     callback = privateKey;
+        //     privateKey = this.mainchain.defaultPrivateKey;
+        // }
+        // if (this.utils.isFunction(options)) {
+        //     callback = options;
+        //     options = {};
+        // }
         if (!callback) {
             return this.injectPromise(
                 this.withdrawTrc10,
@@ -900,23 +939,26 @@ export default class SideChain {
     }
 
     async withdrawTrc(
-        functionSelector,
-        numOrId,
-        withdrawFee,
-        feeLimit,
-        contractAddress,
-        options = {},
-        privateKey = this.mainchain.defaultPrivateKey,
-        callback = false,
-    ) {
-        if (this.utils.isFunction(privateKey)) {
-            callback = privateKey;
-            privateKey = this.mainchain.defaultPrivateKey;
-        }
-        if (this.utils.isFunction(options)) {
-            callback = options;
-            options = {};
-        }
+        functionSelector: string,
+        numOrId: number,
+        withdrawFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: ContractOptions & {
+            shouldPollResponse?: boolean;
+            rawResponse: boolean;
+        },
+        privateKey: string = this.mainchain.defaultPrivateKey,
+        callback?: _CallbackT<any>,
+    ): Promise<void | any> {
+        // if (this.utils.isFunction(privateKey)) {
+        //     callback = privateKey;
+        //     privateKey = this.mainchain.defaultPrivateKey;
+        // }
+        // if (this.utils.isFunction(options)) {
+        //     callback = options;
+        //     options = {};
+        // }
         if (!callback) {
             return this.injectPromise(
                 this.withdrawTrc,
@@ -1044,8 +1086,11 @@ export default class SideChain {
                     }, 3000);
                 }
 
+                // FIXME: either documentation is lying to me or it's a mistake
+                // @ts-ignore
                 if (output.result && output.result === 'FAILED') {
                     return callback({
+                        // @ts-ignore
                         error: this.sidechain.toUtf8(output.resMessage),
                         transaction: signedTransaction,
                         output,
@@ -1064,7 +1109,10 @@ export default class SideChain {
 
                 if (options.rawResponse) return callback(null, output);
 
+                // FIXME: WTF? Undeclared symbol.
+                // @ts-ignore
                 let decoded = decodeOutput(
+                    // @ts-ignore
                     this.outputs,
                     '0x' + output.contractResult[0],
                 );
@@ -1081,17 +1129,19 @@ export default class SideChain {
     }
 
     async withdrawTrc20(
-        num,
-        withdrawFee,
-        feeLimit,
-        contractAddress,
-        options,
-        privateKey = this.mainchain.defaultPrivateKey,
-        callback = false,
-    ) {
-        const functionSelector = 'withdrawal(uint256)';
+        num: number,
+        withdrawFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: ContractOptions & {
+            shouldPollResponse?: boolean;
+            rawResponse: boolean;
+        },
+        privateKey: string = this.mainchain.defaultPrivateKey,
+        callback?: _CallbackT<any>,
+    ): Promise<void | any> {
         return this.withdrawTrc(
-            functionSelector,
+            'withdrawal(uint256)',
             num,
             withdrawFee,
             feeLimit,
@@ -1103,17 +1153,19 @@ export default class SideChain {
     }
 
     async withdrawTrc721(
-        id,
-        withdrawFee,
-        feeLimit,
-        contractAddress,
-        options,
-        privateKey = this.mainchain.defaultPrivateKey,
-        callback = false,
-    ) {
-        const functionSelector = 'withdrawal(uint256)';
+        id: number,
+        withdrawFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: ContractOptions & {
+            shouldPollResponse?: boolean;
+            rawResponse: boolean;
+        },
+        privateKey: string = this.mainchain.defaultPrivateKey,
+        callback?: _CallbackT<any>,
+    ): Promise<void | any> {
         return this.withdrawTrc(
-            functionSelector,
+            'withdrawal(uint256)',
             id,
             withdrawFee,
             feeLimit,
@@ -1125,21 +1177,21 @@ export default class SideChain {
     }
 
     async injectFund(
-        num,
-        feeLimit,
-        options,
-        privateKey = this.mainchain.defaultPrivateKey,
-        callback = false,
-    ) {
-        if (this.utils.isFunction(privateKey)) {
-            callback = privateKey;
-            privateKey = this.mainchain.defaultPrivateKey;
-        }
+        num: number,
+        feeLimit: number,
+        options: Record<string, unknown>,
+        privateKey: string = this.mainchain.defaultPrivateKey,
+        callback?: _CallbackT<string>,
+    ): Promise<void | string> {
+        // if (this.utils.isFunction(privateKey)) {
+        //     callback = privateKey;
+        //     privateKey = this.mainchain.defaultPrivateKey;
+        // }
 
-        if (this.utils.isFunction(options)) {
-            callback = options;
-            options = {};
-        }
+        // if (this.utils.isFunction(options)) {
+        //     callback = options;
+        //     options = {};
+        // }
         if (!callback) {
             return this.injectPromise(
                 this.injectFund,
@@ -1214,13 +1266,16 @@ export default class SideChain {
     }
 
     async retryWithdraw(
-        nonce,
-        retryWithdrawFee,
-        feeLimit,
-        options = {},
-        privateKey = this.sidechain.defaultPrivateKey,
-        callback = false,
-    ) {
+        nonce: number,
+        retryWithdrawFee: number,
+        feeLimit: number,
+        options: ContractOptions & {
+            shouldPollResponse?: boolean;
+            rawResponse: boolean;
+        },
+        privateKey: string = this.mainchain.defaultPrivateKey,
+        callback?: _CallbackT<any>,
+    ): Promise<void | any> {
         const functionSelector = 'retryWithdraw(uint256)';
         return this.withdrawTrc(
             functionSelector,
@@ -1235,13 +1290,13 @@ export default class SideChain {
     }
 
     async retryDeposit(
-        nonce,
-        retryDepositFee,
-        feeLimit,
-        options = {},
-        privateKey = this.mainchain.defaultPrivateKey,
-        callback = false,
-    ) {
+        nonce: number,
+        retryDepositFee: number,
+        feeLimit: number,
+        options: Record<string, unknown> = {},
+        privateKey: string = this.mainchain.defaultPrivateKey,
+        callback?: _CallbackT<IDepositTrc>,
+    ): Promise<void | IDepositTrc> {
         const functionSelector = 'retryDeposit';
         return this.depositTrc(
             functionSelector,
@@ -1256,13 +1311,13 @@ export default class SideChain {
     }
 
     async retryMapping(
-        nonce,
-        retryMappingFee,
-        feeLimit,
-        options = {},
-        privateKey = this.mainchain.defaultPrivateKey,
-        callback = false,
-    ) {
+        nonce: number,
+        retryMappingFee: number,
+        feeLimit: number,
+        options: Record<string, unknown> = {},
+        privateKey: string = this.mainchain.defaultPrivateKey,
+        callback?: _CallbackT<IDepositTrc>,
+    ): Promise<void | IDepositTrc> {
         const functionSelector = 'retryMapping';
         return this.depositTrc(
             functionSelector,
