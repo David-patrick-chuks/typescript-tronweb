@@ -22,7 +22,7 @@ interface ContractOptions {
     filters?: unknown | unknown[];
 }
 
-type _CallbackT<Out> = (err: string | null, data?: unknown[]) => Out;
+type _CallbackT<In> = ((err: unknown) => any) & ((err: null, data: In) => any);
 
 export default class Event {
     tronWeb: TronWeb;
@@ -39,7 +39,7 @@ export default class Event {
         eventServer: string | providers.HttpProvider,
         healthcheck = 'healthcheck',
     ): void {
-        if (!eventServer) return (this.tronWeb.eventServer = false);
+        if (!eventServer) return (this.tronWeb.eventServer = undefined);
 
         if (utils.isString(eventServer))
             eventServer = new providers.HttpProvider(eventServer);
@@ -58,17 +58,18 @@ export default class Event {
     getEventsByContractAddress(
         contractAddress: string,
         options: ContractOptions,
+        callback?: undefined,
     ): Promise<any>;
-    getEventsByContractAddress<Out>(
+    getEventsByContractAddress(
         contractAddress: string,
         options: ContractOptions,
-        callback?: _CallbackT<Out>,
-    ): Promise<Out>;
-    getEventsByContractAddress<Out>(
+        callback: _CallbackT<any>,
+    ): void;
+    getEventsByContractAddress(
         contractAddress: string,
         options: ContractOptions = {},
-        callback?: _CallbackT<Out>,
-    ): Out | Promise<Out | any> {
+        callback?: _CallbackT<any>,
+    ): void | Promise<any> {
         /* eslint-disable prefer-const */
         let {
             sinceTimestamp,
@@ -111,7 +112,7 @@ export default class Event {
         if (!this.tronWeb.eventServer)
             return callback('No event server configured');
 
-        const routeParams = [];
+        const routeParams: (string | number)[] = [];
 
         if (!this.tronWeb.isAddress(contractAddress))
             return callback('Invalid contract address provided');
@@ -150,12 +151,16 @@ export default class Event {
 
         if (blockNumber) routeParams.push(blockNumber);
 
-        const qs: any = {
+        const qs: Record<string, string | number | boolean> = {
             size,
             page,
         };
 
-        if (typeof filters === 'object' && Object.keys(filters).length > 0)
+        if (
+            filters != null &&
+            typeof filters === 'object' &&
+            Object.keys(filters).length > 0
+        )
             qs.filters = JSON.stringify(filters);
 
         if (fromTimestamp) qs.fromTimestamp = qs.since = fromTimestamp;
@@ -199,17 +204,18 @@ export default class Event {
     getEventsByTransactionID(
         transactionID: string,
         options: { rawResponse?: boolean },
+        callback?: undefined,
     ): Promise<any>;
-    getEventsByTransactionID<Out>(
+    getEventsByTransactionID(
         transactionID: string,
         options: { rawResponse?: boolean },
-        callback?: _CallbackT<Out>,
-    ): Out | Promise<Out>;
-    getEventsByTransactionID<Out>(
+        callback: _CallbackT<any>,
+    ): void;
+    getEventsByTransactionID(
         transactionID: string,
-        options: { rawResponse?: boolean } | _CallbackT<Out> = {},
-        callback?: _CallbackT<Out>,
-    ): Out | Promise<Out | any> {
+        options: { rawResponse?: boolean } | _CallbackT<any> = {},
+        callback?: _CallbackT<any>,
+    ): void | Promise<any> {
         if (utils.isFunction(options)) {
             callback = options;
             options = {};
