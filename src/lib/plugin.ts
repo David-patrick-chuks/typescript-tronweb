@@ -1,22 +1,39 @@
-import TronWeb from 'index';
-import utils from 'utils';
+import TronWeb from '..';
+import utils from '../utils';
 import semver from 'semver';
 
+export interface IPluginRegisterResult {
+    libs: string[];
+    plugged: string[];
+    skipped: string[];
+    error?: string;
+}
+export interface IPluginDefn {
+    requires: string;
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    components: Record<string, Record<string, Function>>;
+    fullClass?: string;
+}
+
 export default class Plugin {
-    constructor(tronWeb = false, options = {}) {
-        if (!tronWeb || !tronWeb instanceof TronWeb)
+    tronWeb: TronWeb;
+    pluginNoOverride: string[];
+    disablePlugins: string[] | undefined;
+
+    constructor(tronWeb: TronWeb, options: { disablePlugins?: string[] } = {}) {
+        if (!tronWeb || !(tronWeb instanceof TronWeb))
             throw new Error('Expected instance of TronWeb');
         this.tronWeb = tronWeb;
         this.pluginNoOverride = ['register'];
         this.disablePlugins = options.disablePlugins;
     }
 
-    register(Plugin, options) {
-        let pluginInterface = {
+    register(PluginCls, options) {
+        let pluginInterface: IPluginDefn = {
             requires: '0.0.0',
             components: {},
         };
-        const result = {
+        const result: IPluginRegisterResult = {
             libs: [],
             plugged: [],
             skipped: [],
@@ -25,7 +42,7 @@ export default class Plugin {
             result.error = 'This instance of TronWeb has plugins disabled.';
             return result;
         }
-        const plugin = new Plugin(this.tronWeb);
+        const plugin = new PluginCls(this.tronWeb);
         if (utils.isFunction(plugin.pluginInterface))
             pluginInterface = plugin.pluginInterface(options);
 
@@ -37,7 +54,7 @@ export default class Plugin {
                     className.substring(0, 1).toLowerCase() +
                     className.substring(1);
                 if (className !== classInstanceName) {
-                    TronWeb[className] = Plugin;
+                    TronWeb[className] = PluginCls;
                     this.tronWeb[classInstanceName] = plugin;
                     result.libs.push(className);
                 }

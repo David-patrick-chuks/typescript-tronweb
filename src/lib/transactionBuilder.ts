@@ -1169,11 +1169,11 @@ export default class TransactionBuilder {
             };
             // params.splice(3, 1);
         }
-        // @ts-ignore
         return this._triggerSmartContract(
             contractAddress,
             functionSelector,
             options,
+            // @ts-ignore
             issuerAddress,
             callback,
         );
