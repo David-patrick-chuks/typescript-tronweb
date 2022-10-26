@@ -2784,7 +2784,7 @@ export default class Trx {
             .request('wallet/listexchanges', {}, 'post')
             .then(({ exchanges = [] }: { exchanges: IExchange[] }) => {
                 callback(null, exchanges);
-            }, 'post')
+            })
             .catch((err) => callback(err));
     }
 
@@ -2845,7 +2845,7 @@ export default class Trx {
             .request('wallet/getnodeinfo', {}, 'post')
             .then((info) => {
                 callback(null, info);
-            }, 'post')
+            })
             .catch((err) => callback(err));
     }
 

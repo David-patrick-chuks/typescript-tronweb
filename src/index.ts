@@ -35,6 +35,7 @@ export type ITronWebOptions = {
     headers?: Record<string, string>;
     eventHeaders?: Record<string, string>;
     privateKey: string;
+    disablePlugins?: string[];
 };
 
 export default class TronWeb extends EventEmitter {
@@ -59,9 +60,9 @@ export default class TronWeb extends EventEmitter {
     plugin: Plugin;
     sidechain?: SideChain<TronWeb>;
 
-    fullNode: HttpProvider;
-    solidityNode: HttpProvider;
-    eventServer: HttpProvider;
+    fullNode!: HttpProvider;
+    solidityNode!: HttpProvider;
+    eventServer!: HttpProvider;
 
     defaultBlock: BlockT;
     defaultPrivateKey: string;
@@ -104,6 +105,7 @@ export default class TronWeb extends EventEmitter {
 
         if (
             typeof options === 'object' &&
+            ('fullNode' in options || 'fullHost' in options) &&
             (options.fullNode || options.fullHost)
         ) {
             fullNode = options.fullNode || options.fullHost;
@@ -118,22 +120,20 @@ export default class TronWeb extends EventEmitter {
             fullNode = options;
         }
         if (utils.isString(fullNode)) fullNode = new HttpProvider(fullNode);
-
         if (utils.isString(solidityNode))
             solidityNode = new HttpProvider(solidityNode);
-
         if (utils.isString(eventServer))
             eventServer = new HttpProvider(eventServer);
 
         this.event = new Event(this);
         this.transactionBuilder = new TransactionBuilder(this);
         this.trx = new Trx(this);
-        this.plugin = new Plugin(this, options);
+        this.plugin = new Plugin(this, options as Record<string, unknown>);
         // this.utils = utils;
 
         this.setFullNode(fullNode);
-        this.setSolidityNode(solidityNode);
-        this.setEventServer(eventServer);
+        this.setSolidityNode(solidityNode!);
+        this.setEventServer(eventServer!);
 
         // this.providers = providers;
         // this.BigNumber = BigNumber;
@@ -182,7 +182,9 @@ export default class TronWeb extends EventEmitter {
                 sideOptions,
                 TronWeb,
                 this,
-                options.privateKey,
+                // WTF? Was options.privateKey, which makes even less sense
+                // @ts-ignore
+                privateKey,
             );
         } else if (typeof sideOptions !== 'string') {
             throw new TypeError('Wrong options combination provided');
@@ -305,22 +307,22 @@ export default class TronWeb extends EventEmitter {
         const fullNode = new HttpProvider(
             this.fullNode.host,
             30000,
-            false,
-            false,
+            undefined,
+            undefined,
             headers,
         );
         const solidityNode = new HttpProvider(
             this.solidityNode.host,
             30000,
-            false,
-            false,
+            undefined,
+            undefined,
             headers,
         );
         const eventServer = new HttpProvider(
             this.eventServer.host,
             30000,
-            false,
-            false,
+            undefined,
+            undefined,
             headers,
         );
 
@@ -333,15 +335,15 @@ export default class TronWeb extends EventEmitter {
         const fullNode = new HttpProvider(
             this.fullNode.host,
             30000,
-            false,
-            false,
+            undefined,
+            undefined,
             headers,
         );
         const solidityNode = new HttpProvider(
             this.solidityNode.host,
             30000,
-            false,
-            false,
+            undefined,
+            undefined,
             headers,
         );
 
@@ -353,8 +355,8 @@ export default class TronWeb extends EventEmitter {
         const eventServer = new HttpProvider(
             this.eventServer.host,
             30000,
-            false,
-            false,
+            undefined,
+            undefined,
             headers,
         );
         this.setEventServer(eventServer);

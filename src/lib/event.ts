@@ -1,6 +1,6 @@
 import TronWeb from '..';
 import utils from '../utils';
-import providers from './providers';
+import * as providers from './providers';
 import querystring from 'querystring';
 import injectpromise from 'injectpromise';
 
@@ -39,6 +39,11 @@ export default class Event {
         eventServer: string | providers.HttpProvider,
         healthcheck = 'healthcheck',
     ): void {
+        // tronWeb instance attrs are handled in a weird way
+        // All usages do not check for undefined, but allow to set
+        // attrs to undefined regularly.
+        // FIXME: should it be allowed?
+        // @ts-ignore
         if (!eventServer) return (this.tronWeb.eventServer = undefined);
 
         if (utils.isString(eventServer))
@@ -192,8 +197,8 @@ export default class Event {
                     rawResponse === true
                         ? data
                         : (data as Array<any>).map((event) =>
-                              utils.mapEvent(event),
-                          ),
+                                utils.mapEvent(event),
+                            ),
                 );
             })
             .catch((err: any) =>
@@ -247,8 +252,8 @@ export default class Event {
                     actualOptions.rawResponse === true
                         ? data
                         : (data as Array<any>).map((event) =>
-                              utils.mapEvent(event),
-                          ),
+                                utils.mapEvent(event),
+                            ),
                 );
             })
             .catch(
