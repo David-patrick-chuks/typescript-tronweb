@@ -17,6 +17,7 @@ const ETH_MESSAGE_HEADER = '\x19Ethereum Signed Message:\n32';
 
 // FIXME: more generic or not generic at all
 type _CallbackT<In> = ((err: unknown) => any) & ((err: null, data: In) => any);
+// FIXME: why string?
 export declare type BlockT = number | 'latest' | 'earliest' | string;
 export declare type ResourceT = 'BANDWIDTH' | 'ENERGY';
 // FIXME: All interfaces here should be generated from protobuf instead.

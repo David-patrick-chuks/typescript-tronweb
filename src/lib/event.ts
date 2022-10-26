@@ -4,7 +4,7 @@ import providers from './providers';
 import querystring from 'querystring';
 import injectpromise from 'injectpromise';
 
-interface ContractOptions {
+export interface ContractOptions {
     sinceTimestamp?: number;
     since?: any;
     fromTimestamp?: number;
@@ -192,8 +192,8 @@ export default class Event {
                     rawResponse === true
                         ? data
                         : (data as Array<any>).map((event) =>
-                                utils.mapEvent(event),
-                            ),
+                              utils.mapEvent(event),
+                          ),
                 );
             })
             .catch((err: any) =>
@@ -247,8 +247,8 @@ export default class Event {
                     actualOptions.rawResponse === true
                         ? data
                         : (data as Array<any>).map((event) =>
-                                utils.mapEvent(event),
-                            ),
+                              utils.mapEvent(event),
+                          ),
                 );
             })
             .catch(
