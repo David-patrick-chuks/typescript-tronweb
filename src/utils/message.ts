@@ -1,6 +1,6 @@
-import { ADDRESS_PREFIX } from './address';
-import { hexStr2byteArray } from './code';
-import { getBase58CheckAddress } from './crypto';
+import {ADDRESS_PREFIX} from './address';
+import {hexStr2byteArray} from './code';
+import {getBase58CheckAddress} from './crypto';
 import {
     keccak256,
     toUtf8Bytes,

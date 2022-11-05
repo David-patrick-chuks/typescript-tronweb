@@ -1,13 +1,13 @@
-import { ADDRESS_PREFIX, ADDRESS_PREFIX_BYTE, ADDRESS_SIZE } from './address';
-import { base64EncodeToString } from './code';
-import { base64DecodeFromString, hexStr2byteArray } from './code';
-import { encode58, decode58 } from './base58';
-import { byte2hexStr, byteArray2hexStr } from './bytes';
-import { ec as EC } from 'elliptic';
-import { keccak256, sha256 as ethSha256, SigningKey } from './ethersUtils';
-import { TypedDataEncoder } from './typedData';
+import {ADDRESS_PREFIX, ADDRESS_PREFIX_BYTE, ADDRESS_SIZE} from './address';
+import {base64EncodeToString} from './code';
+import {base64DecodeFromString, hexStr2byteArray} from './code';
+import {encode58, decode58} from './base58';
+import {byte2hexStr, byteArray2hexStr} from './bytes';
+import {ec as EC} from 'elliptic';
+import {keccak256, sha256 as ethSha256, SigningKey} from './ethersUtils';
+import {TypedDataEncoder} from './typedData';
 
-export { byteArray2hexStr } from './bytes';
+export {byteArray2hexStr} from './bytes';
 
 export function getBase58CheckAddress(addressBytes) {
     const hash0 = sha256(addressBytes);

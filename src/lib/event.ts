@@ -1,28 +1,10 @@
 import TronWeb from '..';
 import utils from '../utils';
 import * as providers from './providers';
+import {ContractOptions} from './contract';
 import querystring from 'querystring';
 import injectpromise from 'injectpromise';
-
-export interface ContractOptions {
-    sinceTimestamp?: number;
-    since?: any;
-    fromTimestamp?: number;
-    eventName?: string;
-    blockNumber?: number;
-    size?: number;
-    page?: number;
-    onlyConfirmed?: any;
-    onlyUnconfirmed?: any;
-    previousLastEventFingerprint?: any;
-    previousFingerprint?: any;
-    fingerprint?: any;
-    rawResponse?: boolean;
-    sort?: boolean;
-    filters?: unknown | unknown[];
-}
-
-type _CallbackT<In> = ((err: unknown) => any) & ((err: null, data: In) => any);
+import _CallbackT from '../utils/typing';
 
 export default class Event {
     tronWeb: TronWeb;
@@ -64,17 +46,17 @@ export default class Event {
         contractAddress: string,
         options: ContractOptions,
         callback?: undefined,
-    ): Promise<any>;
+    ): Promise<any[]>;
     getEventsByContractAddress(
         contractAddress: string,
         options: ContractOptions,
-        callback: _CallbackT<any>,
+        callback: _CallbackT<any[]>,
     ): void;
     getEventsByContractAddress(
         contractAddress: string,
         options: ContractOptions = {},
-        callback?: _CallbackT<any>,
-    ): void | Promise<any> {
+        callback?: _CallbackT<any[]>,
+    ): void | Promise<any[]> {
         /* eslint-disable prefer-const */
         let {
             sinceTimestamp,
@@ -104,13 +86,12 @@ export default class Event {
         ) as ContractOptions;
         /* eslint-enable prefer-const */
 
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.getEventsByContractAddress,
                 contractAddress,
                 options,
             );
-        }
 
         fromTimestamp = fromTimestamp || sinceTimestamp || since;
 
@@ -122,11 +103,10 @@ export default class Event {
         if (!this.tronWeb.isAddress(contractAddress))
             return callback('Invalid contract address provided');
 
-        if (eventName && !contractAddress) {
+        if (eventName && !contractAddress)
             return callback(
                 'Usage of event name filtering requires a contract address',
             );
-        }
 
         if (
             typeof fromTimestamp !== 'undefined' &&
@@ -143,11 +123,10 @@ export default class Event {
 
         if (!utils.isInteger(page)) return callback('Invalid page provided');
 
-        if (blockNumber && !eventName) {
+        if (blockNumber && !eventName)
             return callback(
                 'Usage of block number filtering requires an event name',
             );
-        }
 
         if (contractAddress)
             routeParams.push(this.tronWeb.address.fromHex(contractAddress));
@@ -187,7 +166,7 @@ export default class Event {
                     '/',
                 )}?${querystring.stringify(qs)}`,
             )
-            .then((data: any) => {
+            .then((data: unknown[]) => {
                 if (!data) return callback('Unknown error occurred');
 
                 if (!utils.isArray(data)) return callback(data);
@@ -196,51 +175,48 @@ export default class Event {
                     null,
                     rawResponse === true
                         ? data
-                        : (data as Array<any>).map((event) =>
-                                utils.mapEvent(event),
-                            ),
+                        : data.map((event) => utils.mapEvent(event)),
                 );
             })
             .catch((err: any) =>
                 callback((err.response && err.response.data) || err),
-            );
+            ) as unknown as void;
     }
 
     getEventsByTransactionID(
         transactionID: string,
-        options: { rawResponse?: boolean },
+        options: {rawResponse?: boolean},
         callback?: undefined,
-    ): Promise<any>;
+    ): Promise<any[]>;
     getEventsByTransactionID(
         transactionID: string,
-        options: { rawResponse?: boolean },
-        callback: _CallbackT<any>,
+        options: {rawResponse?: boolean},
+        callback: _CallbackT<any[]>,
     ): void;
     getEventsByTransactionID(
         transactionID: string,
-        options: { rawResponse?: boolean } | _CallbackT<any> = {},
-        callback?: _CallbackT<any>,
-    ): void | Promise<any> {
+        options: {rawResponse?: boolean} | _CallbackT<any> = {},
+        callback?: _CallbackT<any[]>,
+    ): void | Promise<any[]> {
         if (utils.isFunction(options)) {
             callback = options;
             options = {};
         }
-        const actualOptions = options as { rawResponse?: boolean };
+        const actualOptions = options as {rawResponse?: boolean};
 
-        if (!callback || !utils.isFunction(callback)) {
+        if (!callback || !utils.isFunction(callback))
             return this.injectPromise(
                 this.getEventsByTransactionID,
                 transactionID,
                 actualOptions,
             );
-        }
 
         if (!this.tronWeb.eventServer)
             return callback('No event server configured');
 
         return this.tronWeb.eventServer
             .request(`event/transaction/${transactionID}`)
-            .then((data: any) => {
+            .then((data: unknown[]) => {
                 if (!callback) return null;
 
                 if (!data) return callback('Unknown error occurred');
@@ -251,15 +227,13 @@ export default class Event {
                     null,
                     actualOptions.rawResponse === true
                         ? data
-                        : (data as Array<any>).map((event) =>
-                                utils.mapEvent(event),
-                            ),
+                        : data.map((event) => utils.mapEvent(event)),
                 );
             })
             .catch(
                 (err: any) =>
                     callback &&
                     callback((err.response && err.response.data) || err),
-            );
+            ) as unknown as void;
     }
 }

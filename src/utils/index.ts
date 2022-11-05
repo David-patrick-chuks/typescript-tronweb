@@ -1,4 +1,4 @@
-import { ADDRESS_PREFIX } from './address';
+import {ADDRESS_PREFIX} from './address';
 import * as accounts from './accounts';
 import * as base58 from './base58';
 import * as bytes from './bytes';
@@ -7,7 +7,7 @@ import * as code from './code';
 import * as abi from './abi';
 import * as message from './message';
 import * as ethersUtils from './ethersUtils';
-import { TypedDataEncoder as _TypedDataEncoder } from './typedData';
+import {TypedDataEncoder as _TypedDataEncoder} from './typedData';
 
 import validator from 'validator';
 import BigNumber from 'bignumber.js';
@@ -113,21 +113,20 @@ const utils = {
     },
 
     // FIXME: need a structure
-    parseEvent(event: any, { inputs: abi }: { inputs: any[] }): any {
+    parseEvent(event: any, {inputs: abi}: {inputs: any[]}): any {
         if (!event.result) return event;
 
-        if (this.isObject(event.result)) {
+        if (this.isObject(event.result))
             for (let i = 0; i < abi.length; i++) {
                 const obj = abi[i];
-                if (obj.type === 'address' && obj.name in event.result) {
+                if (obj.type === 'address' && obj.name in event.result)
                     event.result[obj.name] =
                         ADDRESS_PREFIX +
                         event.result[obj.name].substr(2).toLowerCase();
-                }
             }
-        } else if (this.isArray(event.result)) {
+        else if (this.isArray(event.result))
             event.result = event.result.reduce((obj, result, index) => {
-                const { name, type } = abi[index];
+                const {name, type} = abi[index];
 
                 if (type === 'address')
                     result = ADDRESS_PREFIX + result.substr(2).toLowerCase();
@@ -136,7 +135,6 @@ const utils = {
 
                 return obj;
             }, {});
-        }
 
         return event;
     },

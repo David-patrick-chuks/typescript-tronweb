@@ -18,13 +18,13 @@ export function arrayEquals(
 
     let i;
 
-    for (i = 0; i < array1.length; i++) {
+    for (i = 0; i < array1.length; i++)
         if (strict) {
             if (array1[i] !== array2[i]) return false;
         } else if (JSON.stringify(array1[i]) !== JSON.stringify(array2[i])) {
             return false;
         }
-    }
+
     return true;
 }
 
@@ -98,12 +98,12 @@ export function hexStr2byteArray(str, strict = false) {
 
     let len = str.length;
 
-    if (strict) {
+    if (strict)
         if (len % 2) {
             str = `0${str}`;
             len++;
         }
-    }
+
     const byteArray: number[] = [];
     let d = 0;
     let j = 0;

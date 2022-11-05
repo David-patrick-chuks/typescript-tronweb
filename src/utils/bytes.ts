@@ -1,4 +1,4 @@
-import { Base64 } from './base64';
+import {Base64} from './base64';
 
 export function byte2hexStr(byte) {
     if (typeof byte !== 'number') throw new Error('Input must be a number');

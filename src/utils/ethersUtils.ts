@@ -1,6 +1,6 @@
-import { utils, BytesLike } from 'ethers';
-export { Wallet as ethersWallet, Wordlist, Bytes, BytesLike } from 'ethers';
-export { Mnemonic } from '@ethersproject/hdnode';
+import {utils, BytesLike} from 'ethers';
+export {Wallet as ethersWallet, Wordlist, Bytes, BytesLike} from 'ethers';
+export {Mnemonic} from '@ethersproject/hdnode';
 
 const {
     keccak256,
@@ -25,7 +25,7 @@ const {
  */
 export class SigningKey extends SigningKey_ {
     constructor(
-        privateKey: BytesLike | { value: string; toHexString: () => string },
+        privateKey: BytesLike | {value: string; toHexString: () => string},
     ) {
         super(privateKey as BytesLike);
     }

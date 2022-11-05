@@ -1,10 +1,9 @@
 import injectpromise from 'injectpromise';
 import Validator from '../paramValidator';
 import TronWeb from '..';
-import { HttpProvider } from './providers';
-import { ITransaction, ContractOptions } from './transactionBuilder';
-
-type _CallbackT<In> = ((err: unknown) => any) & ((err: null, data: In) => any);
+import {HttpProvider} from './providers';
+import {ITransaction, ContractOptions} from './transactionBuilder';
+import _CallbackT from '../utils/typing';
 
 export interface IChainOptions {
     fullHost: string;
@@ -138,14 +137,13 @@ export default class SideChain<T extends TronWeb> {
         //     permissionId = 0;
         // }
 
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.multiSign,
                 transaction,
                 privateKey,
                 permissionId,
             );
-        }
 
         if (
             !this.utils.isObject(transaction) ||
@@ -231,7 +229,7 @@ export default class SideChain<T extends TronWeb> {
         //     multisig = false;
         // }
 
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.sign,
                 transaction,
@@ -239,7 +237,6 @@ export default class SideChain<T extends TronWeb> {
                 useTronHeader,
                 multisig,
             );
-        }
 
         // Message signing
         if (this.utils.isString(transaction)) {
@@ -277,11 +274,10 @@ export default class SideChain<T extends TronWeb> {
                         transaction.raw_data.contract[0].parameter.value
                             .owner_address,
                     )
-                ) {
+                )
                     return callback(
                         'Private key does not match address in transaction',
                     );
-                }
             }
             return callback(
                 null,
@@ -311,7 +307,7 @@ export default class SideChain<T extends TronWeb> {
         //     callback = options;
         //     options = {};
         // }
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.depositTrx,
                 callValue,
@@ -320,7 +316,6 @@ export default class SideChain<T extends TronWeb> {
                 options,
                 privateKey,
             );
-        }
 
         if (
             this.validator.notValid(
@@ -384,7 +379,7 @@ export default class SideChain<T extends TronWeb> {
         //     callback = options;
         //     options = {};
         // }
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.depositTrc10,
                 tokenId,
@@ -394,7 +389,6 @@ export default class SideChain<T extends TronWeb> {
                 options,
                 privateKey,
             );
-        }
 
         if (
             this.validator.notValid(
@@ -467,7 +461,7 @@ export default class SideChain<T extends TronWeb> {
         //     callback = options;
         //     options = {};
         // }
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.depositTrc,
                 functionSelector,
@@ -478,7 +472,6 @@ export default class SideChain<T extends TronWeb> {
                 options,
                 privateKey,
             );
-        }
 
         if (
             this.validator.notValid(
@@ -538,6 +531,7 @@ export default class SideChain<T extends TronWeb> {
                     .contract()
                     .at(this.mainGatewayAddress);
                 switch (functionSelector) {
+                    // FIXME: it's actually 1 case
                     case 'depositTRC20':
                         result = await contractInstance
                             .depositTRC20(contractAddress, num)
@@ -674,7 +668,7 @@ export default class SideChain<T extends TronWeb> {
         //     callback = options;
         //     options = {};
         // }
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.mappingTrc,
                 trxHash,
@@ -684,7 +678,6 @@ export default class SideChain<T extends TronWeb> {
                 options,
                 privateKey,
             );
-        }
 
         if (
             this.validator.notValid(
@@ -723,17 +716,15 @@ export default class SideChain<T extends TronWeb> {
                 .contract()
                 .at(this.mainGatewayAddress);
             let result = null;
-            if (functionSelector === 'mappingTRC20') {
+            if (functionSelector === 'mappingTRC20')
                 result = await contractInstance
                     .mappingTRC20(trxHash)
                     .send(options, privateKey);
-            } else if (functionSelector === 'mappingTRC721') {
+            else if (functionSelector === 'mappingTRC721')
                 result = await contractInstance
                     .mappingTRC721(trxHash)
                     .send(options, privateKey);
-            } else {
-                callback(new Error('type must be trc20 or trc721'));
-            }
+            else callback(new Error('type must be trc20 or trc721'));
 
             callback(null, result);
         } catch (ex) {
@@ -800,7 +791,7 @@ export default class SideChain<T extends TronWeb> {
         //     callback = options;
         //     options = {};
         // }
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.withdrawTrx,
                 callValue,
@@ -809,7 +800,6 @@ export default class SideChain<T extends TronWeb> {
                 options,
                 privateKey,
             );
-        }
 
         if (
             this.validator.notValid(
@@ -873,7 +863,7 @@ export default class SideChain<T extends TronWeb> {
         //     callback = options;
         //     options = {};
         // }
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.withdrawTrc10,
                 tokenId,
@@ -883,7 +873,6 @@ export default class SideChain<T extends TronWeb> {
                 options,
                 privateKey,
             );
-        }
 
         if (
             this.validator.notValid(
@@ -959,7 +948,7 @@ export default class SideChain<T extends TronWeb> {
         //     callback = options;
         //     options = {};
         // }
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.withdrawTrc,
                 functionSelector,
@@ -970,7 +959,6 @@ export default class SideChain<T extends TronWeb> {
                 options,
                 privateKey,
             );
-        }
 
         if (
             this.validator.notValid(
@@ -1033,12 +1021,11 @@ export default class SideChain<T extends TronWeb> {
                     parameters,
                     this.sidechain.address.toHex(address),
                 );
-            if (!transaction.result || !transaction.result.result) {
+            if (!transaction.result || !transaction.result.result)
                 return callback(
                     'Unknown error: ' +
                         JSON.stringify(transaction.transaction, null, 2),
                 );
-            }
 
             const signedTransaction = await this.sidechain.trx.sign(
                 transaction.transaction,
@@ -1069,35 +1056,32 @@ export default class SideChain<T extends TronWeb> {
                 return callback(null, signedTransaction.txID);
 
             const checkResult = async (index = 0) => {
-                if (index === 20) {
+                if (index === 20)
                     return callback({
                         error: 'Cannot find result in solidity node',
                         transaction: signedTransaction,
                     });
-                }
 
                 const output = await this.sidechain.trx.getTransactionInfo(
                     signedTransaction.txID,
                 );
 
-                if (!Object.keys(output).length) {
+                if (!Object.keys(output).length)
                     return setTimeout(() => {
                         checkResult(index + 1);
                     }, 3000);
-                }
 
                 // FIXME: either documentation is lying to me or it's a mistake
                 // @ts-ignore
-                if (output.result && output.result === 'FAILED') {
+                if (output.result && output.result === 'FAILED')
                     return callback({
                         // @ts-ignore
                         error: this.sidechain.toUtf8(output.resMessage),
                         transaction: signedTransaction,
                         output,
                     });
-                }
 
-                if (!this.utils.hasProperty(output, 'contractResult')) {
+                if (!this.utils.hasProperty(output, 'contractResult'))
                     return callback({
                         error:
                             'Failed to execute: ' +
@@ -1105,7 +1089,6 @@ export default class SideChain<T extends TronWeb> {
                         transaction: signedTransaction,
                         output,
                     });
-                }
 
                 if (options.rawResponse) return callback(null, output);
 
@@ -1192,7 +1175,7 @@ export default class SideChain<T extends TronWeb> {
         //     callback = options;
         //     options = {};
         // }
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.injectFund,
                 num,
@@ -1200,7 +1183,6 @@ export default class SideChain<T extends TronWeb> {
                 options,
                 privateKey,
             );
-        }
 
         if (
             this.validator.notValid(

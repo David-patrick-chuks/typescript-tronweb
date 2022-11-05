@@ -72,10 +72,10 @@ export default class Validator {
     // FIXME: complexity
     // eslint-disable-next-line complexity
     notValid(params: IOperator[] = [], callback = new Function()) {
-        const normalized: { [key: string]: any } = {};
+        const normalized: {[key: string]: any} = {};
         let no = false;
         for (const param of params) {
-            const { value, type, optional } = param;
+            const {value, type, optional} = param;
             if (
                 optional &&
                 (!utils.isNotNullOrUndefined(value) ||
@@ -87,17 +87,16 @@ export default class Validator {
 
             switch (param.type) {
                 case 'address':
-                    if (!this.tronWeb.isAddress(value)) {
-                        no = true;
-                    } else {
+                    if (!this.tronWeb.isAddress(value)) no = true;
+                    else
                         normalized[param.name] =
                             this.tronWeb.address.toHex(value);
-                    }
+
                     break;
 
                 case 'integer': {
                     // FIXME: this has to be a method with 4 bounds check
-                    const { gt, lt, gte, lte } = param;
+                    const {gt, lt, gte, lte} = param;
                     if (
                         !utils.isInteger(value) ||
                         (typeof gt === 'number' && value <= gt) ||
@@ -160,7 +159,7 @@ export default class Validator {
                     if (!utils.isBoolean(value)) no = true;
                     break;
                 case 'string': {
-                    const { gt, lt, gte, lte } = param;
+                    const {gt, lt, gte, lte} = param;
                     if (
                         !utils.isString(value) ||
                         (typeof gt === 'number' && value.length <= gt) ||

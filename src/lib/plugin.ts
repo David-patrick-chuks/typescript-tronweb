@@ -20,7 +20,7 @@ export default class Plugin {
     pluginNoOverride: string[];
     disablePlugins: string[] | undefined;
 
-    constructor(tronWeb: TronWeb, options: { disablePlugins?: string[] } = {}) {
+    constructor(tronWeb: TronWeb, options: {disablePlugins?: string[]} = {}) {
         if (!tronWeb || !(tronWeb instanceof TronWeb))
             throw new Error('Expected instance of TronWeb');
         this.tronWeb = tronWeb;
@@ -46,7 +46,7 @@ export default class Plugin {
         if (utils.isFunction(plugin.pluginInterface))
             pluginInterface = plugin.pluginInterface(options);
 
-        if (semver.satisfies(TronWeb.version, pluginInterface.requires)) {
+        if (semver.satisfies(TronWeb.version, pluginInterface.requires))
             if (pluginInterface.fullClass) {
                 // plug the entire class at the same level of tronWeb.trx
                 const className = plugin.constructor.name;
@@ -91,11 +91,11 @@ export default class Plugin {
                     }
                 }
             }
-        } else {
+        else
             throw new Error(
                 'The plugin is not compatible with this version of TronWeb',
             );
-        }
+
         return result;
     }
 }

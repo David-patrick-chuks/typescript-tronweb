@@ -1,14 +1,13 @@
 import TronWeb from '..';
 import utils from '../utils';
-import { AbiCoder } from '../utils/ethersUtils';
+import {AbiCoder} from '../utils/ethersUtils';
 import Validator from '../paramValidator';
-import { ADDRESS_PREFIX_REGEX } from '../utils/address';
+import {ADDRESS_PREFIX_REGEX} from '../utils/address';
 import injectpromise from 'injectpromise';
-import { encodeParamsV2ByABI } from '../utils/abi';
-import { ResourceT } from './trx';
-
-type _CallbackT<Out> = ((err: unknown) => Out) &
-    ((err: null, data: any) => Out);
+import {encodeParamsV2ByABI} from '../utils/abi';
+import {ContractOptions as OtherContractOptions} from './contract';
+import {ResourceT, ILog} from './trx';
+import _CallbackT from '../utils/typing';
 
 const INVALID_RESOURCE_MESSAGE =
     'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY';
@@ -41,7 +40,7 @@ export interface IProposalParameter {
     key: number;
     value: number;
 }
-export interface BaseOptions {
+export interface BaseOptions extends OtherContractOptions {
     feeLimit?: number;
     userFeePercentage?: number;
     originEnergyLimit?: number;
@@ -54,13 +53,15 @@ export interface BaseOptions {
     permissionId?: number;
 }
 export type ContractOptions = {
-    abi: string | { entrys: any[] };
+    // FIXME: how does this relate to src/lib/contract/index.ts:ContractOptions
+    abi: string | {entrys: any[]};
     bytecode: string;
     parameters?: any[] | string;
     name: string;
     rawParameter?: string;
     shieldedParameter?: string;
     confirmed?: boolean;
+    shouldPollResponse?: boolean;
 } & BaseOptions;
 
 export interface IUpdateTokenOptions {
@@ -104,6 +105,17 @@ interface IPermissions {
     }[];
     operations: any;
 }
+
+export interface ITriggerSmartContract {
+    transaction: ITransaction;
+    result: {result: boolean};
+}
+export interface ITriggerConstantContract extends ITriggerSmartContract {
+    energy_used: number;
+    constant_result: string[];
+    logs: ILog[];
+}
+
 //helpers
 
 function toHex(value: string): string {
@@ -259,7 +271,7 @@ export default class TransactionBuilder {
         //     from = this.tronWeb.defaultAddress.hex;
         // }
 
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.sendToken,
                 to,
@@ -268,7 +280,6 @@ export default class TransactionBuilder {
                 from,
                 options,
             );
-        }
 
         amount = parseInt(amount.toString());
         if (
@@ -359,7 +370,7 @@ export default class TransactionBuilder {
         //     buyer = this.tronWeb.defaultAddress.hex;
         // }
 
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.purchaseToken,
                 issuerAddress,
@@ -368,7 +379,6 @@ export default class TransactionBuilder {
                 buyer,
                 options,
             );
-        }
 
         if (
             this.validator.notValid(
@@ -479,7 +489,7 @@ export default class TransactionBuilder {
         //     resource = 'BANDWIDTH';
         // }
 
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.freezeBalance,
                 amount,
@@ -489,7 +499,6 @@ export default class TransactionBuilder {
                 receiverAddress,
                 options,
             );
-        }
 
         if (
             this.validator.notValid(
@@ -598,7 +607,7 @@ export default class TransactionBuilder {
         //     resource = 'BANDWIDTH';
         // }
 
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.unfreezeBalance,
                 resource,
@@ -606,7 +615,6 @@ export default class TransactionBuilder {
                 receiverAddress,
                 options,
             );
-        }
 
         if (
             this.validator.notValid(
@@ -682,13 +690,12 @@ export default class TransactionBuilder {
         //     address = this.tronWeb.defaultAddress.hex;
         // }
 
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.withdrawBlockRewards,
                 address,
                 options,
             );
-        }
 
         if (
             this.validator.notValid(
@@ -783,19 +790,19 @@ export default class TransactionBuilder {
     }
 
     vote(
-        votes: { [key: string]: number },
+        votes: {[key: string]: number},
         voterAddress: string,
         options?: IPermissionId,
         callback?: undefined,
     ): Promise<ITransaction>;
     vote(
-        votes: { [key: string]: number },
+        votes: {[key: string]: number},
         voterAddress: string,
         options: IPermissionId,
         callback: _CallbackT<any>,
     ): void;
     vote(
-        votes: { [key: string]: number } = {},
+        votes: {[key: string]: number} = {},
         voterAddress: string = this.tronWeb.defaultAddress.hex,
         options: IPermissionId = {},
         callback?: _CallbackT<any>,
@@ -861,7 +868,7 @@ export default class TransactionBuilder {
                 vote_address: toHex(srAddress),
                 vote_count: parseInt(voteCount.toString()),
             };
-        }) as { vote_address: string; vote_count: number }[];
+        }) as {vote_address: string; vote_count: number}[];
         // Casting, because we'll return immediately otherwise
         // It doesn't affect typechecking anyway
 
@@ -885,29 +892,28 @@ export default class TransactionBuilder {
         options: ContractOptions,
         issuerAddress: string,
         callback?: undefined,
-    ): Promise<ITransaction>;
+    ): Promise<ITransaction & {contract_address: string}>;
     createSmartContract(
         options: ContractOptions,
         issuerAddress: string,
-        callback?: _CallbackT<any>,
+        callback?: _CallbackT<ITransaction & {contract_address: string}>,
     ): void;
     createSmartContract(
         options: ContractOptions,
         issuerAddress: string = this.tronWeb.defaultAddress.hex,
-        callback?: _CallbackT<any>,
-    ): void | Promise<ITransaction> {
+        callback?: _CallbackT<ITransaction & {contract_address: string}>,
+    ): void | Promise<ITransaction & {contract_address: string}> {
         // if (utils.isFunction(issuerAddress)) {
         //     callback = issuerAddress;
         //     issuerAddress = this.tronWeb.defaultAddress.hex;
         // }
 
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.createSmartContract,
                 options,
                 issuerAddress,
             );
-        }
 
         const feeLimit = options.feeLimit || this.tronWeb.feeLimit;
         let userFeePercentage = options.userFeePercentage;
@@ -920,21 +926,16 @@ export default class TransactionBuilder {
         const tokenId = options.tokenId || options.token_id;
 
         /* eslint-disable prefer-const */
-        let {
-            abi = '',
-            bytecode = false,
-            parameters = [],
-            name = '',
-        } = options;
+        let {abi = '', bytecode = false, parameters = [], name = ''} = options;
         /* eslint-enable prefer-const */
 
-        if (abi && utils.isString(abi)) {
+        if (abi && utils.isString(abi))
             try {
                 abi = JSON.parse(abi);
             } catch {
                 return callback('Invalid options.abi provided');
             }
-        }
+
         if (utils.isString(abi)) throw new Error('Impossible!');
 
         const abi_arr = abi.entrys;
@@ -1013,19 +1014,17 @@ export default class TransactionBuilder {
         )
             return;
 
-        if (payable && callValue === 0 && tokenValue === 0) {
+        if (payable && callValue === 0 && tokenValue === 0)
             return callback(
                 'When contract is payable, options.callValue or options.tokenValue' +
                     ' must be a positive integer',
             );
-        }
 
-        if (!payable && (callValue > 0 || (tokenValue && tokenValue > 0))) {
+        if (!payable && (callValue > 0 || (tokenValue && tokenValue > 0)))
             return callback(
                 'When contract is not payable, options.callValue' +
                     ' and options.tokenValue must be 0',
             );
-        }
 
         if (options.rawParameter && utils.isString(options.rawParameter)) {
             parameters = options.rawParameter.replace(/^(0x)/, '');
@@ -1043,40 +1042,37 @@ export default class TransactionBuilder {
                 const abiCoder = new AbiCoder();
                 const types: string[] = [];
                 const values: unknown[] = [];
-                const constructorParams2: { type?: string }[] =
+                const constructorParams2: {type?: string}[] =
                     constructorParams.inputs;
 
-                if (parameters.length !== constructorParams2.length) {
+                if (parameters.length !== constructorParams2.length)
                     return callback(
                         `constructor needs ${constructorParams2.length}` +
                             ` but ${parameters.length} provided`,
                     );
-                }
 
                 for (let i = 0; i < parameters.length; i++) {
                     let type = constructorParams2[i].type;
                     let value = parameters[i];
 
-                    if (!type || !utils.isString(type) || !type.length) {
+                    if (!type || !utils.isString(type) || !type.length)
                         return callback(
                             'Invalid parameter type provided: ' + type,
                         );
-                    }
 
-                    if (type === 'address') {
+                    if (type === 'address')
                         value = toHex(value).replace(
                             ADDRESS_PREFIX_REGEX,
                             '0x',
                         );
-                    } else if (
+                    else if (
                         type.match(/^([^\x5b]*)(\x5b|$)/)![0] === 'address['
-                    ) {
+                    )
                         value = value.map((v) =>
                             toHex(v).replace(ADDRESS_PREFIX_REGEX, '0x'),
                         );
-                    } else if (/trcToken/.test(type)) {
+                    else if (/trcToken/.test(type))
                         type = type.replace(/trcToken/, 'uint256');
-                    }
 
                     types.push(type);
                     values.push(value);
@@ -1124,51 +1120,45 @@ export default class TransactionBuilder {
     triggerSmartContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & { _isConstant?: boolean },
-        parameters: { type: string; value: any }[],
-        issuerAddress: string,
+        options: ContractOptions & {_isConstant?: boolean},
+        parameters: {type: string; value: any}[],
+        issuerAddress: string | undefined,
         callback?: undefined,
-    ): Promise<{ transaction: ITransaction; result: { result: boolean } }>;
+    ): Promise<ITriggerSmartContract>;
     triggerSmartContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & { _isConstant?: boolean },
-        parameters: { type: string; value: any }[],
-        issuerAddress: string,
-        callback: _CallbackT<any>,
+        options: ContractOptions & {_isConstant?: boolean},
+        parameters: {type: string; value: any}[],
+        issuerAddress: string | undefined,
+        callback: _CallbackT<ITriggerSmartContract>,
     ): void;
     triggerSmartContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & { _isConstant?: boolean },
-        parameters: { type: string; value: any }[],
-        issuerAddress: string,
-        callback?: _CallbackT<any>,
-    ): void | Promise<{
-        transaction: ITransaction;
-        result: { result: boolean };
-    }>;
+        options: ContractOptions & {_isConstant?: boolean},
+        parameters: {type: string; value: any}[],
+        issuerAddress: string | undefined,
+        callback?: _CallbackT<ITriggerSmartContract>,
+    ): void | Promise<ITriggerSmartContract>;
     triggerSmartContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & { _isConstant?: boolean },
-        parameters: { type: string; value: any }[] = [],
-        issuerAddress: string = this.tronWeb.defaultAddress.hex,
-        callback?: _CallbackT<any>,
-    ): void | Promise<{
-        transaction: ITransaction;
-        result: { result: boolean };
-    }> {
+        options: ContractOptions & {_isConstant?: boolean},
+        parameters: {type: string; value: any}[] = [],
+        issuerAddress: string | undefined = this.tronWeb.defaultAddress.hex,
+        callback?: _CallbackT<ITriggerSmartContract>,
+    ): void | Promise<ITriggerSmartContract> {
         // triggerSmartContract(...params) {
         // FIXME: it's some weird params shifting, fix it later
-        if (typeof options !== 'object') {
+        if (typeof options !== 'object')
             // @ts-ignore
             options = {
                 feeLimit: options,
                 callValue: parameters,
             };
-            // params.splice(3, 1);
-        }
+        // params.splice(3, 1);
+
         return this._triggerSmartContract(
             contractAddress,
             functionSelector,
@@ -1182,41 +1172,35 @@ export default class TransactionBuilder {
     triggerConstantContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & { _isConstant?: boolean },
-        parameters: { type: string; value: any }[],
-        issuerAddress: string,
+        options: ContractOptions & {_isConstant?: boolean},
+        parameters: {type: string; value: any}[],
+        issuerAddress: string | undefined,
         callback?: undefined,
-    ): Promise<{ transaction: ITransaction; result: { result: boolean } }>;
+    ): Promise<ITriggerConstantContract>;
     triggerConstantContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & { _isConstant?: boolean },
-        parameters: { type: string; value: any }[],
-        issuerAddress: string,
-        callback: _CallbackT<any>,
+        options: ContractOptions & {_isConstant?: boolean},
+        parameters: {type: string; value: any}[],
+        issuerAddress: string | undefined,
+        callback: _CallbackT<ITriggerConstantContract>,
     ): void;
     triggerConstantContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & { _isConstant?: boolean },
-        parameters: { type: string; value: any }[],
-        issuerAddress: string,
-        callback?: _CallbackT<any>,
-    ): void | Promise<{
-        transaction: ITransaction;
-        result: { result: boolean };
-    }>;
+        options: ContractOptions & {_isConstant?: boolean},
+        parameters: {type: string; value: any}[],
+        issuerAddress: string | undefined,
+        callback?: _CallbackT<ITriggerConstantContract>,
+    ): void | Promise<ITriggerConstantContract>;
     triggerConstantContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & { _isConstant?: boolean },
-        parameters: { type: string; value: any }[] = [],
-        issuerAddress: string = this.tronWeb.defaultAddress.hex,
-        callback?: _CallbackT<any>,
-    ): void | Promise<{
-        transaction: ITransaction;
-        result: { result: boolean };
-    }> {
+        options: ContractOptions & {_isConstant?: boolean},
+        parameters: {type: string; value: any}[] = [],
+        issuerAddress: string | undefined = this.tronWeb.defaultAddress.hex,
+        callback?: _CallbackT<ITriggerConstantContract>,
+    ): void | Promise<ITriggerConstantContract> {
         options._isConstant = true;
         return this.triggerSmartContract(
             contractAddress,
@@ -1224,48 +1208,42 @@ export default class TransactionBuilder {
             options,
             parameters,
             issuerAddress,
-            callback,
-        );
+            callback as any,
+        ) as any;
     }
 
     triggerConfirmedConstantContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & { _isConstant?: boolean },
-        parameters: { type: string; value: any }[],
-        issuerAddress: string,
+        options: ContractOptions & {_isConstant?: boolean},
+        parameters: {type: string; value: any}[],
+        issuerAddress: string | undefined,
         callback?: undefined,
-    ): Promise<{ transaction: ITransaction; result: { result: boolean } }>;
+    ): Promise<ITriggerConstantContract>;
     triggerConfirmedConstantContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & { _isConstant?: boolean },
-        parameters: { type: string; value: any }[],
-        issuerAddress: string,
-        callback: _CallbackT<any>,
+        options: ContractOptions & {_isConstant?: boolean},
+        parameters: {type: string; value: any}[],
+        issuerAddress: string | undefined,
+        callback: _CallbackT<ITriggerConstantContract>,
     ): void;
     triggerConfirmedConstantContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & { _isConstant?: boolean },
-        parameters: { type: string; value: any }[],
-        issuerAddress: string,
-        callback?: _CallbackT<any>,
-    ): void | Promise<{
-        transaction: ITransaction;
-        result: { result: boolean };
-    }>;
+        options: ContractOptions & {_isConstant?: boolean},
+        parameters: {type: string; value: any}[],
+        issuerAddress: string | undefined,
+        callback?: _CallbackT<ITriggerConstantContract>,
+    ): void | Promise<ITriggerConstantContract>;
     triggerConfirmedConstantContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & { _isConstant?: boolean },
-        parameters: { type: string; value: any }[] = [],
-        issuerAddress: string = this.tronWeb.defaultAddress.hex,
-        callback?: _CallbackT<any>,
-    ): void | Promise<{
-        transaction: ITransaction;
-        result: { result: boolean };
-    }> {
+        options: ContractOptions & {_isConstant?: boolean},
+        parameters: {type: string; value: any}[] = [],
+        issuerAddress: string | undefined = this.tronWeb.defaultAddress.hex,
+        callback?: _CallbackT<ITriggerConstantContract>,
+    ): void | Promise<ITriggerConstantContract> {
         options._isConstant = true;
         options.confirmed = true;
         return this.triggerSmartContract(
@@ -1274,48 +1252,42 @@ export default class TransactionBuilder {
             options,
             parameters,
             issuerAddress,
-            callback,
-        );
+            callback as any,
+        ) as any;
     }
 
     _triggerSmartContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & { _isConstant?: boolean },
-        parameters: { type: string; value: any }[],
-        issuerAddress: string,
+        options: ContractOptions & {_isConstant?: boolean},
+        parameters: {type: string; value: any}[],
+        issuerAddress?: string,
         callback?: undefined,
-    ): Promise<{ transaction: ITransaction; result: { result: boolean } }>;
+    ): Promise<ITriggerSmartContract>;
     _triggerSmartContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & { _isConstant?: boolean },
-        parameters: { type: string; value: any }[],
+        options: ContractOptions & {_isConstant?: boolean},
+        parameters: {type: string; value: any}[],
         issuerAddress: string,
-        callback: _CallbackT<any>,
+        callback: _CallbackT<ITriggerSmartContract>,
     ): void;
     _triggerSmartContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & { _isConstant?: boolean },
-        parameters: { type: string; value: any }[],
-        issuerAddress: string,
-        callback?: _CallbackT<any>,
-    ): void | Promise<{
-        transaction: ITransaction;
-        result: { result: boolean };
-    }>;
+        options: ContractOptions & {_isConstant?: boolean},
+        parameters: {type: string; value: any}[],
+        issuerAddress?: string,
+        callback?: _CallbackT<ITriggerSmartContract>,
+    ): void | Promise<ITriggerSmartContract>;
     _triggerSmartContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & { _isConstant?: boolean },
-        parameters: { type: string; value: any }[] = [],
+        options: ContractOptions & {_isConstant?: boolean},
+        parameters: {type: string; value: any}[] = [],
         issuerAddress: string = this.tronWeb.defaultAddress.hex,
-        callback?: _CallbackT<any>,
-    ): void | Promise<{
-        transaction: ITransaction;
-        result: { result: boolean };
-    }> {
+        callback?: _CallbackT<ITriggerSmartContract>,
+    ): void | Promise<ITriggerSmartContract> {
         // if (utils.isFunction(issuerAddress)) {
         //     callback = issuerAddress;
         //     issuerAddress = this.tronWeb.defaultAddress.hex;
@@ -1326,7 +1298,7 @@ export default class TransactionBuilder {
         //     parameters = [];
         // }
 
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this._triggerSmartContract,
                 contractAddress,
@@ -1335,9 +1307,8 @@ export default class TransactionBuilder {
                 parameters,
                 issuerAddress,
             );
-        }
 
-        const { tokenValue, tokenId, callValue, feeLimit } = Object.assign(
+        const {tokenValue, tokenId, callValue, feeLimit} = Object.assign(
             {
                 callValue: 0,
                 feeLimit: this.tronWeb.feeLimit,
@@ -1411,26 +1382,24 @@ export default class TransactionBuilder {
 
                 for (let i = 0; i < parameters.length; i++) {
                     // eslint-disable-next-line prefer-const
-                    let { type, value } = parameters[i];
+                    let {type, value} = parameters[i];
 
-                    if (!type || !utils.isString(type) || !type.length) {
+                    if (!type || !utils.isString(type) || !type.length)
                         return callback(
                             'Invalid parameter type provided: ' + type,
-                        );
-                    }
+                        ) as any as void;
 
-                    if (type === 'address') {
+                    if (type === 'address')
                         value = toHex(value).replace(
                             ADDRESS_PREFIX_REGEX,
                             '0x',
                         );
-                    } else if (
+                    else if (
                         type.match(/^([^\x5b]*)(\x5b|$)/)![0] === 'address['
-                    ) {
+                    )
                         value = value.map((v) =>
                             toHex(v).replace(ADDRESS_PREFIX_REGEX, '0x'),
                         );
-                    }
 
                     types.push(type);
                     values.push(value);
@@ -1449,19 +1418,18 @@ export default class TransactionBuilder {
                         .encode(types, values)
                         .replace(/^(0x)/, '');
                 } catch (ex) {
-                    return callback(ex);
+                    return callback(ex) as any as void;
                 }
             } else {
                 param_str = '';
             }
 
             // work for abiv2 if passed the function abi in options
-            if (options.funcABIV2) {
+            if (options.funcABIV2)
                 param_str = encodeParamsV2ByABI(
                     options.funcABIV2,
                     options.parametersV2,
                 ).replace(/^(0x)/, '');
-            }
 
             if (
                 options.shieldedParameter &&
@@ -1513,13 +1481,12 @@ export default class TransactionBuilder {
         ownerAddress: string = this.tronWeb.defaultAddress.hex,
         callback?: _CallbackT<any>,
     ): void | Promise<ITransaction> {
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.clearABI,
                 contractAddress,
                 ownerAddress,
             );
-        }
 
         if (!this.tronWeb.isAddress(contractAddress))
             return callback('Invalid contract address provided');
@@ -1556,13 +1523,12 @@ export default class TransactionBuilder {
         ownerAddress: string = this.tronWeb.defaultAddress.hex,
         callback?: _CallbackT<any>,
     ): void | Promise<ITransaction> {
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.updateBrokerage,
                 brokerage,
                 ownerAddress,
             );
-        }
 
         if (!utils.isNotNullOrUndefined(brokerage))
             return callback('Invalid brokerage provided');
@@ -1719,20 +1685,18 @@ export default class TransactionBuilder {
         if (
             utils.isNotNullOrUndefined(voteScore) &&
             (!utils.isInteger(voteScore) || voteScore <= 0)
-        ) {
+        )
             return callback(
                 'voteScore must be a positive integer greater than 0',
             );
-        }
 
         if (
             utils.isNotNullOrUndefined(precision) &&
             (!utils.isInteger(precision) || precision < 0 || precision > 6)
-        ) {
+        )
             return callback(
                 'precision must be a positive integer >= 0 and <= 6',
             );
-        }
 
         const data: Record<string, unknown> = {
             owner_address: toHex(issuerAddress),
@@ -1804,14 +1768,13 @@ export default class TransactionBuilder {
         //     address = this.tronWeb.defaultAddress.hex;
         // }
 
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.updateAccount,
                 accountName,
                 address,
                 options,
             );
-        }
 
         if (
             this.validator.notValid(
@@ -2044,14 +2007,13 @@ export default class TransactionBuilder {
         //     issuerAddress = this.tronWeb.defaultAddress.hex;
         // }
 
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.createProposal,
                 parameters,
                 issuerAddress,
                 options,
             );
-        }
 
         if (
             this.validator.notValid(
@@ -2125,14 +2087,13 @@ export default class TransactionBuilder {
         //     issuerAddress = this.tronWeb.defaultAddress.hex;
         // }
 
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.deleteProposal,
                 proposalID,
                 issuerAddress,
                 options,
             );
-        }
 
         if (
             this.validator.notValid(
@@ -2206,7 +2167,7 @@ export default class TransactionBuilder {
         //     voterAddress = this.tronWeb.defaultAddress.hex;
         // }
 
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.voteProposal,
                 proposalID,
@@ -2214,7 +2175,6 @@ export default class TransactionBuilder {
                 voterAddress,
                 options,
             );
-        }
 
         if (
             this.validator.notValid(
@@ -2298,7 +2258,7 @@ export default class TransactionBuilder {
         //     ownerAddress = this.tronWeb.defaultAddress.hex;
         // }
 
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.createTRXExchange,
                 tokenName,
@@ -2307,7 +2267,6 @@ export default class TransactionBuilder {
                 ownerAddress,
                 options,
             );
-        }
 
         if (
             this.validator.notValid(
@@ -2403,7 +2362,7 @@ export default class TransactionBuilder {
         //     ownerAddress = this.tronWeb.defaultAddress.hex;
         // }
 
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.createTokenExchange,
                 firstTokenName,
@@ -2413,7 +2372,6 @@ export default class TransactionBuilder {
                 ownerAddress,
                 options,
             );
-        }
 
         if (
             this.validator.notValid(
@@ -2510,7 +2468,7 @@ export default class TransactionBuilder {
         //     ownerAddress = this.tronWeb.defaultAddress.hex;
         // }
 
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.injectExchangeTokens,
                 exchangeID,
@@ -2519,7 +2477,6 @@ export default class TransactionBuilder {
                 ownerAddress,
                 options,
             );
-        }
 
         if (
             this.validator.notValid(
@@ -2610,7 +2567,7 @@ export default class TransactionBuilder {
         //     ownerAddress = this.tronWeb.defaultAddress.hex;
         // }
 
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.withdrawExchangeTokens,
                 exchangeID,
@@ -2619,7 +2576,6 @@ export default class TransactionBuilder {
                 ownerAddress,
                 options,
             );
-        }
 
         if (
             this.validator.notValid(
@@ -2713,7 +2669,7 @@ export default class TransactionBuilder {
         //     ownerAddress = this.tronWeb.defaultAddress.hex;
         // }
 
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.tradeExchangeTokens,
                 exchangeID,
@@ -2723,7 +2679,6 @@ export default class TransactionBuilder {
                 ownerAddress,
                 options,
             );
-        }
 
         if (
             this.validator.notValid(
@@ -2816,7 +2771,7 @@ export default class TransactionBuilder {
         //     ownerAddress = this.tronWeb.defaultAddress.hex;
         // }
 
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.updateSetting,
                 contractAddress,
@@ -2824,7 +2779,6 @@ export default class TransactionBuilder {
                 ownerAddress,
                 options,
             );
-        }
 
         if (
             this.validator.notValid(
@@ -2904,7 +2858,7 @@ export default class TransactionBuilder {
         //     ownerAddress = this.tronWeb.defaultAddress.hex;
         // }
 
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.updateEnergyLimit,
                 contractAddress,
@@ -2912,7 +2866,6 @@ export default class TransactionBuilder {
                 ownerAddress,
                 options,
             );
-        }
 
         if (
             this.validator.notValid(
@@ -2967,7 +2920,7 @@ export default class TransactionBuilder {
             )
                 return false;
 
-            for (const key of permissions.keys) {
+            for (const key of permissions.keys)
                 if (
                     !this.tronWeb.isAddress(key.address) ||
                     !utils.isInteger(key.weight) ||
@@ -2976,7 +2929,6 @@ export default class TransactionBuilder {
                     (type === 2 && !permissions.operations)
                 )
                     return false;
-            }
         }
         return true;
     }
@@ -3017,7 +2969,7 @@ export default class TransactionBuilder {
         //     ownerPermissions = witnessPermissions = activesPermissions = false;
         // }
 
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.updateAccountPermissions,
                 ownerAddress,
@@ -3025,7 +2977,6 @@ export default class TransactionBuilder {
                 witnessPermissions,
                 activesPermissions,
             );
-        }
 
         if (!this.tronWeb.isAddress(ownerAddress))
             return callback('Invalid ownerAddress provided');
@@ -3039,10 +2990,9 @@ export default class TransactionBuilder {
         if (!Array.isArray(activesPermissions))
             activesPermissions = [activesPermissions];
 
-        for (const activesPermission of activesPermissions) {
+        for (const activesPermission of activesPermissions)
             if (!this.checkPermissions(activesPermission, 2))
                 return callback('Invalid activesPermissions provided');
-        }
 
         const data: Record<string, unknown> = {
             owner_address: ownerAddress,
@@ -3051,12 +3001,11 @@ export default class TransactionBuilder {
 
         if (witnessPermissions) data.witness = witnessPermissions;
 
-        if (activesPermissions) {
+        if (activesPermissions)
             data.actives =
                 activesPermissions.length === 1
                     ? activesPermissions[0]
                     : activesPermissions;
-        }
 
         this.tronWeb.fullNode
             .request('wallet/accountpermissionupdate', data, 'post')
@@ -3093,7 +3042,7 @@ export default class TransactionBuilder {
     async alterTransaction(
         transaction: ITransaction,
         // eslint-disable-next-line @typescript-eslint/ban-types
-        options: ({} | { data: unknown; dataFormat: string }) & {
+        options: ({} | {data: unknown; dataFormat: string}) & {
             extension?: number;
         },
         callback?: undefined,
@@ -3101,7 +3050,7 @@ export default class TransactionBuilder {
     async alterTransaction(
         transaction: ITransaction,
         // eslint-disable-next-line @typescript-eslint/ban-types
-        options: ({} | { data: unknown; dataFormat: string }) & {
+        options: ({} | {data: unknown; dataFormat: string}) & {
             extension?: number;
         },
         callback: _CallbackT<any>,
@@ -3109,27 +3058,25 @@ export default class TransactionBuilder {
     async alterTransaction(
         transaction: ITransaction,
         // eslint-disable-next-line @typescript-eslint/ban-types
-        options: ({} | { data: unknown; dataFormat: string }) & {
+        options: ({} | {data: unknown; dataFormat: string}) & {
             extension?: number;
         },
         callback?: _CallbackT<any>,
     ): Promise<void | ITransaction> {
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.alterTransaction,
                 transaction,
                 options,
             );
-        }
 
-        if (transaction.signature) {
+        if (transaction.signature)
             return callback(
                 'You can not extend the expiration of a signed transaction.',
             );
-        }
 
         if ('data' in options && options.data) {
-            let { data } = options;
+            let {data} = options;
             if (options.dataFormat !== 'hex') data = this.tronWeb.toHex(data);
             if (!utils.isString(data))
                 throw new TypeError('Invalid data provided');
@@ -3169,15 +3116,14 @@ export default class TransactionBuilder {
         extension: number,
         callback?: _CallbackT<any>,
     ): Promise<void | ITransaction> {
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.extendExpiration,
                 transaction,
                 extension,
             );
-        }
 
-        this.alterTransaction(transaction, { extension }, callback);
+        this.alterTransaction(transaction, {extension}, callback);
     }
 
     async addUpdateData(
@@ -3203,15 +3149,14 @@ export default class TransactionBuilder {
         //     dataFormat = 'utf8';
         // }
 
-        if (!callback) {
+        if (!callback)
             return this.injectPromise(
                 this.addUpdateData,
                 transaction,
                 data,
                 dataFormat,
             );
-        }
 
-        this.alterTransaction(transaction, { data, dataFormat }, callback);
+        this.alterTransaction(transaction, {data, dataFormat}, callback);
     }
 }

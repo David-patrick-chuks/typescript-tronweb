@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { AxiosInstance, Method } from 'axios';
+import {AxiosInstance, Method} from 'axios';
 import utils from '../../utils';
 
 export class HttpProvider {
@@ -41,14 +41,14 @@ export class HttpProvider {
             baseURL: host,
             timeout: timeout,
             headers: headers,
+            // TODO: was it a typo? was `user` before, and axios refuse to accept it
             auth:
                 user && password
                     ? {
-                            // user,
-                            // TODO: was it a typo? was `user` before, and axios refuse to accept it
-                            username: user,
-                            password,
-                        }
+                          // user,
+                          username: user,
+                          password,
+                      }
                     : undefined,
         });
     }
@@ -66,7 +66,8 @@ export class HttpProvider {
     }
 
     request(url: string, payload = {}, method: Method = 'get') {
-        method = method.toLowerCase() as Method; // legacy, non-lowercase should be rejected
+        // legacy, non-lowercase should be rejected
+        method = method.toLowerCase() as Method;
 
         return this.instance
             .request({
@@ -78,6 +79,6 @@ export class HttpProvider {
                 url,
                 method,
             })
-            .then(({ data }) => data);
+            .then(({data}) => data);
     }
 }

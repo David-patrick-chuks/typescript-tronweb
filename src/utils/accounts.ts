@@ -1,4 +1,4 @@
-import { byteArray2hexStr } from './bytes';
+import {byteArray2hexStr} from './bytes';
 import {
     getBase58CheckAddress,
     genPriKey,
@@ -6,8 +6,8 @@ import {
     getPubKeyFromPriKey,
     pkToAddress,
 } from './crypto';
-import { ethersWallet, Wordlist, Mnemonic } from './ethersUtils';
-import { TRON_BIP39_PATH_INDEX_0 } from './address';
+import {ethersWallet, Wordlist, Mnemonic} from './ethersUtils';
+import {TRON_BIP39_PATH_INDEX_0} from './address';
 import utils from './index';
 
 const INVALID_TRON_PATH_ERROR_MSG = 'Invalid tron path provided';
@@ -22,7 +22,7 @@ export type IAccountWithMnemonic = IAccountBase & {
 };
 
 export function generateAccount(): IAccountBase & {
-    address: { base58: string; hex: string };
+    address: {base58: string; hex: string};
 } {
     const priKeyBytes = genPriKey();
     const pubKeyBytes = getPubKeyFromPriKey(priKeyBytes);

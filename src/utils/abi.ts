@@ -1,5 +1,5 @@
-import { ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX } from './address';
-import { AbiCoder } from './ethersUtils';
+import {ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX} from './address';
+import {AbiCoder} from './ethersUtils';
 import TronWeb from '..';
 
 const abiCoder = new AbiCoder();
@@ -17,12 +17,11 @@ function deepCopy<T>(target: T): T {
 
     const newTarget = (Array.isArray(target) ? [] : {}) as typeof target;
 
-    for (const key in target) {
+    for (const key in target)
         newTarget[key] =
             target[key] instanceof Object && !target[key]['_isBigNumber']
                 ? deepCopy(target[key])
                 : target[key];
-    }
 
     return newTarget;
 }
@@ -67,11 +66,10 @@ export function decodeParams(
     if (ignoreMethodHash && output.replace(/^0x/, '').length % 64 === 8)
         output = '0x' + output.replace(/^0x/, '').substring(8);
 
-    if (output.replace(/^0x/, '').length % 64) {
+    if (output.replace(/^0x/, '').length % 64)
         throw new Error(
             'The encoded string is not valid. Its length must be a multiple of 64.',
         );
-    }
 
     // workaround for unsupported trcToken type
     types = types.map((type) => {
@@ -95,13 +93,11 @@ export function decodeParams(
 }
 
 export function encodeParams(types: string[], values: any[]): string {
-    for (let i = 0; i < types.length; i++) {
-        if (types[i] === 'address') {
+    for (let i = 0; i < types.length; i++)
+        if (types[i] === 'address')
             values[i] = TronWeb.address
                 .toHex(values[i])
                 .replace(ADDRESS_PREFIX_REGEX, '0x');
-        }
-    }
 
     return abiCoder.encode(types, values);
 }
@@ -119,7 +115,7 @@ function extractArrayDim(type: string): number {
 export interface IFieldABI {
     name: string;
     type: string;
-    components: IFieldABI[];
+    components?: IFieldABI[];
 }
 export interface IFunABI {
     inputs?: IFieldABI[];
@@ -168,46 +164,40 @@ export function encodeParamsV2ByABI(funABI: IFunABI, args) {
 
     const mapTuple = (components, args, dimension) => {
         if (dimension > 1) {
-            if (args.length) {
+            if (args.length)
                 args.forEach((arg) => {
                     mapTuple(components, arg, dimension - 1);
                 });
-            }
         } else {
-            if (args.length && dimension) {
+            if (args.length && dimension)
                 args.forEach((arg) => {
                     encodeArgs(components, arg);
                 });
-            }
         }
     };
 
     const encodeArgs = (inputs: IFieldABI[] = [], args: any[]) => {
-        if (inputs.length) {
+        if (inputs.length)
             inputs.forEach((input, i) => {
                 const type = input.type;
 
-                if (args[i]) {
-                    if (type === 'address') {
-                        args[i] = _addressToHex(args[i]);
-                    } else if (
+                if (args[i])
+                    if (type === 'address') args[i] = _addressToHex(args[i]);
+                    else if (
                         type.match(/^([^\x5b]*)(\x5b|$)/)![0] === 'address['
-                    ) {
+                    )
                         convertAddresses(args[i]);
-                    } else if (type.indexOf('tuple') === 0) {
+                    else if (type.indexOf('tuple') === 0)
                         if (extractSize(type)) {
                             const dimension = extractArrayDim(type);
                             mapTuple(input.components, args[i], dimension);
                         } else {
                             encodeArgs(input.components, args[i]);
                         }
-                    }
-                }
             });
-        }
     };
 
-    if (funABI.inputs && funABI.inputs.length) {
+    if (funABI.inputs && funABI.inputs.length)
         for (let i = 0; i < funABI.inputs.length; i++) {
             const type = funABI.inputs[i].type;
             // "false" will be converting to `false` and "true" will be working
@@ -221,7 +211,6 @@ export function encodeParamsV2ByABI(funABI: IFunABI, args) {
             );
             if (args.length < types.length) args.push('');
         }
-    }
 
     encodeArgs(funABI.inputs, args);
     convertTypes(types);
@@ -251,17 +240,15 @@ export function decodeParamsV2ByABI(funABI: IFunABI, data) {
 
     const mapTuple = (components, args, dimension) => {
         if (dimension > 1) {
-            if (args.length) {
+            if (args.length)
                 args.forEach((arg) => {
                     mapTuple(components, arg, dimension - 1);
                 });
-            }
         } else {
-            if (args.length && dimension) {
+            if (args.length && dimension)
                 args.forEach((arg) => {
                     decodeResult(components, arg);
                 });
-            }
         }
     };
 
@@ -287,13 +274,13 @@ export function decodeParamsV2ByABI(funABI: IFunABI, data) {
 
     const decodeResult = (
         outputs: IFieldABI[] = [],
-        result: { [key: number | string]: any },
+        result: {[key: number | string]: any},
     ) => {
-        if (outputs.length) {
+        if (outputs.length)
             outputs.forEach((output, i) => {
-                const { type, name } = output;
+                const {type, name} = output;
 
-                if (result[i]) {
+                if (result[i])
                     if (type === 'address') {
                         result[i] = TronWeb.address.toHex(result[i]);
                         if (name)
@@ -313,9 +300,7 @@ export function decodeParamsV2ByABI(funABI: IFunABI, data) {
 
                         if (name) result[name] = result[i];
                     }
-                }
             });
-        }
     };
 
     // Only decode if there supposed to be fields

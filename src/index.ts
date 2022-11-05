@@ -1,30 +1,28 @@
 import providers from './lib/providers';
-import { HttpProvider } from './lib/providers';
+import {HttpProvider} from './lib/providers';
 import utils from './utils';
 import BigNumber from 'bignumber.js';
 import EventEmitter from 'eventemitter3';
-import { version } from '../package.json';
+import {version} from '../package.json';
 import semver from 'semver';
 import injectpromise from 'injectpromise';
 
 import TransactionBuilder from './lib/transactionBuilder';
 import Trx from './lib/trx';
-import { BlockT } from './lib/trx';
+import {BlockT} from './lib/trx';
 import Contract from './lib/contract';
 import Plugin from './lib/plugin';
 import Event from './lib/event';
-import { ContractOptions } from './lib/event';
+import {ContractOptions} from './lib/contract';
 import SideChain from './lib/sidechain';
-import { IChainOptions } from './lib/sidechain';
-import { keccak256 } from './utils/ethersUtils';
-import { ADDRESS_PREFIX, TRON_BIP39_PATH_INDEX_0 } from './utils/address';
+import {IChainOptions} from './lib/sidechain';
+import {keccak256} from './utils/ethersUtils';
+import {ADDRESS_PREFIX, TRON_BIP39_PATH_INDEX_0} from './utils/address';
+import _CallbackT from './utils/typing';
 
 const DEFAULT_VERSION = '3.5.0';
 
 const FEE_LIMIT = 150000000;
-
-type _CallbackT<Out> = ((err: unknown) => Out) &
-    ((err: null, data: any) => Out);
 
 export type ITronWebOptions = {
     fullHost?: string;
@@ -177,7 +175,7 @@ export default class TronWeb extends EventEmitter {
         if (
             typeof sideOptions === 'object' &&
             (sideOptions.fullNode || sideOptions.fullHost)
-        ) {
+        )
             this.sidechain = new SideChain(
                 sideOptions,
                 TronWeb,
@@ -186,11 +184,9 @@ export default class TronWeb extends EventEmitter {
                 // @ts-ignore
                 privateKey,
             );
-        } else if (typeof sideOptions !== 'string') {
+        else if (typeof sideOptions !== 'string')
             throw new TypeError('Wrong options combination provided');
-        } else {
-            privateKey = privateKey || sideOptions;
-        }
+        else privateKey = privateKey || sideOptions;
 
         if (privateKey) this.setPrivateKey(privateKey);
         // this.fullnodeVersion = DEFAULT_VERSION;
@@ -260,7 +256,7 @@ export default class TronWeb extends EventEmitter {
             base58,
         };
 
-        this.emit('addressChanged', { hex, base58 });
+        this.emit('addressChanged', {hex, base58});
     }
 
     fullnodeSatisfies(version: string): void {
@@ -413,13 +409,13 @@ export default class TronWeb extends EventEmitter {
         //     }
         // }
 
-        if (callback) {
+        if (callback)
             return this.event.getEventsByContractAddress(
                 contractAddress,
                 options,
                 callback,
             );
-        }
+
         return this.event.getEventsByContractAddress(
             contractAddress,
             options,
@@ -429,26 +425,26 @@ export default class TronWeb extends EventEmitter {
 
     getEventByTransactionID(
         transactionID: string,
-        options: { rawResponse?: boolean },
+        options: {rawResponse?: boolean},
         callback?: undefined,
     ): Promise<any>;
     getEventByTransactionID(
         transactionID: string,
-        options: { rawResponse?: boolean },
+        options: {rawResponse?: boolean},
         callback: _CallbackT<any>,
     ): void;
     getEventByTransactionID(
         transactionID: string,
-        options: { rawResponse?: boolean } = {},
+        options: {rawResponse?: boolean} = {},
         callback?: _CallbackT<any>,
     ): void | Promise<any> {
-        if (callback) {
+        if (callback)
             return this.event.getEventsByTransactionID(
                 transactionID,
                 options,
                 callback,
             );
-        }
+
         return this.event.getEventsByTransactionID(
             transactionID,
             options,
@@ -522,13 +518,11 @@ export default class TronWeb extends EventEmitter {
         }
 
         const result = TronWeb.fromDecimal(val);
-        if (result === '0xNaN') {
+        if (result === '0xNaN')
             throw new Error(
                 'The passed value is not convertible to a hex string',
             );
-        } else {
-            return result;
-        }
+        else return result;
     }
     toHex(val) {
         return TronWeb.toHex(val);
@@ -647,7 +641,7 @@ export default class TronWeb extends EventEmitter {
         if (!utils.isString(address)) return false;
 
         // Convert HEX to Base58
-        if (address.length === 42) {
+        if (address.length === 42)
             try {
                 return TronWeb.isAddress(
                     utils.crypto.getBase58CheckAddress(
@@ -658,7 +652,7 @@ export default class TronWeb extends EventEmitter {
             } catch (err) {
                 return false;
             }
-        }
+
         try {
             return utils.crypto.isAddressValid(address);
         } catch (err) {
