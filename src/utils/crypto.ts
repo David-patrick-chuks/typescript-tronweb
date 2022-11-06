@@ -6,8 +6,16 @@ import {byte2hexStr, byteArray2hexStr} from './bytes';
 import {ec as EC} from 'elliptic';
 import {keccak256, sha256 as ethSha256, SigningKey} from './ethersUtils';
 import {TypedDataEncoder} from './typedData';
-
+import {ITransaction, ISignedTransaction} from '../lib/transactionBuilder';
 export {byteArray2hexStr} from './bytes';
+
+export interface IDomain {
+    name: string;
+    version: string;
+    chainId: string;
+    verifyingContract: string;
+}
+export type TypedDataTypes = Record<string, {name: string; type: string}[]>;
 
 export function getBase58CheckAddress(addressBytes) {
     const hash0 = sha256(addressBytes);
@@ -40,7 +48,10 @@ export function decodeBase58Address(base58Sting) {
     throw new Error('Invalid address provided');
 }
 
-export function signTransaction(priKeyBytes, transaction) {
+export function signTransaction(
+    priKeyBytes: string | number[] | Uint8Array | Buffer,
+    transaction: ITransaction,
+): ISignedTransaction {
     if (typeof priKeyBytes === 'string')
         priKeyBytes = hexStr2byteArray(priKeyBytes);
 
@@ -53,7 +64,7 @@ export function signTransaction(priKeyBytes, transaction) {
     } else {
         transaction.signature = [signature];
     }
-    return transaction;
+    return transaction as ISignedTransaction;
 }
 
 export function arrayToBase64String(a) {
@@ -70,7 +81,12 @@ export function signBytes(privateKey, contents) {
     return signBytes;
 }
 
-export function _signTypedData(domain, types, value, privateKey) {
+export function _signTypedData(
+    domain: IDomain,
+    types: TypedDataTypes,
+    value: Record<string, unknown>,
+    privateKey: string,
+) {
     const key = {
         toHexString: function () {
             return '0x' + privateKey;

@@ -5,7 +5,7 @@ export class Base64 {
     private _keyStr =
         'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
 
-    encode(input) {
+    encode(input: string): string {
         let output = '';
         let chr1;
         let chr2;
@@ -40,7 +40,7 @@ export class Base64 {
         return output;
     }
 
-    encodeIgnoreUtf8(inputBytes) {
+    encodeIgnoreUtf8(inputBytes: Uint8Array | Buffer): string {
         let output = '';
         let chr1;
         let chr2;
@@ -75,7 +75,7 @@ export class Base64 {
         return output;
     }
 
-    decode(input) {
+    decode(input: string): string {
         let output = '';
         let chr1;
         let chr2;
@@ -108,7 +108,7 @@ export class Base64 {
         return this._utf8_decode(output);
     }
 
-    decodeToByteArray(input: string): number[] {
+    decodeToByteArray(input: string): Uint8Array {
         let output = '';
         let chr1;
         let chr2;
@@ -141,7 +141,7 @@ export class Base64 {
         return this._out2ByteArray(output);
     }
 
-    private _out2ByteArray(utftext: string): number[] {
+    private _out2ByteArray(utftext: string): Uint8Array {
         const byteArray = new Array(utftext.length);
 
         let i = 0;
@@ -153,7 +153,7 @@ export class Base64 {
             i++;
         }
 
-        return byteArray;
+        return new Uint8Array(byteArray);
     }
 
     private _utf8_encode(string: string): string {

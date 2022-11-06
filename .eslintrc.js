@@ -4,6 +4,7 @@ module.exports = {
         commonjs: true,
         jquery: true,
         es2021: true,
+        mocha: true,
     },
     globals: {
         bootstrap: 'readonly',
@@ -55,13 +56,23 @@ module.exports = {
         'space-infix-ops': 2,
         'comma-dangle': [2, 'always-multiline'],
         curly: [2, 'multi', 'consistent'],
+        'no-constant-condition': ['error', {checkLoops: false}],
         'no-unused-vars': 0,
         // ts
         '@typescript-eslint/no-unused-vars': 2,
         '@typescript-eslint/ban-ts-comment': 0,
         '@typescript-eslint/no-non-null-assertion': 0,
         '@typescript-eslint/no-explicit-any': 0,
+        '@typescript-eslint/no-empty-function': 0,
         // FIXME: only temporary
         '@typescript-eslint/no-this-alias': 0,
     },
+    overrides: [
+        {
+            files: ['test/**/*.ts'],
+            rules: {
+                'max-len': 0,
+            },
+        },
+    ],
 };

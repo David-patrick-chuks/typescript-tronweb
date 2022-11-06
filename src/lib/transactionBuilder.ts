@@ -3,11 +3,12 @@ import utils from '../utils';
 import {AbiCoder} from '../utils/ethersUtils';
 import Validator from '../paramValidator';
 import {ADDRESS_PREFIX_REGEX} from '../utils/address';
-import injectpromise from 'injectpromise';
 import {encodeParamsV2ByABI} from '../utils/abi';
 import {ContractOptions as OtherContractOptions} from './contract';
 import {ResourceT, ILog} from './trx';
 import _CallbackT from '../utils/typing';
+import {WithTronwebAndInjectpromise} from '../utils/_base';
+import {IAbi} from './contract';
 
 const INVALID_RESOURCE_MESSAGE =
     'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY';
@@ -18,7 +19,6 @@ export interface ITransaction {
     ret?: {
         contractRet: 'SUCCESS';
     }[];
-    signature?: string[];
     raw_data: {
         // FIXME: types
         data?: unknown;
@@ -29,18 +29,20 @@ export interface ITransaction {
         ref_block_bytes: string;
         ref_block_hash: string;
     };
+    signature?: string[];
     txID: string;
     raw_data_hex: string;
 }
-interface _LooseObject {
-    [key: string]: any;
+
+export interface ISignedTransaction extends ITransaction {
+    signature: string[];
 }
 export interface IProposalParameter {
     // FIXME: sure?
     key: number;
     value: number;
 }
-export interface BaseOptions extends OtherContractOptions {
+export interface BaseOptions {
     feeLimit?: number;
     userFeePercentage?: number;
     originEnergyLimit?: number;
@@ -51,48 +53,51 @@ export interface BaseOptions extends OtherContractOptions {
     funcABIV2?: any;
     parametersV2?: any;
     permissionId?: number;
-}
-export type ContractOptions = {
-    // FIXME: how does this relate to src/lib/contract/index.ts:ContractOptions
-    abi: string | {entrys: any[]};
-    bytecode: string;
-    parameters?: any[] | string;
-    name: string;
     rawParameter?: string;
     shieldedParameter?: string;
     confirmed?: boolean;
+}
+export interface ContractOptions extends BaseOptions, OtherContractOptions {
+    // FIXME: how does this relate to src/lib/contract/index.ts:ContractOptions
+    abi: string | {entrys: IAbi[]};
+    bytecode: string;
+    parameters?: any[] | string;
     shouldPollResponse?: boolean;
-} & BaseOptions;
+    name: string;
+}
+export interface ITriggerContractOptions extends BaseOptions {
+    _isConstant?: boolean;
+}
 
-export interface IUpdateTokenOptions {
+interface IPermissionId {
+    permissionId?: number;
+}
+export interface IUpdateTokenOptions extends IPermissionId {
     description: string;
     url: string;
     // The creator's "donated" bandwidth for use by token holders
-    freeBandwidth?: number;
+    freeBandwidth?: number | string;
     // Out of `totalFreeBandwidth`, the amount each token holder get
-    freeBandwidthLimit?: number;
+    freeBandwidthLimit?: number | string;
 }
 export interface ICreateTokenOptions extends IUpdateTokenOptions {
     name: string;
     abbreviation: string;
-    totalSupply: number;
-    voteScore: number;
-    precision: number;
+    totalSupply: number | string;
+    voteScore?: number | string;
+    precision?: number | string;
 
     // Timestamps
-    saleStart?: number;
-    saleEnd: number;
+    saleStart?: number | string;
+    saleEnd: number | string;
 
     // How much TRX will `tokenRatio` cost?
-    trxRatio?: number;
+    trxRatio?: number | string;
     // How many tokens will `trxRatio` afford?
-    tokenRatio?: number;
-    frozenAmount?: number;
-    frozenDuration?: number;
+    tokenRatio?: number | string;
+    frozenAmount?: number | string;
+    frozenDuration?: number | string;
     // for now there is no default for the following values
-}
-interface IPermissionId {
-    permissionId?: number;
 }
 type IResources = any;
 interface IPermissions {
@@ -103,7 +108,7 @@ interface IPermissions {
         address: string;
         weight: number;
     }[];
-    operations: any;
+    operations?: any;
 }
 
 export interface ITriggerSmartContract {
@@ -135,17 +140,12 @@ function resultManager(transaction, callback) {
     return callback(null, transaction);
 }
 
-export default class TransactionBuilder {
-    tronWeb: TronWeb;
-    injectPromise: injectpromise;
+export default class TransactionBuilder extends WithTronwebAndInjectpromise {
     validator: Validator;
 
     constructor(tronWeb: TronWeb) {
-        if (!tronWeb || !(tronWeb instanceof TronWeb))
-            throw new Error('Expected instance of TronWeb');
+        super(tronWeb);
         self = this;
-        this.tronWeb = tronWeb;
-        this.injectPromise = injectpromise(this);
         this.validator = new Validator(tronWeb);
     }
 
@@ -219,7 +219,7 @@ export default class TransactionBuilder {
         )
             return;
 
-        const data: _LooseObject = {
+        const data: Record<string, unknown> = {
             to_address: toHex(to),
             owner_address: toHex(from),
             amount: amount,
@@ -317,7 +317,7 @@ export default class TransactionBuilder {
         )
             return;
 
-        const data: _LooseObject = {
+        const data: Record<string, unknown> = {
             to_address: toHex(to),
             owner_address: toHex(from),
             asset_name: fromUtf8(tokenID),
@@ -415,7 +415,7 @@ export default class TransactionBuilder {
         )
             return;
 
-        const data: _LooseObject = {
+        const data: Record<string, unknown> = {
             to_address: toHex(issuerAddress),
             owner_address: toHex(buyer),
             asset_name: fromUtf8(tokenID),
@@ -538,7 +538,7 @@ export default class TransactionBuilder {
         )
             return;
 
-        const data: _LooseObject = {
+        const data: Record<string, unknown> = {
             owner_address: toHex(address),
             frozen_balance: parseInt(amount.toString()),
             frozen_duration: parseInt(duration.toString()),
@@ -642,7 +642,7 @@ export default class TransactionBuilder {
         )
             return;
 
-        const data: _LooseObject = {
+        const data: Record<string, unknown> = {
             owner_address: toHex(address),
             resource: resource,
         };
@@ -711,7 +711,7 @@ export default class TransactionBuilder {
         )
             return;
 
-        const data: _LooseObject = {
+        const data: Record<string, unknown> = {
             owner_address: toHex(address),
         };
 
@@ -775,7 +775,7 @@ export default class TransactionBuilder {
         )
             return;
 
-        const data: _LooseObject = {
+        const data: Record<string, unknown> = {
             owner_address: toHex(address),
             url: fromUtf8(url),
         };
@@ -874,7 +874,7 @@ export default class TransactionBuilder {
 
         if (invalid) return;
 
-        const data: _LooseObject = {
+        const data: Record<string, unknown> = {
             owner_address: toHex(voterAddress),
             votes: votesArr,
         };
@@ -1120,7 +1120,7 @@ export default class TransactionBuilder {
     triggerSmartContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & {_isConstant?: boolean},
+        options: ITriggerContractOptions,
         parameters: {type: string; value: any}[],
         issuerAddress: string | undefined,
         callback?: undefined,
@@ -1128,7 +1128,7 @@ export default class TransactionBuilder {
     triggerSmartContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & {_isConstant?: boolean},
+        options: ITriggerContractOptions,
         parameters: {type: string; value: any}[],
         issuerAddress: string | undefined,
         callback: _CallbackT<ITriggerSmartContract>,
@@ -1136,7 +1136,7 @@ export default class TransactionBuilder {
     triggerSmartContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & {_isConstant?: boolean},
+        options: ITriggerContractOptions,
         parameters: {type: string; value: any}[],
         issuerAddress: string | undefined,
         callback?: _CallbackT<ITriggerSmartContract>,
@@ -1144,7 +1144,7 @@ export default class TransactionBuilder {
     triggerSmartContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & {_isConstant?: boolean},
+        options: ITriggerContractOptions,
         parameters: {type: string; value: any}[] = [],
         issuerAddress: string | undefined = this.tronWeb.defaultAddress.hex,
         callback?: _CallbackT<ITriggerSmartContract>,
@@ -1172,7 +1172,7 @@ export default class TransactionBuilder {
     triggerConstantContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & {_isConstant?: boolean},
+        options: ITriggerContractOptions,
         parameters: {type: string; value: any}[],
         issuerAddress: string | undefined,
         callback?: undefined,
@@ -1180,7 +1180,7 @@ export default class TransactionBuilder {
     triggerConstantContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & {_isConstant?: boolean},
+        options: ITriggerContractOptions,
         parameters: {type: string; value: any}[],
         issuerAddress: string | undefined,
         callback: _CallbackT<ITriggerConstantContract>,
@@ -1188,7 +1188,7 @@ export default class TransactionBuilder {
     triggerConstantContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & {_isConstant?: boolean},
+        options: ITriggerContractOptions,
         parameters: {type: string; value: any}[],
         issuerAddress: string | undefined,
         callback?: _CallbackT<ITriggerConstantContract>,
@@ -1196,7 +1196,7 @@ export default class TransactionBuilder {
     triggerConstantContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & {_isConstant?: boolean},
+        options: ITriggerContractOptions,
         parameters: {type: string; value: any}[] = [],
         issuerAddress: string | undefined = this.tronWeb.defaultAddress.hex,
         callback?: _CallbackT<ITriggerConstantContract>,
@@ -1215,7 +1215,7 @@ export default class TransactionBuilder {
     triggerConfirmedConstantContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & {_isConstant?: boolean},
+        options: ITriggerContractOptions,
         parameters: {type: string; value: any}[],
         issuerAddress: string | undefined,
         callback?: undefined,
@@ -1223,7 +1223,7 @@ export default class TransactionBuilder {
     triggerConfirmedConstantContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & {_isConstant?: boolean},
+        options: ITriggerContractOptions,
         parameters: {type: string; value: any}[],
         issuerAddress: string | undefined,
         callback: _CallbackT<ITriggerConstantContract>,
@@ -1231,7 +1231,7 @@ export default class TransactionBuilder {
     triggerConfirmedConstantContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & {_isConstant?: boolean},
+        options: ITriggerContractOptions,
         parameters: {type: string; value: any}[],
         issuerAddress: string | undefined,
         callback?: _CallbackT<ITriggerConstantContract>,
@@ -1239,7 +1239,7 @@ export default class TransactionBuilder {
     triggerConfirmedConstantContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & {_isConstant?: boolean},
+        options: ITriggerContractOptions,
         parameters: {type: string; value: any}[] = [],
         issuerAddress: string | undefined = this.tronWeb.defaultAddress.hex,
         callback?: _CallbackT<ITriggerConstantContract>,
@@ -1259,7 +1259,7 @@ export default class TransactionBuilder {
     _triggerSmartContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & {_isConstant?: boolean},
+        options: ITriggerContractOptions,
         parameters: {type: string; value: any}[],
         issuerAddress?: string,
         callback?: undefined,
@@ -1267,7 +1267,7 @@ export default class TransactionBuilder {
     _triggerSmartContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & {_isConstant?: boolean},
+        options: ITriggerContractOptions,
         parameters: {type: string; value: any}[],
         issuerAddress: string,
         callback: _CallbackT<ITriggerSmartContract>,
@@ -1275,7 +1275,7 @@ export default class TransactionBuilder {
     _triggerSmartContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & {_isConstant?: boolean},
+        options: ITriggerContractOptions,
         parameters: {type: string; value: any}[],
         issuerAddress?: string,
         callback?: _CallbackT<ITriggerSmartContract>,
@@ -1283,7 +1283,7 @@ export default class TransactionBuilder {
     _triggerSmartContract(
         contractAddress: string,
         functionSelector: string,
-        options: ContractOptions & {_isConstant?: boolean},
+        options: ITriggerContractOptions,
         parameters: {type: string; value: any}[] = [],
         issuerAddress: string = this.tronWeb.defaultAddress.hex,
         callback?: _CallbackT<ITriggerSmartContract>,
@@ -1539,7 +1539,7 @@ export default class TransactionBuilder {
         if (!this.tronWeb.isAddress(ownerAddress))
             return callback('Invalid owner address provided');
 
-        const data: _LooseObject = {
+        const data: Record<string, unknown> = {
             brokerage: parseInt(brokerage.toString()),
             owner_address: toHex(ownerAddress),
         };
@@ -1551,17 +1551,17 @@ export default class TransactionBuilder {
     }
 
     createToken(
-        options: ICreateTokenOptions & IPermissionId,
+        options: ICreateTokenOptions,
         issuerAddress: string,
         callback?: undefined,
     ): Promise<ITransaction>;
     createToken(
-        options: ICreateTokenOptions & IPermissionId,
+        options: ICreateTokenOptions,
         issuerAddress: string,
         callback: _CallbackT<any>,
     ): void;
     createToken(
-        options: ICreateTokenOptions & IPermissionId,
+        options: ICreateTokenOptions,
         issuerAddress: string = this.tronWeb.defaultAddress.hex,
         callback?: _CallbackT<any>,
     ): void | Promise<ITransaction> {
@@ -1650,7 +1650,7 @@ export default class TransactionBuilder {
                         name: 'sale end timestamp',
                         type: 'integer',
                         value: saleEnd,
-                        gt: saleStart,
+                        gt: parseInt(saleStart.toString()),
                     },
                     {
                         name: 'Free bandwidth amount',
@@ -1947,7 +1947,7 @@ export default class TransactionBuilder {
         )
             return;
 
-        const data: _LooseObject = {
+        const data: Record<string, unknown> = {
             owner_address: toHex(issuerAddress),
             description: fromUtf8(description),
             url: fromUtf8(url),
@@ -2908,7 +2908,10 @@ export default class TransactionBuilder {
             .catch((err) => callback(err));
     }
 
-    checkPermissions(permissions: IPermissions, type: number): boolean {
+    checkPermissions(
+        permissions: IPermissions | null | undefined,
+        type: number,
+    ): boolean {
         if (permissions) {
             if (
                 permissions.type !== type ||
@@ -2935,24 +2938,34 @@ export default class TransactionBuilder {
 
     updateAccountPermissions(
         ownerAddress: string,
-        ownerPermissions: IPermissions,
-        witnessPermissions: IPermissions,
-        activesPermissions: IPermissions | IPermissions[],
+        ownerPermissions?: IPermissions | null,
+        witnessPermissions?: IPermissions | null,
+        activesPermissions?:
+            | IPermissions
+            | (IPermissions | null | undefined)[]
+            | null,
         callback?: unknown,
     ): Promise<ITransaction>;
     updateAccountPermissions(
         ownerAddress: string,
-        ownerPermissions: IPermissions,
-        witnessPermissions: IPermissions,
-        activesPermissions: IPermissions | IPermissions[],
-        callback: _CallbackT<any>,
+        ownerPermissions: IPermissions | null | undefined,
+        witnessPermissions: IPermissions | null | undefined,
+        activesPermissions:
+            | IPermissions
+            | (IPermissions | null | undefined)[]
+            | null
+            | undefined,
+        callback: _CallbackT<ITransaction>,
     ): void;
     updateAccountPermissions(
         ownerAddress: string = this.tronWeb.defaultAddress.hex,
-        ownerPermissions: IPermissions,
-        witnessPermissions: IPermissions,
-        activesPermissions: IPermissions | IPermissions[],
-        callback?: _CallbackT<any>,
+        ownerPermissions?: IPermissions | null,
+        witnessPermissions?: IPermissions | null,
+        activesPermissions?:
+            | IPermissions
+            | (IPermissions | null | undefined)[]
+            | null,
+        callback?: _CallbackT<ITransaction>,
     ): void | Promise<ITransaction> {
         // if (utils.isFunction(activesPermissions)) {
         //     callback = activesPermissions;

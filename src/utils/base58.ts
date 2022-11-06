@@ -5,7 +5,7 @@ for (let i = 0; i < ALPHABET.length; i++) ALPHABET_MAP[ALPHABET.charAt(i)] = i;
 
 const BASE = 58;
 
-export function encode58(buffer) {
+export function encode58(buffer: Buffer | Uint8Array | string) {
     if (buffer.length === 0) return '';
 
     let i;
@@ -16,7 +16,7 @@ export function encode58(buffer) {
     for (i = 0; i < buffer.length; i++) {
         for (j = 0; j < digits.length; j++) digits[j] <<= 8;
 
-        digits[0] += buffer[i];
+        digits[0] += +buffer[i];
         let carry = 0;
 
         for (j = 0; j < digits.length; ++j) {
@@ -39,8 +39,8 @@ export function encode58(buffer) {
         .join('');
 }
 
-export function decode58(string) {
-    if (string.length === 0) return [];
+export function decode58(string: string): Uint8Array {
+    if (string.length === 0) return new Uint8Array();
 
     let i;
     let j;
@@ -71,5 +71,5 @@ export function decode58(string) {
 
     for (i = 0; string[i] === '1' && i < string.length - 1; i++) bytes.push(0);
 
-    return bytes.reverse();
+    return new Uint8Array(bytes.reverse());
 }

@@ -9,11 +9,17 @@ export interface IPluginRegisterResult {
     error?: string;
 }
 export interface IPluginDefn {
-    requires: string;
+    // FIXME: it can be better
+    requires?: string;
     // eslint-disable-next-line @typescript-eslint/ban-types
-    components: Record<string, Record<string, Function>>;
-    fullClass?: string;
+    components?: Record<string, Record<string, Function>>;
+    fullClass?: boolean;
 }
+
+export interface IPlugin<T extends Record<string, unknown> | null | unknown> {
+    pluginInterface?: (options?: T) => IPluginDefn;
+}
+type Class<I, Args extends any[] = any[]> = new (...args: Args) => I;
 
 export default class Plugin {
     tronWeb: TronWeb;
@@ -28,7 +34,7 @@ export default class Plugin {
         this.disablePlugins = options.disablePlugins;
     }
 
-    register(PluginCls, options) {
+    register<T>(PluginCls: Class<IPlugin<T>>, options?: T) {
         let pluginInterface: IPluginDefn = {
             requires: '0.0.0',
             components: {},

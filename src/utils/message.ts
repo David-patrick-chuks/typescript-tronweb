@@ -24,7 +24,10 @@ export function hashMessage(message: string | Uint8Array): string {
     );
 }
 
-export function signMessage(message: string, privateKey: string): string {
+export function signMessage(
+    message: string | Uint8Array,
+    privateKey: string,
+): string {
     if (!privateKey.match(/^0x/)) privateKey = '0x' + privateKey;
 
     const signingKey = new SigningKey(privateKey);
@@ -34,7 +37,10 @@ export function signMessage(message: string, privateKey: string): string {
     return joinSignature(signature);
 }
 
-export function verifyMessage(message: string, signature: string): string {
+export function verifyMessage(
+    message: string | Uint8Array,
+    signature: string,
+): string {
     if (!signature.match(/^0x/)) signature = '0x' + signature;
 
     const recovered = recoverAddress(hashMessage(message), signature);

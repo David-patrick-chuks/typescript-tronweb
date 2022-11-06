@@ -1,24 +1,13 @@
-import TronWeb from '..';
 import utils from '../utils';
 import * as providers from './providers';
 import {ContractOptions} from './contract';
 import querystring from 'querystring';
-import injectpromise from 'injectpromise';
 import _CallbackT from '../utils/typing';
+import {WithTronwebAndInjectpromise} from '../../src/utils/_base';
 
-export default class Event {
-    tronWeb: TronWeb;
-    injectPromise: injectpromise;
-
-    constructor(tronWeb: TronWeb) {
-        if (!tronWeb || !(tronWeb instanceof TronWeb))
-            throw new Error('Expected instance of TronWeb');
-        this.tronWeb = tronWeb;
-        this.injectPromise = injectpromise(this);
-    }
-
+export default class Event extends WithTronwebAndInjectpromise {
     setServer(
-        eventServer: string | providers.HttpProvider,
+        eventServer: string | providers.HttpProvider | null | undefined,
         healthcheck = 'healthcheck',
     ): void {
         // tronWeb instance attrs are handled in a weird way
@@ -44,7 +33,7 @@ export default class Event {
 
     getEventsByContractAddress(
         contractAddress: string,
-        options: ContractOptions,
+        options?: ContractOptions,
         callback?: undefined,
     ): Promise<any[]>;
     getEventsByContractAddress(
@@ -185,7 +174,7 @@ export default class Event {
 
     getEventsByTransactionID(
         transactionID: string,
-        options: {rawResponse?: boolean},
+        options?: {rawResponse?: boolean},
         callback?: undefined,
     ): Promise<any[]>;
     getEventsByTransactionID(

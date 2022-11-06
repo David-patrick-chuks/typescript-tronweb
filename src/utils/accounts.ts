@@ -16,14 +16,15 @@ export interface IAccountBase {
     privateKey: string;
     publicKey: string;
 }
-export type IAccountWithMnemonic = IAccountBase & {
+export interface IAccountWithMnemonic extends IAccountBase {
     mnemonic: Mnemonic;
     address: string;
-};
-
-export function generateAccount(): IAccountBase & {
+}
+export interface IAccount extends IAccountBase {
     address: {base58: string; hex: string};
-} {
+}
+
+export function generateAccount(): IAccount {
     const priKeyBytes = genPriKey();
     const pubKeyBytes = getPubKeyFromPriKey(priKeyBytes);
     const addressBytes = getAddressFromPriKey(priKeyBytes);
@@ -52,19 +53,17 @@ export function generateRandom(options?: {
 
     const account = ethersWallet.createRandom(options);
 
-    const result = {
+    return {
         mnemonic: account.mnemonic,
         privateKey: account.privateKey,
         publicKey: account.publicKey,
         address: pkToAddress(account.privateKey.replace(/^0x/, '')),
     };
-
-    return result;
 }
 
 export function generateAccountWithMnemonic(
     mnemonic: string,
-    path: string,
+    path?: string | null,
     wordlist: string | Wordlist = 'en',
 ): IAccountWithMnemonic {
     if (!path) path = TRON_BIP39_PATH_INDEX_0;

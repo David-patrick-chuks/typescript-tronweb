@@ -25,16 +25,18 @@ const DEFAULT_VERSION = '3.5.0';
 const FEE_LIMIT = 150000000;
 
 export type ITronWebOptions = {
-    fullHost?: string;
-    fullNode?: string | HttpProvider;
-    solidityNode?: string | HttpProvider;
-    eventServer?: string | HttpProvider;
-
     headers?: Record<string, string>;
     eventHeaders?: Record<string, string>;
-    privateKey: string;
+    privateKey?: string;
     disablePlugins?: string[];
-};
+} & (
+    | {fullHost: string}
+    | {
+          fullNode: HttpProvider | string;
+          solidityNode: HttpProvider | string;
+          eventServer: HttpProvider | string;
+      }
+);
 
 export default class TronWeb extends EventEmitter {
     static providers = providers;
@@ -46,6 +48,7 @@ export default class TronWeb extends EventEmitter {
     static Event = Event;
     static version = version;
     static utils = utils;
+    version = version;
 
     providers = providers;
     utils = utils;
@@ -71,28 +74,28 @@ export default class TronWeb extends EventEmitter {
     fullnodeVersion = DEFAULT_VERSION;
     feeLimit = FEE_LIMIT;
 
-    constructor(options: ITronWebOptions);
+    constructor(options: ITronWebOptions, sideOptions?: IChainOptions);
     constructor(
         // for retro-compatibility:
         options: string | HttpProvider,
         solidityNode: string | HttpProvider,
-        eventServer: string | HttpProvider,
-        sideOptions: IChainOptions,
-        privateKey: string,
+        eventServer?: string | HttpProvider,
+        sideOptions?: IChainOptions,
+        privateKey?: string | null,
     );
     constructor(
         // for retro-compatibility:
         options: string | HttpProvider,
         solidityNode: string | HttpProvider,
-        eventServer: string | HttpProvider,
-        sideOptions: string,
+        eventServer?: string | HttpProvider,
+        sideOptions?: string | null,
     );
     constructor(
         options: ITronWebOptions | string | HttpProvider,
         // for retro-compatibility:
-        solidityNode?: string | HttpProvider,
+        solidityNode?: string | IChainOptions | HttpProvider,
         eventServer?: string | HttpProvider,
-        sideOptions?: IChainOptions | string,
+        sideOptions?: IChainOptions | string | null,
         privateKey?: string,
     ) {
         super();
@@ -104,13 +107,20 @@ export default class TronWeb extends EventEmitter {
         if (
             typeof options === 'object' &&
             ('fullNode' in options || 'fullHost' in options) &&
-            (options.fullNode || options.fullHost)
+            ('fullNode' in options ? options.fullNode : options.fullHost)
         ) {
-            fullNode = options.fullNode || options.fullHost;
+            fullNode =
+                'fullNode' in options ? options.fullNode : options.fullHost;
             // shift
             sideOptions = solidityNode as any as IChainOptions;
-            solidityNode = options.solidityNode || options.fullHost;
-            eventServer = options.eventServer || options.fullHost;
+            solidityNode =
+                'solidityNode' in options
+                    ? options.solidityNode
+                    : options.fullHost;
+            eventServer =
+                'eventServer' in options
+                    ? options.eventServer
+                    : options.fullHost;
             headers = options.headers || false;
             eventHeaders = options.eventHeaders || headers;
             privateKey = options.privateKey;
@@ -130,7 +140,7 @@ export default class TronWeb extends EventEmitter {
         // this.utils = utils;
 
         this.setFullNode(fullNode);
-        this.setSolidityNode(solidityNode!);
+        this.setSolidityNode(solidityNode as HttpProvider);
         this.setEventServer(eventServer!);
 
         // this.providers = providers;
@@ -173,8 +183,11 @@ export default class TronWeb extends EventEmitter {
 
         // for sidechain
         if (
+            sideOptions &&
             typeof sideOptions === 'object' &&
-            (sideOptions.fullNode || sideOptions.fullHost)
+            ('fullNode' in sideOptions
+                ? sideOptions.fullNode
+                : sideOptions.fullHost)
         )
             this.sidechain = new SideChain(
                 sideOptions,
@@ -198,7 +211,7 @@ export default class TronWeb extends EventEmitter {
         if (eventHeaders) this.setEventHeader(eventHeaders);
     }
 
-    async getFullnodeVersion(): Promise<void> {
+    async getFullnodeVersion() {
         try {
             const nodeInfo = await this.trx.getNodeInfo();
             this.fullnodeVersion = nodeInfo.configNodeInfo.codeVersion;
@@ -209,7 +222,7 @@ export default class TronWeb extends EventEmitter {
         }
     }
 
-    setDefaultBlock(blockID?: BlockT | undefined): void {
+    setDefaultBlock(blockID?: BlockT | undefined) {
         if ([undefined, 'latest', 'earliest', 0].includes(blockID)) {
             // This allows undefined, but allowing it in class body raises 100+ errors
             // @ts-ignore
@@ -223,7 +236,7 @@ export default class TronWeb extends EventEmitter {
         this.defaultBlock = Math.abs(blockID);
     }
 
-    setPrivateKey(privateKey: string): void {
+    setPrivateKey(privateKey: string) {
         try {
             const addr = this.address.fromPrivateKey(privateKey);
             if (addr) this.setAddress(addr);
@@ -236,7 +249,7 @@ export default class TronWeb extends EventEmitter {
         this.emit('privateKeyChanged', privateKey);
     }
 
-    setAddress(address: string): void {
+    setAddress(address: string) {
         if (!this.isAddress(address))
             throw new Error('Invalid address provided');
 
@@ -259,7 +272,7 @@ export default class TronWeb extends EventEmitter {
         this.emit('addressChanged', {hex, base58});
     }
 
-    fullnodeSatisfies(version: string): void {
+    fullnodeSatisfies(version: string): boolean {
         return semver.satisfies(this.fullnodeVersion, version);
     }
 
@@ -269,7 +282,7 @@ export default class TronWeb extends EventEmitter {
         );
     }
 
-    setFullNode(fullNode: string | HttpProvider): void {
+    setFullNode(fullNode: string | HttpProvider) {
         if (utils.isString(fullNode)) fullNode = new HttpProvider(fullNode);
 
         if (!this.isValidProvider(fullNode))
@@ -293,7 +306,7 @@ export default class TronWeb extends EventEmitter {
     }
 
     setEventServer(
-        eventServer: string | HttpProvider,
+        eventServer: string | HttpProvider | undefined | null,
         healthcheck = 'healthcheck',
     ): void {
         this.event.setServer(eventServer, healthcheck);
@@ -498,9 +511,7 @@ export default class TronWeb extends EventEmitter {
         return TronWeb.sha3(string, prefix);
     }
 
-    static toHex(
-        val: boolean | BigNumber | Record<string, unknown> | string | number,
-    ): string {
+    static toHex(val: unknown): string {
         if (utils.isBoolean(val)) return TronWeb.fromDecimal(+val);
 
         if (utils.isBigNumber(val)) return TronWeb.fromDecimal(val);
@@ -517,14 +528,14 @@ export default class TronWeb extends EventEmitter {
                 return TronWeb.fromUtf8(val);
         }
 
-        const result = TronWeb.fromDecimal(val);
+        const result = TronWeb.fromDecimal(val as any);
         if (result === '0xNaN')
             throw new Error(
                 'The passed value is not convertible to a hex string',
             );
         else return result;
     }
-    toHex(val) {
+    toHex(val: unknown): string {
         return TronWeb.toHex(val);
     }
 
@@ -600,29 +611,27 @@ export default class TronWeb extends EventEmitter {
     }
 
     static fromSun(sun: BigNumber): BigNumber;
-    static fromSun(sun: string): string;
-    static fromSun(sun: BigNumber | string): BigNumber | string {
+    static fromSun(sun: string | number): string;
+    static fromSun(sun: BigNumber | string | number): BigNumber | string {
         const trx = TronWeb.toBigNumber(sun).div(1_000_000);
         return utils.isBigNumber(sun) ? trx : trx.toString(10);
     }
     fromSun(sun: BigNumber): BigNumber;
-    fromSun(sun: string): string;
-    fromSun(sun: BigNumber | string): BigNumber | string {
-        if (typeof sun === 'string') return TronWeb.fromSun(sun);
-        return TronWeb.fromSun(sun);
+    fromSun(sun: string | number): string;
+    fromSun(sun: BigNumber | string | number): BigNumber | string {
+        return TronWeb.fromSun(sun as any);
     }
 
     static toSun(trx: BigNumber): BigNumber;
-    static toSun(trx: string): string;
-    static toSun(trx: BigNumber | string): BigNumber | string {
+    static toSun(trx: string | number): string;
+    static toSun(trx: BigNumber | string | number): BigNumber | string {
         const sun = TronWeb.toBigNumber(trx).times(1_000_000);
         return utils.isBigNumber(trx) ? sun : sun.toString(10);
     }
     toSun(trx: BigNumber): BigNumber;
-    toSun(trx: string): string;
-    toSun(trx: BigNumber | string): BigNumber | string {
-        if (typeof trx === 'string') return TronWeb.toSun(trx);
-        return TronWeb.toSun(trx);
+    toSun(trx: string | number): string;
+    toSun(trx: BigNumber | string | number): BigNumber | string {
+        return TronWeb.toSun(trx as any);
     }
 
     static toBigNumber(amount: string | number | BigNumber = 0): BigNumber {
@@ -670,10 +679,10 @@ export default class TronWeb extends EventEmitter {
         return TronWeb.createAccount();
     }
 
-    static createRandom(options) {
+    static createRandom(options = {}) {
         return utils.accounts.generateRandom(options);
     }
-    createRandom(options) {
+    createRandom(options = {}) {
         return TronWeb.createRandom(options);
     }
 

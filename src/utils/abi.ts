@@ -29,18 +29,18 @@ function deepCopy<T>(target: T): T {
 export function decodeParams(
     names_: string[],
     types_: string,
-    output_: boolean,
+    output_?: boolean,
+): any;
+export function decodeParams(
+    names_: string[],
+    types_: string[],
+    output_?: string,
+    ignoreMethodHash_?: boolean,
 ): any[];
 export function decodeParams(
     names_: string[],
     types_: string[] | string,
-    output_: string | boolean,
-    ignoreMethodHash_: boolean,
-): any[];
-export function decodeParams(
-    names_: string[],
-    types_: string[] | string,
-    output_: string | boolean,
+    output_?: string | boolean,
     ignoreMethodHash_?: boolean,
 ): any[] {
     let ignoreMethodHash: boolean;

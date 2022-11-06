@@ -2,21 +2,40 @@ import TronWeb from '../..';
 import utils from '../../utils';
 import Method from './method';
 import {ContractOptions as ExtendedContractOptions} from '../transactionBuilder';
-import injectpromise from 'injectpromise';
 import _CallbackT from '../../utils/typing';
+import {WithTronwebAndInjectpromise} from '../../../src/utils/_base';
 
 export interface IAbiItem {
     name: string;
     type: string;
+    components?: IAbiItem[];
+    internalType?: string;
 }
-export interface IAbi {
-    // FIXME: split into several depending on stateMutability
+export interface IEventAbiItem extends IAbiItem {
+    indexed: boolean;
+}
+// FIXME: split into several depending on stateMutability
+export interface IFuncAbi {
     name: string;
-    type: string;
-    stateMutability: 'pure' | 'payable' | 'mutable' | 'nonpayable';
+    type: 'function' | 'constructor' | 'receive' | 'fallback';
+    stateMutability: 'pure' | 'view' | 'nonpayable' | 'payable';
     inputs: IAbiItem[];
     outputs: IAbiItem[];
+    constant?: boolean;
+    payable?: boolean;
 }
+export interface IEventAbi {
+    name: string;
+    type: 'event';
+    inputs: IEventAbiItem[];
+    anonymous: boolean;
+}
+export interface IErrorAbi {
+    name: string;
+    type: 'error';
+    inputs: IEventAbiItem[];
+}
+export type IAbi = IFuncAbi | IEventAbi | IErrorAbi;
 
 export interface ContractOptions {
     sinceTimestamp?: number;
@@ -32,14 +51,12 @@ export interface ContractOptions {
     previousFingerprint?: any;
     fingerprint?: any;
     rawResponse?: boolean;
-    sort?: boolean;
+    sort?: string;
     filters?: unknown | unknown[];
     resourceNode?: string;
 }
 
-class _Contract {
-    tronWeb: TronWeb;
-    injectPromise: injectpromise;
+class _Contract extends WithTronwebAndInjectpromise {
     address: string | null;
     abi: IAbi[];
     eventListener: NodeJS.Timer | null;
@@ -52,11 +69,7 @@ class _Contract {
     props: string[];
 
     constructor(tronWeb: TronWeb, abi: IAbi[] = [], address?: string) {
-        if (!tronWeb || !(tronWeb instanceof TronWeb))
-            throw new Error('Expected instance of TronWeb');
-
-        this.tronWeb = tronWeb;
-        this.injectPromise = injectpromise(this);
+        super(tronWeb);
 
         this.address = address || null;
         this.abi = abi;
@@ -175,7 +188,13 @@ class _Contract {
         abi.forEach((func) => {
             // Don't build a method for constructor function.
             // That's handled through contract create.
-            if (!func.type || /constructor/i.test(func.type)) return;
+            if (
+                !func.type ||
+                /constructor/i.test(func.type) ||
+                func.type === 'event' ||
+                func.type === 'error'
+            )
+                return;
 
             const method = new Method(this as unknown as Contract, func);
             const methodCall = method.onMethod.bind(method);

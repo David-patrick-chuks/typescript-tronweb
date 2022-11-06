@@ -10,9 +10,9 @@ import {
 export const bin2String = bytesToString;
 
 export function arrayEquals(
-    array1: any[],
-    array2: any[],
-    strict: boolean,
+    array1: {length: number; [key: number]: unknown},
+    array2: {length: number; [key: number]: unknown},
+    strict = false,
 ): boolean {
     if (array1.length !== array2.length) return false;
 
@@ -28,7 +28,7 @@ export function arrayEquals(
     return true;
 }
 
-export function stringToBytes(str: string): number[] {
+export function stringToBytes(str: string): Uint8Array {
     if (typeof str !== 'string')
         throw new Error('The passed string is not a string');
 
@@ -56,7 +56,7 @@ export function stringToBytes(str: string): number[] {
         }
     }
 
-    return bytes;
+    return new Uint8Array(bytes);
 }
 
 export {
@@ -85,14 +85,14 @@ export function isHexChar(c) {
         (c >= 'a' && c <= 'f') ||
         (c >= '0' && c <= '9')
     )
-        return 1;
+        return true;
 
-    return 0;
+    return false;
 }
 
 // set strict as true: if the length of str is odd,
 // add 0 before the str to make its length as even
-export function hexStr2byteArray(str, strict = false) {
+export function hexStr2byteArray(str: string, strict = false) {
     if (typeof str !== 'string')
         throw new Error('The passed string is not a string');
 
@@ -126,11 +126,11 @@ export function hexStr2byteArray(str, strict = false) {
         }
     }
 
-    return byteArray;
+    return new Uint8Array(byteArray);
 }
 
 //yyyy-MM-DD HH-mm-ss
-export function strToDate(str) {
+export function strToDate(str: string) {
     if (!/^\d{4}-\d{2}-\d{2}( \d{2}-\d{2}-\d{2}|)/.test(str))
         throw new Error('The passed date string is not valid');
 
@@ -152,16 +152,16 @@ export function strToDate(str) {
     return new Date(year, month, day);
 }
 
-export function isNumber(c) {
-    if (c >= '0' && c <= '9') return 1;
-
-    return 0;
+export function isNumber(c: string | number): boolean {
+    return c >= '0' && c <= '9';
 }
 
-//return 1: address  --- 20Bytes HexString
-//return 2: blockNumber ------ Decimal number
-//return 3: assetName ------ String
-//return other: error
+/**
+ * return 1: address  --- 20Bytes HexString
+ * return 2: blockNumber ------ Decimal number
+ * return 3: assetName ------ String
+ * return other: error
+ */
 export function getStringType(str: string): 1 | 2 | 3 | -1 {
     if (null == str) return -1;
 

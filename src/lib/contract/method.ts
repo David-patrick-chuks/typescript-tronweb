@@ -1,11 +1,10 @@
 import utils from '../../utils';
-import TronWeb from '../..';
 import Contract from '.';
-import {IAbi, IAbiItem} from '.';
+import {IFuncAbi, IAbiItem} from '.';
 import {encodeParamsV2ByABI, decodeParamsV2ByABI} from '../../utils/abi';
 import {ContractOptions, ITriggerConstantContract} from '../transactionBuilder';
-import injectpromise from 'injectpromise';
 import _CallbackT from '../../utils/typing';
+import {WithTronwebAndInjectpromise} from '../../../src/utils/_base';
 
 const getFunctionSelector = (abi) => {
     abi.stateMutability = abi.stateMutability
@@ -28,20 +27,19 @@ const decodeOutput = (abi, output) => {
     return decodeParamsV2ByABI(abi, output);
 };
 
-export default class Method {
-    tronWeb: TronWeb;
+export default class Method extends WithTronwebAndInjectpromise {
     contract: Contract;
-    abi: IAbi;
+    abi: IFuncAbi;
     name: string;
     inputs: IAbiItem[];
     outputs: IAbiItem[];
     functionSelector: string;
     signature: string;
-    injectPromise: injectpromise;
     defaultOptions: Record<string, unknown>;
 
-    constructor(contract: Contract, abi: IAbi) {
-        this.tronWeb = contract.tronWeb;
+    constructor(contract: Contract, abi: IFuncAbi) {
+        super(contract.tronWeb);
+
         this.contract = contract;
 
         this.abi = abi;
@@ -54,7 +52,6 @@ export default class Method {
         this.signature = this.tronWeb
             .sha3(this.functionSelector, false)
             .slice(0, 8);
-        this.injectPromise = injectpromise(this);
 
         this.defaultOptions = {
             feeLimit: this.tronWeb.feeLimit,
