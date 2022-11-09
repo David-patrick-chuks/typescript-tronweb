@@ -38,6 +38,7 @@ jobs:
     strategy:
       matrix:
         node-version: ['12.x', '14.x', '16.x', '18.x']
+      max-parallel: 1
       fail-fast: false
 
     services:
@@ -46,10 +47,8 @@ jobs:
         ports:
           - 9090:9090
         env:
-          MNEMONIC: ${{ secrets.MNEMONIC }}
-        options: >-
-           -e "mnemonic=$MNEMONIC"
-           -e 'defaultBalance=1000000'
+          mnemonic: ${{ secrets.MNEMONIC }}
+          defaultBalance: 1000000
 
     steps:
       - name: Checkout
