@@ -1,65 +1,54 @@
 name: Pull Request & Push to Master Branch
 
 on:
-  push:
-    branches:
-      master
-  pull_request:
-    branches:
-      master
-  workflow_dispatch:
-
-
+    push:
+        branches: master
+    pull_request:
+        branches: master
+    workflow_dispatch:
 
 jobs:
-  # lint:
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       python-version: ['3.8', '3.9', '3.10']
-  #     fail-fast: false
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
-  #     - name: Set up Python ${{ matrix.python-version }}
-  #       uses: actions/setup-python@v3
-  #       with:
-  #         python-version: ${{ matrix.python-version }}
-  #     - name: Install dependencies
-  #       run: |
-  #         pip install pre-commit
-  #     - name: Run pre-commit
-  #       run: |
-  #         pre-commit install
-  #         pre-commit run --all-files -v
+    lint:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+            - name: Set up Python 3.10
+              uses: actions/setup-python@v3
+              with:
+                  python-version: '3.10'
+            - name: Install dependencies
+              run: pip install pre-commit
+            - name: Run pre-commit
+              run: pre-commit run --all-files -v
 
-  test:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: ['12.x', '14.x', '16.x', '18.x']
-      max-parallel: 1
-      # fail-fast: false
+    test:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                node-version: ['12.x', '14.x', '16.x', '18.x']
+            max-parallel: 1
+            fail-fast: false
 
-    services:
-      tronnet:
-        image: trontools/quickstart
-        ports:
-          - 9090:9090
-        env:
-          mnemonic: ${{ secrets.MNEMONIC }}
-          defaultBalance: 1000000
+        services:
+            tronnet:
+                image: trontools/quickstart
+                ports:
+                    - 9090:9090
+                env:
+                    mnemonic: ${{ secrets.MNEMONIC }}
+                    defaultBalance: 1000000
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: build
-        run: npm i
-      - name: run
-        run: npm test
-        env:
-          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v3
+              with:
+                  node-version: ${{ matrix.node-version }}
+            - name: build
+              run: npm i
+            - name: run
+              run: npm test
+              env:
+                  PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}

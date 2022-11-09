@@ -1,12 +1,7 @@
 import chalk from 'chalk';
 
 import TronWeb from '../../src/index';
-import {
-    FULL_NODE_API, // SOLIDITY_NODE_API,
-    // EVENT_API,
-    PRIVATE_KEY, // SUN_NETWORK,
-    SIDE_CHAIN,
-} from './config';
+import {FULL_NODE_API, PRIVATE_KEY, SIDE_CHAIN} from './config';
 import jlog from './jlog';
 
 export {default as TronWeb} from '../../src/index';
