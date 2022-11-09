@@ -39,7 +39,7 @@ jobs:
       matrix:
         node-version: ['12.x', '14.x', '16.x', '18.x']
       max-parallel: 1
-      fail-fast: false
+      # fail-fast: false
 
     services:
       tronnet:
