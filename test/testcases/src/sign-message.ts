@@ -3,7 +3,7 @@ import {TronWeb} from '../../helpers/tronWebBuilder';
 const tests = [
     // message is string
     {
-        address: 'TMVQGm1qAQYVdetCeGRRkTWYYrLXuHK2HC',
+        address: 'TVEZYjZyemfJoLUdGtzsM2ua1HAnbsNgAF',
         name: 'string("hello world")',
         message: 'hello world',
         messageHash:
