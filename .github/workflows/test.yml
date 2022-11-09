@@ -29,7 +29,6 @@ jobs:
                 node-version: ['12.x', '14.x', '16.x', '18.x']
             max-parallel: 1
             fail-fast: false
-
         services:
             tronnet:
                 image: trontools/quickstart
@@ -38,7 +37,6 @@ jobs:
                 env:
                     mnemonic: ${{ secrets.MNEMONIC }}
                     defaultBalance: 1000000
-
         steps:
             - name: Checkout
               uses: actions/checkout@v3
@@ -52,3 +50,21 @@ jobs:
               run: npm test
               env:
                   PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+
+    check-build:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                node-version: ['12.x', '14.x', '16.x', '18.x']
+            fail-fast: false
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v3
+              with:
+                  node-version: ${{ matrix.node-version }}
+            - name: install
+              run: npm i
+            - name: build
+              run: npm build

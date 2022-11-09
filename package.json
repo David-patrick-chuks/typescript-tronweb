@@ -4,7 +4,6 @@
     "description": "JavaScript SDK that encapsulates the TRON HTTP API",
     "main": "src/index.js",
     "scripts": {
-        "prepare": "npm run build",
         "build": "npm run clean && webpack --config webpack.config.js --progress --color",
         "clean": "rimraf dist",
         "newaccount": "npx ts-node test/helpers/newAccounts 50",
