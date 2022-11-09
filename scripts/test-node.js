@@ -1,12 +1,12 @@
 const fs = require('fs');
 const path = require('path');
-const target = path.resolve(__dirname, '..', 'test', 'setup', 'TronWeb.js');
+const target = path.resolve(__dirname, '..', 'test', 'setup', 'TronWeb.ts');
 
 try {
     fs.unlinkSync(target);
-} catch(ex) {}
+} catch (ex) {}
 
 fs.copyFileSync(
-    path.resolve(__dirname, '..', 'test', 'setup', 'node.js'),
-    target
+    path.resolve(__dirname, '..', 'test', 'setup', 'node.ts'),
+    target,
 );

@@ -2,9 +2,7 @@ module.exports = {
     env: {
         browser: true,
         commonjs: true,
-        jquery: true,
         es2021: true,
-        mocha: true,
     },
     globals: {
         bootstrap: 'readonly',
@@ -70,8 +68,17 @@ module.exports = {
     overrides: [
         {
             files: ['test/**/*.ts'],
+            env: {node: true, mocha: true},
             rules: {
                 'max-len': 0,
+            },
+        },
+        {
+            files: ['scripts/*.js', './*'],
+            env: {node: true},
+            rules: {
+                'max-len': 0,
+                '@typescript-eslint/no-var-requires': 0,
             },
         },
     ],

@@ -10,7 +10,7 @@ import injectpromise from 'injectpromise';
 import TransactionBuilder from './lib/transactionBuilder';
 import Trx from './lib/trx';
 import {BlockT} from './lib/trx';
-import Contract from './lib/contract';
+import {default as Contract, IAbi} from './lib/contract';
 import Plugin from './lib/plugin';
 import Event from './lib/event';
 import {ContractOptions} from './lib/contract';
@@ -197,9 +197,9 @@ export default class TronWeb extends EventEmitter {
                 // @ts-ignore
                 privateKey,
             );
-        else if (typeof sideOptions !== 'string')
+        else if (typeof sideOptions !== 'string' && sideOptions != null)
             throw new TypeError('Wrong options combination provided');
-        else privateKey = privateKey || sideOptions;
+        else if (sideOptions != null) privateKey = privateKey || sideOptions;
 
         if (privateKey) this.setPrivateKey(privateKey);
         // this.fullnodeVersion = DEFAULT_VERSION;
@@ -465,11 +465,12 @@ export default class TronWeb extends EventEmitter {
         );
     }
 
-    contract(abi: any[] = [], address?: string) {
+    contract(abi: IAbi[] = [], address?: string): Contract {
         return new Contract(this, abi, address);
     }
 
     static get address() {
+        // FIXME: types are baaad
         return {
             fromHex(address) {
                 if (!utils.isHex(address)) return address;

@@ -1,5 +1,7 @@
 import chalk from 'chalk';
 import TronWeb from '../setup/TronWeb';
+import TronWebRef from '../../src/index';
+export {default as TronWeb} from '../setup/TronWeb';
 import jlog from './jlog';
 
 import {
@@ -20,7 +22,7 @@ export interface IAccts {
 export const createInstanceSide = (
     extraOptions = {},
     sideExtraOptions = {},
-) => {
+): TronWebRef => {
     const options = Object.assign(
         {
             fullHost: SIDE_CHAIN.fullNode,
@@ -37,10 +39,11 @@ export const createInstanceSide = (
         },
         sideExtraOptions,
     );
+    console.log(chalk.green(JSON.stringify(sideOptions)));
     return new TronWeb(options, sideOptions);
 };
 
-export const createInstance = (extraOptions = {}) => {
+export const createInstance = (extraOptions = {}): TronWebRef => {
     const options = Object.assign(
         {
             fullHost: FULL_NODE_API,
@@ -94,8 +97,6 @@ export const getTestAccounts = async (block) => {
     }
     return Promise.resolve(accounts);
 };
-
-export {TronWeb};
 
 export default {
     createInstance,

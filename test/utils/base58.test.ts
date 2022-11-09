@@ -62,14 +62,13 @@ describe('TronWeb.utils.base58', function () {
             // TODO. As above. Is this what we want?
             const tronWeb = createInstance();
 
-            assert.equal(
-                JSON.stringify(tronWeb.utils.base58.decode58('')),
-                '[]',
-            );
-            assert.equal(
-                JSON.stringify(tronWeb.utils.base58.decode58('1')),
-                '[0]',
-            );
+            let r = tronWeb.utils.base58.decode58('');
+            assert.equal(r.length, 0);
+            assert.equal(typeof r, 'object'); // Uint8Array
+
+            r = tronWeb.utils.base58.decode58('1');
+            assert.equal(r.length, 1);
+            assert.equal(r.join(), '0');
         });
     });
 });

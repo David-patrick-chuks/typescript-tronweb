@@ -1,9 +1,9 @@
 {
     "compilerOptions": {
-        "module": "amd",
+        "module": "commonjs",
+        "outDir": "dist",
         "moduleResolution": "node",
         "target": "es2015",
-        "outFile": "dist/app.js",
         "strict": true,
         "noImplicitAny": false,  // FIXME: only during migration
         "esModuleInterop": true,
@@ -12,7 +12,6 @@
         "resolveJsonModule": true
     },
     "include": [
-        "src/**/*",
-        "test/**/*"
+        "src/**/*"
     ]
 }

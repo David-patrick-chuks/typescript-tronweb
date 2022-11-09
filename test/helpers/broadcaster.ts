@@ -36,12 +36,19 @@ async function broadcastVerbose<T extends ITransaction>(
         transaction,
         pk || undefined,
     );
-    const result = {
-        transaction,
-        signedTransaction,
-        receipt: await tronWeb.trx.sendRawTransaction(signedTransaction),
-    };
-    return Promise.resolve(result);
+    while (true)
+        try {
+            const tx = await tronWeb.trx.sendRawTransaction(signedTransaction);
+            if (tx && tx.code === 'SERVER_BUSY') continue;
+            const result = {
+                transaction,
+                signedTransaction,
+                receipt: tx,
+            };
+            return Promise.resolve(result);
+        } catch (ex) {
+            return Promise.reject(ex);
+        }
 }
 
 export default broadcastVerbose;

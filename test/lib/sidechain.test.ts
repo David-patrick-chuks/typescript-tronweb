@@ -1,4 +1,13 @@
-export {};
+/**
+ * This file contains multiple "interesting" tests.
+ * When some awaitable contract call is not polled for result,
+ * it means we do not actually check the transaction result -
+ * only the fact that tx was accepted by API.
+ * In case of mapping requests, it is a necessity: same pair
+ * cannot be mapped multiple times. In other places it is followed
+ * by one final test with proper expectations checking
+ */
+
 import {assert} from 'chai';
 
 import assertThrow from '../helpers/assertThrow';
@@ -15,7 +24,7 @@ import {
     CONTRACT_ADDRESS20,
     CONTRACT_ADDRESS721,
     ADDRESS20_MAPPING,
-    // ADDRESS721_MAPPING,
+    ADDRESS721_MAPPING,
     HASH20,
     HASH721,
     RETRY_MAPPING_FEE,
@@ -30,14 +39,34 @@ describe('TronWeb.sidechain', function () {
     describe('#deposit', function () {
         describe('#depositTrx()', function () {
             const tronWeb = tronWebBuilder.createInstanceSide();
+            const callValue = 10_000_000;
+
             it('Sidechain must be defined', async function () {
                 assert.isDefined(tronWeb.sidechain);
             });
 
+            it('should check the balance of mainchain and sidechain after depositTrx', async function () {
+                const balanceBefore =
+                    await tronWeb.sidechain!.sidechain.trx.getUnconfirmedBalance();
+
+                const [txID] = await tronWeb.sidechain!.depositTrx(
+                    callValue,
+                    DEPOSIT_FEE,
+                    FEE_LIMIT,
+                    {shouldPollResponse: true, keepTxID: true},
+                );
+                assert.equal(txID.length, 64);
+
+                await wait(5);
+                const balanceAfter =
+                    await tronWeb.sidechain!.sidechain.trx.getUnconfirmedBalance();
+
+                assert.equal(balanceBefore + callValue, balanceAfter);
+            });
+
             it('deposit trx from main chain to side chain', async function () {
-                const callValue = 10000000;
                 // TODO: is it possible to define a constructor such that
-                // sidechain is always defined with proper options?
+                // - sidechain is always defined with proper options?
                 const txID = await tronWeb.sidechain!.depositTrx(
                     callValue,
                     DEPOSIT_FEE,
@@ -47,38 +76,32 @@ describe('TronWeb.sidechain', function () {
             });
 
             it('depositTrx with the defined private key', async function () {
-                const callValue = 10000000;
-                const options = {};
                 const txID = await tronWeb.sidechain!.depositTrx(
                     callValue,
                     DEPOSIT_FEE,
                     FEE_LIMIT,
-                    options,
+                    {},
                     PRIVATE_KEY,
                 );
                 assert.equal(txID.length, 64);
             });
 
             it('depositTrx with permissionId in options object', async function () {
-                const callValue = 10000000;
-                const options = {permissionId: 0};
                 const txID = await tronWeb.sidechain!.depositTrx(
                     callValue,
                     DEPOSIT_FEE,
                     FEE_LIMIT,
-                    options,
+                    {permissionId: 0},
                 );
                 assert.equal(txID.length, 64);
             });
 
             it('depositTrx with permissionId in options object and the defined private key', async function () {
-                const callValue = 10000000;
-                const options = {permissionId: 0};
                 const txID = await tronWeb.sidechain!.depositTrx(
                     callValue,
                     DEPOSIT_FEE,
                     FEE_LIMIT,
-                    options,
+                    {permissionId: 0},
                     PRIVATE_KEY,
                 );
                 assert.equal(txID.length, 64);
@@ -101,30 +124,39 @@ describe('TronWeb.sidechain', function () {
                     'Invalid feeLimit provided',
                 );
             });
-
-            it('should check the balance of mainchain and sidechain after depositTrx', async function () {
-                const callValue = 10000000;
-                const dataBefore =
-                    await tronWeb.sidechain!.sidechain.trx.getAccount();
-                const balanceBefore = dataBefore.balance;
-                const txID = await tronWeb.sidechain!.depositTrx(
-                    callValue,
-                    DEPOSIT_FEE,
-                    FEE_LIMIT,
-                );
-                assert.equal(txID.length, 64);
-                await wait(90);
-                const dataAfter =
-                    await tronWeb.sidechain!.sidechain.trx.getAccount();
-                const balanceAfter = dataAfter.balance;
-                assert.equal(balanceBefore + callValue, balanceAfter);
-            });
         });
 
         describe('#depositTrc10()', function () {
             const tronWeb = tronWebBuilder.createInstanceSide();
+            const tokenValue = 10;
+
+            it('should check the TRC10 balance of mainchain and sidechain after depositTrc10', async function () {
+                const dataBefore =
+                    await tronWeb.sidechain!.sidechain.trx.getUnconfirmedAccount();
+                const balanceBefore = dataBefore.assetV2.filter(
+                    (item) => item.key === TOKEN_ID.toString(),
+                )[0].value;
+
+                const [txID] = await tronWeb.sidechain!.depositTrc10(
+                    TOKEN_ID,
+                    tokenValue,
+                    DEPOSIT_FEE,
+                    FEE_LIMIT,
+                    {shouldPollResponse: true, keepTxID: true},
+                );
+                assert.equal(txID.length, 64);
+
+                await wait(10);
+                const dataAfter =
+                    await tronWeb.sidechain!.sidechain.trx.getUnconfirmedAccount();
+                const balanceAfter = dataAfter.assetV2.filter(
+                    (item) => item.key === TOKEN_ID.toString(),
+                )[0].value;
+
+                assert.equal(balanceBefore + tokenValue, balanceAfter);
+            });
+
             it('deposit trc10 from main chain to side chain', async function () {
-                const tokenValue = 10;
                 const txID = await tronWeb.sidechain!.depositTrc10(
                     TOKEN_ID,
                     tokenValue,
@@ -135,41 +167,35 @@ describe('TronWeb.sidechain', function () {
             });
 
             it('depositTrc10 with the defined private key', async function () {
-                const tokenValue = 10;
-                const options = {};
                 const txID = await tronWeb.sidechain!.depositTrc10(
                     TOKEN_ID,
                     tokenValue,
                     DEPOSIT_FEE,
                     FEE_LIMIT,
-                    options,
+                    {},
                     PRIVATE_KEY,
                 );
                 assert.equal(txID.length, 64);
             });
 
             it('depositTrc10 with permissionId in options object', async function () {
-                const tokenValue = 10;
-                const options = {permissionId: 0};
                 const txID = await tronWeb.sidechain!.depositTrc10(
                     TOKEN_ID,
                     tokenValue,
                     DEPOSIT_FEE,
                     FEE_LIMIT,
-                    options,
+                    {permissionId: 0},
                 );
                 assert.equal(txID.length, 64);
             });
 
             it('depositTrc10 with permissionId in options object and the defined private key', async function () {
-                const tokenValue = 10;
-                const options = {permissionId: 0};
                 const txID = await tronWeb.sidechain!.depositTrc10(
                     TOKEN_ID,
                     tokenValue,
                     DEPOSIT_FEE,
                     FEE_LIMIT,
-                    options,
+                    {permissionId: 0},
                     PRIVATE_KEY,
                 );
                 assert.equal(txID.length, 64);
@@ -213,35 +239,57 @@ describe('TronWeb.sidechain', function () {
                     'Invalid feeLimit provided',
                 );
             });
-
-            it('should check the TRC10 balance of mainchain and sidechain after depositTrc10', async function () {
-                const tokenValue = 10;
-                const dataBefore =
-                    await tronWeb.sidechain!.sidechain.trx.getAccount();
-                const balanceBefore = dataBefore.assetV2.filter(
-                    (item) => item.key === TOKEN_ID.toString(),
-                )[0].value;
-                const txID = await tronWeb.sidechain!.depositTrc10(
-                    TOKEN_ID,
-                    tokenValue,
-                    DEPOSIT_FEE,
-                    FEE_LIMIT,
-                );
-                assert.equal(txID.length, 64);
-                await wait(80);
-                const dataAfter =
-                    await tronWeb.sidechain!.sidechain.trx.getAccount();
-                const balanceAfter = dataAfter.assetV2.filter(
-                    (item) => item.key === TOKEN_ID.toString(),
-                )[0].value;
-                assert.equal(balanceBefore + tokenValue, balanceAfter);
-            });
         });
 
         describe('#depositTrc20', function () {
             const tronWeb = tronWebBuilder.createInstanceSide();
+            const num = 100;
+
+            it('should check the trc20 balance after depositTrc20', async function () {
+                // only mapping once
+                // can check the mapping contract address in sidechain via call
+                // mainToSideContractMap(address) of mainchain gateway
+                // const mappingResult = await tronWeb.sidechain!.mappingTrc20(HASH20, MAPPING_FEE, FEE_LIMIT, {shouldPollResponse: true, keepTxID: true});
+
+                // Approve
+                let [txID] = await tronWeb.sidechain!.approveTrc20(
+                    num,
+                    FEE_LIMIT,
+                    CONTRACT_ADDRESS20,
+                    {shouldPollResponse: true, keepTxID: true},
+                );
+                assert.equal(txID.length, 64);
+
+                // Check the trc20 balance of mainchain before deposit
+                const contractInstance = await tronWeb
+                    .contract()
+                    .at(CONTRACT_ADDRESS20);
+                const address = tronWeb.address.fromPrivateKey(PRIVATE_KEY);
+
+                const dataBefore = await contractInstance
+                    .balanceOf(address)
+                    .call();
+                const balanceBefore = parseInt(dataBefore._hex, 16);
+
+                [txID] = await tronWeb.sidechain!.depositTrc20(
+                    num,
+                    DEPOSIT_FEE,
+                    FEE_LIMIT,
+                    CONTRACT_ADDRESS20,
+                    {shouldPollResponse: true, keepTxID: true},
+                );
+                assert.equal(txID.length, 64);
+
+                await wait(10);
+                const dataAfter = await contractInstance
+                    .balanceOf(address)
+                    .call();
+                const balanceAfter = parseInt(dataAfter._hex, 16);
+
+                assert.equal(balanceBefore - num, balanceAfter);
+            }).timeout(0);
+
             it('deposit trc20 from main chain to side chain', async function () {
-                const num = 100;
                 const txID = await tronWeb.sidechain!.depositTrc20(
                     num,
                     DEPOSIT_FEE,
@@ -252,41 +300,35 @@ describe('TronWeb.sidechain', function () {
             });
 
             it('depositTrc20 with the defined private key', async function () {
-                const num = 100;
-                const options = {};
                 const txID = await tronWeb.sidechain!.depositTrc20(
                     num,
                     DEPOSIT_FEE,
                     FEE_LIMIT,
                     CONTRACT_ADDRESS20,
-                    options,
+                    {},
                     PRIVATE_KEY,
                 );
                 assert.equal(txID.length, 64);
             });
 
             it('depositTrc20 with permissionId in options object', async function () {
-                const num = 100;
-                const options = {permissionId: 0};
                 const txID = await tronWeb.sidechain!.depositTrc20(
                     num,
                     DEPOSIT_FEE,
                     FEE_LIMIT,
                     CONTRACT_ADDRESS20,
-                    options,
+                    {permissionId: 0},
                 );
                 assert.equal(txID.length, 64);
             });
 
             it('depositTrc20 with permissionId in options object and the defined private key', async function () {
-                const num = 100;
-                const options = {permissionId: 0};
                 const txID = await tronWeb.sidechain!.depositTrc20(
                     num,
                     DEPOSIT_FEE,
                     FEE_LIMIT,
                     CONTRACT_ADDRESS20,
-                    options,
+                    {permissionId: 0},
                     PRIVATE_KEY,
                 );
                 assert.equal(txID.length, 64);
@@ -306,7 +348,6 @@ describe('TronWeb.sidechain', function () {
             });
 
             it('should throw if an invalid fee limit is passed', async function () {
-                const num = 100;
                 const feeLimit = -1;
                 await assertThrow(
                     tronWeb.sidechain!.depositTrc20(
@@ -330,92 +371,49 @@ describe('TronWeb.sidechain', function () {
                     'Invalid contractAddress address provided',
                 );
             });
-
-            it('should check the trc20 balance after depositTrc20', async function () {
-                const num = 100;
-                // only mapping once
-                // can check the mapping contract address in sidechain via call mainToSideContractMap(address) of mainchain gateway
-                // const options = {};
-                // const mappingResult = await tronWeb.sidechain!.mappingTrc20(HASH20, MAPPING_FEE, FEE_LIMIT,  options);
-
-                // check the trc20 balance of mainchain before deposit
-                const contractInstance = await tronWeb
-                    .contract()
-                    .at(CONTRACT_ADDRESS20);
-                const address = tronWeb.address.fromPrivateKey(PRIVATE_KEY);
-                const dataBefore = await contractInstance
-                    .balanceOf(address)
-                    .call();
-                const balanceBefore = parseInt(dataBefore._hex, 16);
-
-                // approve trc20
-                // const approveResult = await tronWeb.sidechain!.approveTrc20(100000, FEE_LIMIT, CONTRACT_ADDRESS20);
-
-                const txID = await tronWeb.sidechain!.depositTrc20(
-                    num,
-                    DEPOSIT_FEE,
-                    FEE_LIMIT,
-                    CONTRACT_ADDRESS20,
-                );
-                assert.equal(txID.length, 64);
-                await wait(80);
-                const dataAfter = await contractInstance
-                    .balanceOf(address)
-                    .call();
-                const balanceAfter = parseInt(dataAfter._hex, 16);
-
-                assert.equal(balanceBefore + num, balanceAfter);
-            });
         });
 
         describe('#depositTrc721', function () {
             const tronWeb = tronWebBuilder.createInstanceSide();
-            it('deposit trc721 from main chain to side chain', async function () {
-                const txID = await tronWeb.sidechain!.depositTrc721(
+
+            it('should check the trc721 balance after depositTrc721', async function () {
+                const address = tronWeb.address.fromPrivateKey(PRIVATE_KEY);
+
+                // Approve
+                await tronWeb.sidechain!.approveTrc721(
                     TRC721_ID,
-                    DEPOSIT_FEE,
                     FEE_LIMIT,
                     CONTRACT_ADDRESS721,
+                    {shouldPollResponse: true, keepTxID: true},
                 );
-                assert.equal(txID.length, 64);
-            });
 
-            it('should check the trc20 balance after depositTrc721', async function () {
-                const num = 100;
-
-                // only mapping once
-                // can check the mapping contract address in sidechain via call mainToSideContractMap(address) of mainchain gateway
-                // const options = {};
-                // const mappingResult = await tronWeb.sidechain!.mappingTrc20(HASH20, MAPPING_FEE, FEE_LIMIT,  options);
-
-                // check the trc20 balance of mainchain before deposit
+                // check the trc721 balance of mainchain before deposit
                 const contractInstance = await tronWeb
                     .contract()
-                    .at(CONTRACT_ADDRESS20);
-                const address = tronWeb.address.fromPrivateKey(PRIVATE_KEY);
+                    .at(CONTRACT_ADDRESS721);
                 const dataBefore = await contractInstance
                     .balanceOf(address)
                     .call();
                 const balanceBefore = parseInt(dataBefore._hex, 16);
 
-                // approve trc20
-                // const approveResult = await tronWeb.sidechain!.approveTrc20(100000, FEE_LIMIT, CONTRACT_ADDRESS20);
-
-                const txID = await tronWeb.sidechain!.depositTrc721(
+                // Deposit
+                const [txID] = await tronWeb.sidechain!.depositTrc721(
                     TRC721_ID,
                     DEPOSIT_FEE,
                     FEE_LIMIT,
                     CONTRACT_ADDRESS721,
+                    {shouldPollResponse: true, keepTxID: true},
                 );
                 assert.equal(txID.length, 64);
-                await wait(80);
+
+                await wait(30);
                 const dataAfter = await contractInstance
                     .balanceOf(address)
                     .call();
                 const balanceAfter = parseInt(dataAfter._hex, 16);
 
-                assert.equal(balanceBefore + num, balanceAfter);
-            });
+                assert.equal(balanceBefore - 1, balanceAfter);
+            }).timeout(0);
         });
     });
 
@@ -431,35 +429,32 @@ describe('TronWeb.sidechain', function () {
         });
 
         it('mappingTrc20 with the defined private key', async function () {
-            const options = {};
             const txID = await tronWeb.sidechain!.mappingTrc20(
                 HASH20,
                 MAPPING_FEE,
                 FEE_LIMIT,
-                options,
+                {},
                 PRIVATE_KEY,
             );
             assert.equal(txID.length, 64);
         });
 
         it('mappingTrc20 with permissionId in options object', async function () {
-            const options = {permissionId: 0};
             const txID = await tronWeb.sidechain!.mappingTrc20(
                 HASH20,
                 MAPPING_FEE,
                 FEE_LIMIT,
-                options,
+                {permissionId: 0},
             );
             assert.equal(txID.length, 64);
         });
 
         it('mappingTrc20 with permissionId in options object and the defined private key', async function () {
-            const options = {permissionId: 0};
             const txID = await tronWeb.sidechain!.mappingTrc20(
                 HASH20,
                 MAPPING_FEE,
                 FEE_LIMIT,
-                options,
+                {permissionId: 0},
                 PRIVATE_KEY,
             );
             assert.equal(txID.length, 64);
@@ -486,15 +481,13 @@ describe('TronWeb.sidechain', function () {
         });
 
         it('check the transaction result after mapping TRC20', async function () {
-            const mappingResult = await tronWeb.sidechain!.mappingTrc20(
+            const txID = await tronWeb.sidechain!.mappingTrc20(
                 HASH20,
                 MAPPING_FEE,
                 FEE_LIMIT,
             );
             while (true) {
-                const checkResult = await tronWeb.trx.getTransactionInfo(
-                    mappingResult,
-                );
+                const checkResult = await tronWeb.trx.getTransactionInfo(txID);
                 if (checkResult && checkResult.result) break;
             }
         });
@@ -514,23 +507,14 @@ describe('TronWeb.sidechain', function () {
                 HASH721,
                 MAPPING_FEE,
                 FEE_LIMIT,
+                // {shouldPollResponse: true, keepTxID: true},
             );
             assert.equal(txID.length, 64);
-        });
-
-        it('check the transaction result after mapping TRC721', async function () {
-            const mappingResult = await tronWeb.sidechain!.mappingTrc721(
-                HASH721,
-                MAPPING_FEE,
-                FEE_LIMIT,
-            );
             while (true) {
-                const checkResult = await tronWeb.trx.getTransactionInfo(
-                    mappingResult,
-                );
+                const checkResult = await tronWeb.trx.getTransactionInfo(txID);
                 if (checkResult && checkResult.result) break;
             }
-        });
+        }).timeout(0); // Sometimes very long on 1st (real) call
 
         it('should get the mapping address after mappingTrc721', async function () {
             const sideGatawayInstance = await tronWeb
@@ -546,48 +530,60 @@ describe('TronWeb.sidechain', function () {
     describe('#withdraw', function () {
         describe('#withdrawTrx()', function () {
             const tronWeb = tronWebBuilder.createInstanceSide();
+            const callValue = 10_000_000;
+
+            it('should check the balance of mainchain and sidechain after withdrawTrx', async function () {
+                const balanceBefore = await tronWeb.trx.getUnconfirmedBalance();
+
+                const [txID] = await tronWeb.sidechain!.withdrawTrx(
+                    callValue,
+                    WITHDRAW_FEE,
+                    FEE_LIMIT,
+                    {shouldPollResponse: true, keepTxID: true},
+                );
+                assert.equal(txID.length, 64);
+                await wait(10);
+
+                const balanceAfter = await tronWeb.trx.getUnconfirmedBalance();
+                assert.equal(balanceBefore + callValue, balanceAfter);
+            });
+
             it('withdraw trx from side chain to main chain', async function () {
                 const txID = await tronWeb.sidechain!.withdrawTrx(
-                    10000000,
+                    callValue,
                     WITHDRAW_FEE,
-                    10000000,
+                    FEE_LIMIT,
                 );
                 assert.equal(txID.length, 64);
             });
 
             it('withdrawTrx with the defined private key', async function () {
-                const callValue = 10000000;
-                const options = {};
                 const txID = await tronWeb.sidechain!.withdrawTrx(
                     callValue,
                     WITHDRAW_FEE,
                     FEE_LIMIT,
-                    options,
+                    {},
                     PRIVATE_KEY,
                 );
                 assert.equal(txID.length, 64);
             });
 
             it('withdrawTrx with permissionId in options object', async function () {
-                const callValue = 10000000;
-                const options = {permissionId: 0};
                 const txID = await tronWeb.sidechain!.withdrawTrx(
                     callValue,
                     WITHDRAW_FEE,
                     FEE_LIMIT,
-                    options,
+                    {permissionId: 0},
                 );
                 assert.equal(txID.length, 64);
             });
 
             it('withdrawTrx with permissionId in options object and the defined private key', async function () {
-                const callValue = 10000000;
-                const options = {permissionId: 0};
                 const txID = await tronWeb.sidechain!.withdrawTrx(
                     callValue,
                     WITHDRAW_FEE,
                     FEE_LIMIT,
-                    options,
+                    {permissionId: 0},
                     PRIVATE_KEY,
                 );
                 assert.equal(txID.length, 64);
@@ -610,28 +606,37 @@ describe('TronWeb.sidechain', function () {
                     'Invalid feeLimit provided',
                 );
             });
-
-            it('should check the balance of mainchain and sidechain after withdrawTrx', async function () {
-                const callValue = 10000000;
-                const dataBefore = await tronWeb.trx.getAccount();
-                const balanceBefore = dataBefore.balance;
-                const txID = await tronWeb.sidechain!.withdrawTrx(
-                    callValue,
-                    WITHDRAW_FEE,
-                    FEE_LIMIT,
-                );
-                assert.equal(txID.length, 64);
-                await wait(90);
-                const dataAfter = await tronWeb.trx.getAccount();
-                const balanceAfter = dataAfter.balance;
-                assert.equal(balanceBefore + callValue, balanceAfter);
-            });
         });
 
         describe('#withdrawTrc10()', function () {
             const tronWeb = tronWebBuilder.createInstanceSide();
+            const tokenValue = 10;
+
+            it('should check the TRC10 balance of mainchain and sidechain after withdrawTrc10', async function () {
+                const dataBefore = await tronWeb.trx.getUnconfirmedAccount();
+                const balanceBefore = dataBefore.assetV2.filter(
+                    (item) => item.key === TOKEN_ID.toString(),
+                )[0].value;
+
+                const [txID] = await tronWeb.sidechain!.withdrawTrc10(
+                    TOKEN_ID,
+                    tokenValue,
+                    DEPOSIT_FEE,
+                    FEE_LIMIT,
+                    {shouldPollResponse: true, keepTxID: true},
+                );
+                assert.equal(txID.length, 64);
+                await wait(10);
+
+                const dataAfter = await tronWeb.trx.getUnconfirmedAccount();
+                const balanceAfter = dataAfter.assetV2.filter(
+                    (item) => item.key === TOKEN_ID.toString(),
+                )[0].value;
+
+                assert.equal(balanceBefore + tokenValue, balanceAfter);
+            });
+
             it('withdraw trc10 from side chain to main chain', async function () {
-                const tokenValue = 10;
                 const txID = await tronWeb.sidechain!.withdrawTrc10(
                     TOKEN_ID,
                     tokenValue,
@@ -642,14 +647,12 @@ describe('TronWeb.sidechain', function () {
             });
 
             it('withdrawTrc10 with the defined private key', async function () {
-                const tokenValue = 10;
-                const options = {};
                 const txID = await tronWeb.sidechain!.withdrawTrc10(
                     TOKEN_ID,
                     tokenValue,
                     WITHDRAW_FEE,
                     FEE_LIMIT,
-                    options,
+                    {},
                     PRIVATE_KEY,
                 );
                 assert.equal(txID.length, 64);
@@ -669,14 +672,12 @@ describe('TronWeb.sidechain', function () {
             });
 
             it('withdrawTrc10 with permissionId in options object and the defined private key', async function () {
-                const tokenValue = 10;
-                const options = {permissionId: 0};
                 const txID = await tronWeb.sidechain!.withdrawTrc10(
                     TOKEN_ID,
                     tokenValue,
                     WITHDRAW_FEE,
                     FEE_LIMIT,
-                    options,
+                    {permissionId: 0},
                     PRIVATE_KEY,
                 );
                 assert.equal(txID.length, 64);
@@ -720,34 +721,44 @@ describe('TronWeb.sidechain', function () {
                     'Invalid feeLimit provided',
                 );
             });
-
-            it('should check the TRC10 balance of mainchain and sidechain after withdrawTrc10', async function () {
-                const tokenValue = 10;
-                const dataBefore = await tronWeb.trx.getAccount();
-                const balanceBefore = dataBefore.assetV2.filter(
-                    (item) => item.key === TOKEN_ID.toString(),
-                )[0].value;
-                const txID = await tronWeb.sidechain!.withdrawTrc10(
-                    TOKEN_ID,
-                    tokenValue,
-                    DEPOSIT_FEE,
-                    FEE_LIMIT,
-                );
-                assert.equal(txID.length, 64);
-                await wait(90);
-                const dataAfter = await tronWeb.trx.getAccount();
-                const balanceAfter = dataAfter.assetV2.filter(
-                    (item) => item.key === TOKEN_ID.toString(),
-                )[0].value;
-                assert.equal(balanceBefore + tokenValue, balanceAfter);
-            });
         });
 
         describe('#withdrawTrc', function () {
             describe('#withdrawTrc20', function () {
                 const tronWeb = tronWebBuilder.createInstanceSide();
+                const num = 10;
+
+                it('should check the trc20 balance after withdrawTrc20', async function () {
+                    // main
+
+                    const contractInstance = await tronWeb
+                        .contract()
+                        .at(CONTRACT_ADDRESS20);
+                    const address = tronWeb.address.fromPrivateKey(PRIVATE_KEY);
+                    const dataBefore = await contractInstance
+                        .balanceOf(address)
+                        .call();
+                    const balanceBefore = parseInt(dataBefore._hex, 16);
+
+                    const [txID] = await tronWeb.sidechain!.withdrawTrc20(
+                        num,
+                        WITHDRAW_FEE,
+                        FEE_LIMIT,
+                        ADDRESS20_MAPPING,
+                        {shouldPollResponse: true, keepTxID: true},
+                    );
+                    assert.equal(txID.length, 64);
+
+                    await wait(10);
+                    const dataAfter = await contractInstance
+                        .balanceOf(address)
+                        .call();
+                    const balanceAfter = parseInt(dataAfter._hex, 16);
+
+                    assert.equal(balanceBefore + num, balanceAfter);
+                });
+
                 it('withdraw trc20 from side chain to main chain', async function () {
-                    const num = 10;
                     const txID = await tronWeb.sidechain!.withdrawTrc20(
                         num,
                         WITHDRAW_FEE,
@@ -758,41 +769,35 @@ describe('TronWeb.sidechain', function () {
                 });
 
                 it('withdrawTrc20 with the defined private key', async function () {
-                    const num = 10;
-                    const options = {};
                     const txID = await tronWeb.sidechain!.withdrawTrc20(
                         num,
                         WITHDRAW_FEE,
                         FEE_LIMIT,
                         ADDRESS20_MAPPING,
-                        options,
+                        {},
                         PRIVATE_KEY,
                     );
                     assert.equal(txID.length, 64);
                 });
 
                 it('withdrawTrc20 with permissionId in options object', async function () {
-                    const num = 10;
-                    const options = {permissionId: 0};
                     const txID = await tronWeb.sidechain!.withdrawTrc20(
                         num,
                         WITHDRAW_FEE,
                         FEE_LIMIT,
                         ADDRESS20_MAPPING,
-                        options,
+                        {permissionId: 0},
                     );
                     assert.equal(txID.length, 64);
                 });
 
                 it('withdrawTrc20 with permissionId in options object and the defined private key', async function () {
-                    const num = 10;
-                    const options = {permissionId: 0};
                     const txID = await tronWeb.sidechain!.withdrawTrc20(
                         num,
                         WITHDRAW_FEE,
                         FEE_LIMIT,
                         ADDRESS20_MAPPING,
-                        options,
+                        {permissionId: 0},
                         PRIVATE_KEY,
                     );
                     assert.equal(txID.length, 64);
@@ -812,22 +817,15 @@ describe('TronWeb.sidechain', function () {
                 });
 
                 it('should throw if an invalid fee limit is passed', async function () {
-                    // const feeLimit = 100000000000;
-                    const num = 10;
-                    const options = {permissionId: 0};
-                    const txID = await tronWeb.sidechain!.withdrawTrc20(
-                        num,
-                        WITHDRAW_FEE,
-                        FEE_LIMIT,
-                        ADDRESS20_MAPPING,
-                        options,
-                        PRIVATE_KEY,
+                    await assertThrow(
+                        tronWeb.sidechain!.withdrawTrc20(
+                            100,
+                            WITHDRAW_FEE,
+                            FEE_LIMIT * 10,
+                            ADDRESS20_MAPPING,
+                        ),
+                        'Invalid feeLimit provided',
                     );
-                    assert.equal(txID.length, 64);
-                    // await assertThrow(
-                    //     tronWeb.sidechain!.withdrawTrc20(100, WITHDRAW_FEE, feeLimit, ADDRESS20_MAPPING),
-                    //     'Invalid feeLimit provided'
-                    // );
                 });
 
                 it('should throw if an invalid contract address is passed', async function () {
@@ -841,53 +839,47 @@ describe('TronWeb.sidechain', function () {
                         'Invalid contractAddress address provided',
                     );
                 });
+            });
 
-                it('should check the trc20 balance after withdrawTrc20', async function () {
-                    const num = 10;
+            describe('#withdrawTrc721', async function () {
+                const tronWeb = tronWebBuilder.createInstanceSide();
+
+                it('withdraw trc721 from side chain to main chain', async function () {
+                    const address = tronWeb.address.fromPrivateKey(PRIVATE_KEY);
+
+                    // check the trc721 balance of mainchain before deposit
                     const contractInstance = await tronWeb
                         .contract()
-                        .at(CONTRACT_ADDRESS20);
-                    const address = tronWeb.address.fromPrivateKey(PRIVATE_KEY);
+                        .at(CONTRACT_ADDRESS721);
                     const dataBefore = await contractInstance
                         .balanceOf(address)
                         .call();
                     const balanceBefore = parseInt(dataBefore._hex, 16);
-                    const txID = await tronWeb.sidechain!.withdrawTrc20(
-                        num,
-                        WITHDRAW_FEE,
+
+                    // Deposit
+                    const [txID] = await tronWeb.sidechain!.withdrawTrc721(
+                        TRC721_ID,
+                        DEPOSIT_FEE,
                         FEE_LIMIT,
-                        ADDRESS20_MAPPING,
+                        ADDRESS721_MAPPING,
+                        {shouldPollResponse: true, keepTxID: true},
                     );
                     assert.equal(txID.length, 64);
 
-                    await wait(80);
-
+                    await wait(30);
                     const dataAfter = await contractInstance
                         .balanceOf(address)
                         .call();
                     const balanceAfter = parseInt(dataAfter._hex, 16);
 
-                    assert.equal(balanceBefore + num, balanceAfter);
-                });
-            });
-
-            describe('#withdrawTrc721', async function () {
-                const tronWeb = tronWebBuilder.createInstanceSide();
-                it('withdraw trc721 from side chain to main chain', async function () {
-                    const txID = await tronWeb.sidechain!.withdrawTrc721(
-                        TRC721_ID,
-                        WITHDRAW_FEE,
-                        FEE_LIMIT,
-                        ADDRESS20_MAPPING,
-                    );
-                    assert.equal(txID.length, 64);
+                    assert.equal(balanceBefore + 1, balanceAfter);
                 });
             });
         });
     });
 
     describe('#injectFund', function () {
-        it('excute injectFund', async function () {
+        it('execute injectFund', async function () {
             const tronWeb = tronWebBuilder.createInstanceSide();
             const txID = await tronWeb.sidechain!.injectFund(
                 1000000,

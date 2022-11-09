@@ -1,7 +1,7 @@
 import TronWeb from '../setup/TronWeb';
-import ethers from 'ethers';
+import {BigNumber, utils} from 'ethers';
 
-const bnify = ethers.BigNumber.from;
+const bnify = BigNumber.from;
 
 export const getValues = (object: any, named = false) => {
     if (Array.isArray(object)) {
@@ -21,7 +21,7 @@ export const getValues = (object: any, named = false) => {
             return object.value;
 
         case 'buffer':
-            return ethers.utils.arrayify(object.value);
+            return utils.arrayify(object.value);
 
         case 'tuple': {
             const result = getValues(object.value, named);
@@ -75,9 +75,9 @@ export const equals = (actual: any, expected: any): boolean => {
 
     // Uint8Array
     if (expected.buffer) {
-        if (!ethers.utils.isHexString(actual)) return false;
+        if (!utils.isHexString(actual)) return false;
 
-        actual = ethers.utils.arrayify(actual);
+        actual = utils.arrayify(actual);
 
         if (!actual.buffer || actual.length !== expected.length) return false;
 

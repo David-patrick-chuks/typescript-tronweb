@@ -11,29 +11,29 @@ const basePlugins = [
 const mode = process.env.NODE_ENV || 'production';
 
 const baseConfig = {
-    entry: path.resolve(__dirname, 'src', 'index.js'),
+    entry: path.resolve(__dirname, 'src', 'index.ts'),
     module: {
         rules: [
-            {
-                test: /\.js$/,
-                exclude: /(node_modules|bower_components)/,
-                use: {
-                    loader: 'babel-loader',
-                    options: {
-                        presets: [
-                            ['@babel/env', {
-                                targets: {
-                                    browsers: [
-                                        '>0.25%',
-                                        'not dead',
-                                    ],
-                                },
-                            }],
-                        ],
-                        plugins: basePlugins,
-                    },
-                },
-            },
+            // {
+            //     test: /\.ts$/,
+            //     exclude: /(node_modules|bower_components)/,
+            //     use: {
+            //         loader: 'babel-loader',
+            //         options: {
+            //             presets: [
+            //                 ['@babel/env', {
+            //                     targets: {
+            //                         browsers: [
+            //                             '>0.25%',
+            //                             'not dead',
+            //                         ],
+            //                     },
+            //                 }],
+            //             ],
+            //             plugins: basePlugins,
+            //         },
+            //     },
+            // },
             {
                 test: /\.ts$/,
                 exclude: /(node_modules|bower_components)/,
@@ -57,23 +57,18 @@ const baseConfig = {
         ],
     },
     resolve: {
-        modules: [
-            'node_modules',
-            path.resolve(__dirname, 'src'),
-        ],
+        modules: ['node_modules', path.resolve(__dirname, 'src')],
         extensions: ['.ts', '.js'],
+        fallback: {
+            querystring: require.resolve('querystring-es3'),
+        },
     },
     devtool: 'source-map',
     mode,
 };
 
-nodePlugins = [
-    ...basePlugins,
-];
-
-if (mode === 'development')
-    nodePlugins.push('source-map-support');
-
+const nodePlugins = [...basePlugins];
+if (mode === 'development') nodePlugins.push('source-map-support');
 
 module.exports = [
     {
@@ -84,28 +79,28 @@ module.exports = [
             libraryTarget: 'commonjs2',
             libraryExport: 'default',
         },
-        module: {
-            rules: [
-                {
-                    test: /\.js$/,
-                    exclude: /(node_modules|bower_components)/,
-                    use: {
-                        loader: 'babel-loader',
-                        options: {
-                            presets: [
-                                ['@babel/env', {
-                                    targets: {
-                                        node: 6,
-                                    },
-                                    forceAllTransforms: true,
-                                }],
-                            ],
-                            plugins: nodePlugins,
-                        },
-                    },
-                },
-            ],
-        },
+        // module: {
+        //     rules: [
+        //         {
+        //             test: /\.js$/,
+        //             exclude: /(node_modules|bower_components)/,
+        //             use: {
+        //                 loader: 'babel-loader',
+        //                 options: {
+        //                     presets: [
+        //                         ['@babel/env', {
+        //                             targets: {
+        //                                 node: 6,
+        //                             },
+        //                             forceAllTransforms: true,
+        //                         }],
+        //                     ],
+        //                     plugins: nodePlugins,
+        //                 },
+        //             },
+        //         },
+        //     ],
+        // },
         externals: [externals()],
         target: 'node',
     },

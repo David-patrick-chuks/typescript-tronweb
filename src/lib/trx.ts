@@ -61,7 +61,7 @@ export interface ITransactionInfo {
     resMessage?: string;
 }
 
-export type MakeSigned<T> = T extends string ? T : T & {signature: string};
+export type MakeSigned<T> = T extends string ? T : T & {signature: string[]};
 
 // export interface ITransaction {
 //     number: number;
@@ -80,7 +80,10 @@ export type MakeSigned<T> = T extends string ? T : T & {signature: string};
 export type IBroadcastResult = {
     code: string;
     message: string;
-} & ({result: true; transaction: ISignedTransaction} | {result: false});
+} & (
+    | {result: true; transaction: ISignedTransaction; txid: string}
+    | {result: false}
+);
 export type IBroadcastHexResult = {
     code: string;
     message: string;
@@ -88,6 +91,20 @@ export type IBroadcastHexResult = {
     | {result: true; transaction: ISignedTransaction; hexTransaction: string}
     | {result: false}
 );
+
+// TODO: types aboveshould be generic to preserve additional properties
+// export type IBroadcastResult<T extends ITransaction> = {
+//     code: string;
+//     message: string;
+// } & ({result: true; transaction: MakeSigned<T>, txid: string} | {result: false});
+// export type IBroadcastHexResult<T extends ITransaction> = {
+//     code: string;
+//     message: string;
+// } & (
+//     | {result: true; transaction: MakeSigned<T>; hexTransaction: string}
+//     | {result: false}
+// );
+
 export interface IAccount {
     // FIXME: is it related to utils/accounts.ts?
     address: string;
@@ -110,12 +127,14 @@ export interface IAccountNet {
     NetLimit: number;
 }
 export interface IToken {
-    id: number;
+    id: string;
     owner_address: string;
     name: string;
     abbr: string;
     description: string;
     url: string;
+    vote_score: number;
+    precision: number;
 }
 export type IAssetIssue = IToken;
 
@@ -129,6 +148,7 @@ export interface ISignWeight {
 export interface IProposal {
     proposal_id: number;
     proposer_address: string;
+    state?: string;
 }
 export interface IExchange {
     exchange_id: string;
@@ -976,17 +996,21 @@ export default class Trx extends WithTronwebAndInjectpromise {
             .catch((err) => callback(err));
     }
 
-    getTokensIssuedByAddress(): Promise<number>;
-    getTokensIssuedByAddress(address: _CallbackT<any>): void;
+    getTokensIssuedByAddress(): Promise<Record<string, IToken>>;
+    getTokensIssuedByAddress(address: _CallbackT<Record<string, IToken>>): void;
     getTokensIssuedByAddress(
         address: string,
         callback?: undefined,
-    ): Promise<number>;
-    getTokensIssuedByAddress(address: string, callback: _CallbackT<any>): void;
+    ): Promise<Record<string, IToken>>;
     getTokensIssuedByAddress(
-        address: string | _CallbackT<any> = this.tronWeb.defaultAddress.hex,
-        callback?: _CallbackT<any>,
-    ): void | Promise<number> {
+        address: string,
+        callback: _CallbackT<Record<string, IToken>>,
+    ): void;
+    getTokensIssuedByAddress(
+        address: string | _CallbackT<Record<string, IToken>> = this.tronWeb
+            .defaultAddress.hex,
+        callback?: _CallbackT<Record<string, IToken>>,
+    ): void | Promise<Record<string, IToken>> {
         if (utils.isFunction(address))
             return this.getTokensIssuedByAddress(
                 this.tronWeb.defaultAddress.hex,
@@ -1024,12 +1048,15 @@ export default class Trx extends WithTronwebAndInjectpromise {
     getTokenFromID(
         tokenID: string | number,
         callback?: undefined,
-    ): Promise<any>;
-    getTokenFromID(tokenID: string | number, callback: _CallbackT<any>): void;
+    ): Promise<IToken>;
     getTokenFromID(
         tokenID: string | number,
-        callback?: _CallbackT<any>,
-    ): void | Promise<any> {
+        callback: _CallbackT<IToken>,
+    ): void;
+    getTokenFromID(
+        tokenID: string | number,
+        callback?: _CallbackT<IToken>,
+    ): void | Promise<IToken> {
         if (!callback) return this.injectPromise(this.getTokenFromID, tokenID);
 
         if (utils.isInteger(tokenID)) tokenID = tokenID.toString();
@@ -2003,7 +2030,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
 
     sendRawTransaction(
         signedTransaction: ITransaction,
-        options?: _PureObject,
+        options?: _PureObject | null | string,
         callback?: undefined,
     ): Promise<IBroadcastResult>;
     sendRawTransaction(
@@ -2013,12 +2040,17 @@ export default class Trx extends WithTronwebAndInjectpromise {
     ): void;
     sendRawTransaction(
         signedTransaction: ITransaction,
-        options: _PureObject | undefined,
+        options: _PureObject | undefined | null | string,
         callback?: _CallbackT<IBroadcastResult>,
     ): void;
     sendRawTransaction(
         signedTransaction: ITransaction,
-        options?: _PureObject | _CallbackT<IBroadcastResult>,
+        options:
+            | _PureObject
+            | _CallbackT<IBroadcastResult>
+            | undefined
+            | null
+            | string = 'UNUSED LEGACY?',
         callback?: _CallbackT<IBroadcastResult>,
     ): void | Promise<IBroadcastResult> {
         if (utils.isFunction(options))
@@ -2034,8 +2066,8 @@ export default class Trx extends WithTronwebAndInjectpromise {
         if (!utils.isObject(signedTransaction))
             return callback('Invalid transaction provided');
 
-        if (!utils.isObject(options))
-            return callback('Invalid options provided');
+        // if (!utils.isObject(options || {}))
+        //     return callback('Invalid options provided');
 
         if (
             !signedTransaction.signature ||
@@ -2062,17 +2094,21 @@ export default class Trx extends WithTronwebAndInjectpromise {
     ): void;
     sendHexTransaction(
         signedHexTransaction: string,
-        options?: _PureObject,
+        options?: _PureObject | null,
         callback?: undefined,
     ): Promise<IBroadcastHexResult>;
     sendHexTransaction(
         signedHexTransaction: string,
-        options: _PureObject | undefined,
+        options: _PureObject | undefined | null,
         callback?: _CallbackT<IBroadcastHexResult>,
     ): void;
     sendHexTransaction(
         signedHexTransaction: string,
-        options?: _PureObject | _CallbackT<IBroadcastHexResult>,
+        options:
+            | _PureObject
+            | _CallbackT<IBroadcastHexResult>
+            | null
+            | undefined = {},
         callback?: _CallbackT<IBroadcastHexResult>,
     ): void | Promise<IBroadcastHexResult> {
         if (utils.isFunction(options))
@@ -2088,7 +2124,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
         if (!utils.isHex(signedHexTransaction))
             return callback('Invalid hex transaction provided');
 
-        if (!utils.isObject(options))
+        if (!utils.isObject(options || {}))
             return callback('Invalid options provided');
 
         const params = {
@@ -2762,12 +2798,12 @@ export default class Trx extends WithTronwebAndInjectpromise {
      * Get the exchange ID.
      */
     getExchangeByID(
-        exchangeID: number,
+        exchangeID: string,
         callback?: undefined,
     ): Promise<IExchange>;
-    getExchangeByID(exchangeID: number, callback: _CallbackT<IExchange>): void;
+    getExchangeByID(exchangeID: string, callback: _CallbackT<IExchange>): void;
     getExchangeByID(
-        exchangeID: number,
+        exchangeID: string,
         callback?: _CallbackT<IExchange>,
     ): void | Promise<IExchange> {
         if (!callback)
@@ -2906,12 +2942,12 @@ export default class Trx extends WithTronwebAndInjectpromise {
     getTokenByID(
         tokenID: string | number,
         callback?: undefined,
-    ): Promise<IToken[]>;
-    getTokenByID(tokenID: string | number, callback: _CallbackT<any>): void;
+    ): Promise<IToken>;
+    getTokenByID(tokenID: string | number, callback: _CallbackT<IToken>): void;
     getTokenByID(
         tokenID: string | number,
-        callback?: _CallbackT<any>,
-    ): void | Promise<IToken[]> {
+        callback?: _CallbackT<IToken>,
+    ): void | Promise<IToken> {
         if (!callback) return this.injectPromise(this.getTokenByID, tokenID);
 
         if (utils.isInteger(tokenID)) tokenID = tokenID.toString();
@@ -3138,7 +3174,8 @@ export default class Trx extends WithTronwebAndInjectpromise {
 
         if (!callback)
             return this.injectPromise(this._getBrokerage, address, options);
-        if (!utils.isString(address)) return callback('Invalid address.');
+        if (!utils.isString(address))
+            return callback(`Invalid address: ${address}.`);
 
         if (
             this.validator.notValid(

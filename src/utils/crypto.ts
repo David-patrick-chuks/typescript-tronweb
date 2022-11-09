@@ -17,24 +17,24 @@ export interface IDomain {
 }
 export type TypedDataTypes = Record<string, {name: string; type: string}[]>;
 
-export function getBase58CheckAddress(addressBytes) {
-    const hash0 = sha256(addressBytes);
-    const hash1 = sha256(hash0);
-
-    let checkSum = hash1.slice(0, 4);
-    checkSum = addressBytes.concat(checkSum);
+export function getBase58CheckAddress(
+    addressBytes: Uint8Array | Buffer | number[],
+) {
+    const hash = sha256(sha256(addressBytes));
+    let checkSum = hash.slice(0, 4);
+    checkSum = new Uint8Array([...addressBytes, ...checkSum]);
 
     return encode58(checkSum);
 }
 
-export function decodeBase58Address(base58Sting) {
-    if (typeof base58Sting != 'string') return false;
+export function decodeBase58Address(base58String) {
+    if (typeof base58String != 'string') return false;
 
-    if (base58Sting.length <= 4) return false;
+    if (base58String.length <= 4) return false;
 
-    let address = decode58(base58Sting);
+    let address = decode58(base58String);
 
-    if (base58Sting.length <= 4) return false;
+    if (base58String.length <= 4) return false;
 
     const checkSum = address.slice(-4);
 
@@ -43,7 +43,7 @@ export function decodeBase58Address(base58Sting) {
     const hash = sha256(sha256(address));
     const checkSum1 = hash.slice(0, 4);
 
-    if (checkSum === checkSum1) return address;
+    if (checkSum.join() === checkSum1.join()) return address;
 
     throw new Error('Invalid address provided');
 }
@@ -76,9 +76,7 @@ export function signBytes(privateKey, contents) {
         privateKey = hexStr2byteArray(privateKey);
 
     const hashBytes = sha256(contents);
-    const signBytes = getECKeySig(hashBytes, privateKey);
-
-    return signBytes;
+    return getECKeySig(hashBytes, privateKey);
 }
 
 export function _signTypedData(
@@ -152,7 +150,7 @@ export function decode58Check(addressStr) {
     const decodeData = decodeCheck.slice(0, decodeCheck.length - 4);
     const hash = sha256(sha256(decodeData));
 
-    if (hash.slice(0, 4) === checkSum) return decodeData;
+    if (hash.slice(0, 4).join() === checkSum.join()) return decodeData;
 
     return false;
 }
@@ -171,10 +169,8 @@ export function isAddressValid(base58Str) {
     const checkSum = address.slice(21);
     address = address.slice(0, 21);
 
-    const hash = sha256(sha256(address));
-    const checkSum1 = hash.slice(0, 4);
-
-    return checkSum === checkSum1;
+    const checkSum1 = sha256(sha256(address)).slice(0, 4);
+    return checkSum.join() === checkSum1.join();
 }
 
 export function getBase58CheckAddressFromPriKeyBase64String(
@@ -191,18 +187,14 @@ export function getHexStrAddressFromPriKeyBase64String(priKeyBase64String) {
     const priKeyBytes = base64DecodeFromString(priKeyBase64String);
     const pubBytes = getPubKeyFromPriKey(priKeyBytes);
     const addressBytes = computeAddress(pubBytes);
-    const addressHex = byteArray2hexStr(addressBytes);
-
-    return addressHex;
+    return byteArray2hexStr(addressBytes);
 }
 
 export function getAddressFromPriKeyBase64String(priKeyBase64String) {
     const priKeyBytes = base64DecodeFromString(priKeyBase64String);
     const pubBytes = getPubKeyFromPriKey(priKeyBytes);
     const addressBytes = computeAddress(pubBytes);
-    const addressBase64 = base64EncodeToString(addressBytes);
-
-    return addressBase64;
+    return base64EncodeToString(addressBytes);
 }
 
 export function getPubKeyFromPriKey(priKeyBytes) {
@@ -221,9 +213,7 @@ export function getPubKeyFromPriKey(priKeyBytes) {
     while (yHex.length < 64) yHex = `0${yHex}`;
 
     const pubkeyHex = `04${xHex}${yHex}`;
-    const pubkeyBytes = hexStr2byteArray(pubkeyHex);
-
-    return pubkeyBytes;
+    return hexStr2byteArray(pubkeyHex);
 }
 
 export function getECKeySig(hashBytes, priKeyBytes) {

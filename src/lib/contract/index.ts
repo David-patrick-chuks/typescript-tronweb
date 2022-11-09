@@ -56,6 +56,12 @@ export interface ContractOptions {
     resourceNode?: string;
 }
 
+export interface IMethodSendOptions {
+    shouldPollResponse?: boolean;
+    rawResponse?: boolean;
+    keepTxID?: boolean;
+}
+
 class _Contract extends WithTronwebAndInjectpromise {
     address: string | null;
     abi: IAbi[];
@@ -64,7 +70,7 @@ class _Contract extends WithTronwebAndInjectpromise {
     bytecode: unknown;
     deployed: boolean;
     lastBlock: unknown;
-    methods: Record<string, unknown>;
+    methods: Record<string, MethodCallT>;
     methodInstances: Record<string, Method>;
     props: string[];
 

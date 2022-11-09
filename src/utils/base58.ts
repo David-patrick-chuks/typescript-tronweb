@@ -8,9 +8,7 @@ const BASE = 58;
 export function encode58(buffer: Buffer | Uint8Array | string) {
     if (buffer.length === 0) return '';
 
-    let i;
-    let j;
-
+    let i, j;
     const digits = [0];
 
     for (i = 0; i < buffer.length; i++) {

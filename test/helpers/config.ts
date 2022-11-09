@@ -3,17 +3,19 @@ import {
     IUpdateTokenOptions,
 } from '../../src/lib/transactionBuilder';
 
-const fullHost = 'http://127.0.0.1:' + (process.env.HOST_PORT || 9090);
+const fullHost =
+    process.env.FULL_HOST ||
+    'http://127.0.0.1:' + (process.env.HOST_PORT || 9090);
 
 export const PRIVATE_KEY: string = process.env.PRIVATE_KEY!;
 export const CONSUME_USER_RESOURCE_PERCENT = 30;
-export const FEE_LIMIT = 100000000;
+export const FEE_LIMIT = 100_000_000;
 export const FULL_NODE_API = fullHost;
 export const SOLIDITY_NODE_API = fullHost;
 export const EVENT_API = fullHost;
 export const NETWORK_ID = '*';
-export const ADDRESS_HEX = '41928c9af0651632157ef27a2cf17ca72c575a4d21';
-export const ADDRESS_BASE58 = 'TPL66VK2gCXNCD7EJg9pgJRfqcRazjhUZY';
+export const ADDRESS_HEX = '415c1be25a139ce20549e4983220d82529513167d4';
+export const ADDRESS_BASE58 = 'TJNEa8mJ3vFn8nNcnVrg742D8YExYLKoQq';
 export const UPDATED_TEST_TOKEN_OPTIONS: IUpdateTokenOptions = {
     description: 'Very useless utility token',
     url: 'https://none.example.com',
@@ -93,32 +95,53 @@ export const SIDE_CHAIN = {
         sideChainId: '413AF23F37DA0D48234FDD43D89931E98E1144481B',
     },
 };
-export const TOKEN_ID = 1000003;
+export const TOKEN_ID = 1_000_003;
 export const DEPOSIT_FEE = 0;
-export const MAPPING_FEE = 1000000000;
+export const MAPPING_FEE = 1_000_000_000;
 export const WITHDRAW_FEE = 0;
-export const RETRY_MAPPING_FEE = 1000000000;
+export const RETRY_MAPPING_FEE = 1_000_000_000;
 export const RETRY_DEPOSIT_FEE = 0;
 export const RETRY_WITHDRAW_FEE = 0;
 export const NONCE = 35;
 
-export const HASH20 =
-    'cd48770186c7f3563cdc630fb4623f9700392f742a51d27877c592ff3c9125af';
-export const CONTRACT_ADDRESS20 = 'TQq3EYEiaYr95r6ePRQwycukCEAE4qWkE7';
-export const CONTRACT_ADDRESS20_HEX =
-    '41a2fe67ceadf6e147c440fe556a0a15bd210ec412';
+// export const HASH20 =
+//     'cd48770186c7f3563cdc630fb4623f9700392f742a51d27877c592ff3c9125af';
+// export const CONTRACT_ADDRESS20 = 'TQq3EYEiaYr95r6ePRQwycukCEAE4qWkE7';
+// export const CONTRACT_ADDRESS20_HEX =
+//     '41a2fe67ceadf6e147c440fe556a0a15bd210ec412';
 
-export const ADDRESS20_MAPPING = 'TQnwLGKPg7jRCr2QPLaPV349qAkQPgY1kp';
+export const HASH20 =
+    'ba43a825ade96734e4510fb393726323d4467b35993d775d976243439b212ca2';
+export const CONTRACT_ADDRESS20 = 'TUcEVfak1kokpCaBDNqp1FjyQbgAfTychk';
+export const CONTRACT_ADDRESS20_HEX =
+    '41cc72e6b36b63ff30b7875a3f7dc9cf7991f8e99a';
+
+// export const ADDRESS20_MAPPING = 'TQnwLGKPg7jRCr2QPLaPV349qAkQPgY1kp';
+// export const ADDRESS20_MAPPING_HEX =
+//     '41a298a5bdf9963ded01e0ba751c9e4d39141bbcdc';
+
+export const ADDRESS20_MAPPING = 'TDYndzgKdme76gp1h2TLJb6LycEETHnKb9';
 export const ADDRESS20_MAPPING_HEX =
-    '41a298a5bdf9963ded01e0ba751c9e4d39141bbcdc';
+    '4127422ec5ad9a00dca97ed616a85a16e356b91d44';
+
+// export const HASH721 =
+//     '95c05e26f6afc92972d5ffeb1c24a8c27baaa5556dd5c50a7f297b9017711135';
+// export const CONTRACT_ADDRESS721 = 'TX8qeDzWJ3ePxwajj18PGbcc7FwV1dhqt3';
+// export const CONTRACT_ADDRESS721_HEX =
+//     '41e82cf8a78a02e1ba25b9bf4c2ebce0bb7c7189ba';
 
 export const HASH721 =
-    '95c05e26f6afc92972d5ffeb1c24a8c27baaa5556dd5c50a7f297b9017711135';
-export const CONTRACT_ADDRESS721 = 'TX8qeDzWJ3ePxwajj18PGbcc7FwV1dhqt3';
+    '0a66eb6919f9e964271cb0e549928e0bd034c68408471ceabf379837031b5950';
+export const CONTRACT_ADDRESS721 = 'TBjaDrKdBxkLua4oDm63BTsoG6yRmsbg6S';
 export const CONTRACT_ADDRESS721_HEX =
-    '41e82cf8a78a02e1ba25b9bf4c2ebce0bb7c7189ba';
+    '41135c24629b5245adb6d69d222059d44f566bcd5f';
 
-export const ADDRESS721_MAPPING = 'TWU8w6qrqb42x9gt5NRGdzXD6xjgzEvnK1';
+// export const ADDRESS721_MAPPING = 'TWU8w6qrqb42x9gt5NRGdzXD6xjgzEvnK1';
+// export const ADDRESS721_MAPPING_HEX =
+//     '41e0db2ebd7619fc7d4af7d4cd04515c4f77840d45';
+// export const TRC721_ID = 1;
+
+export const ADDRESS721_MAPPING = 'TCEsrYEVRV6uou4bLDNdQ7Jk93VBMEXWFj';
 export const ADDRESS721_MAPPING_HEX =
-    '41e0db2ebd7619fc7d4af7d4cd04515c4f77840d45';
+    '4118e6ec8716f6a6bae8a9e3aa80c2c7035b71dbe7';
 export const TRC721_ID = 1;

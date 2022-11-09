@@ -1,6 +1,6 @@
 export {};
 import {assert} from 'chai';
-import {ADDRESS_HEX, ADDRESS_BASE58} from '../helpers/config';
+// import {ADDRESS_HEX, ADDRESS_BASE58} from '../helpers/config';
 import tronWebBuilder from '../helpers/tronWebBuilder';
 import {equals, getValues} from '../helpers/testUtils';
 // import ethers from 'ethers';
@@ -114,14 +114,22 @@ describe('TronWeb.utils.abi', function () {
         it('should encode abi coded params passing addresses in hex and base58 mode', function () {
             const tronWeb = tronWebBuilder.createInstance();
             const types = ['string', 'address', 'address'];
-            const values = ['Onwer', ADDRESS_HEX, ADDRESS_BASE58];
+            const values = [
+                'Onwer',
+                '41928c9af0651632157ef27a2cf17ca72c575a4d21',
+                'TPL66VK2gCXNCD7EJg9pgJRfqcRazjhUZY',
+            ];
 
             const expected =
                 '0x0000000000000000000000000000000000000000000000000000000000000060000000000000000000000000928c9af0651632157ef27a2cf17ca72c575a4d21000000000000000000000000928c9af0651632157ef27a2cf17ca72c575a4d2100000000000000000000000000000000000000000000000000000000000000054f6e776572000000000000000000000000000000000000000000000000000000';
             const result = tronWeb.utils.abi.encodeParams(types, values);
 
-            for (let i = 0; i < expected.length; i++)
-                assert.equal(result[i], expected[i]);
+            console.log(result);
+            console.log(expected);
+            assert.equal(result, expected);
+
+            // for (let i = 0; i < expected.length; i++)
+            //     assert.equal(result[i], expected[i]);
         });
     });
 
@@ -131,7 +139,7 @@ describe('TronWeb.utils.abi', function () {
 
         const tests = loadTests('contract-interface');
         tests.forEach((test) => {
-            const {normalizedValues, result, iface} = test;
+            const {normalizedValues, result, interface: iface} = test;
             const funcABI = JSON.parse(iface);
             const inputValues = getValues(JSON.parse(normalizedValues));
             funcABI[0].inputs = funcABI[0].outputs;
@@ -162,7 +170,7 @@ describe('TronWeb.utils.abi', function () {
 
         const tests = loadTests('contract-interface-abi2');
         tests.forEach((test) => {
-            const {values, result, iface} = test;
+            const {values, result, interface: iface} = test;
             const funcABI = JSON.parse(iface);
             const inputValues = getValues(JSON.parse(values));
             funcABI[0].inputs = funcABI[0].outputs;
@@ -193,7 +201,7 @@ describe('TronWeb.utils.abi', function () {
 
         const tests = loadTests('contract-interface');
         tests.forEach((test) => {
-            const {normalizedValues, result, iface} = test;
+            const {normalizedValues, result, interface: iface} = test;
             const funcABI = JSON.parse(iface);
             const outputValues = getValues(JSON.parse(normalizedValues));
             const title =
@@ -226,7 +234,7 @@ describe('TronWeb.utils.abi', function () {
 
         const tests = loadTests('contract-interface-abi2');
         tests.forEach((test) => {
-            const {values, result, iface} = test;
+            const {values, result, interface: iface} = test;
             const funcABI = JSON.parse(iface);
             const outputValues = getValues(JSON.parse(values));
             const title =

@@ -8,6 +8,8 @@ import {
     ITriggerContractOptions,
 } from './transactionBuilder';
 import _CallbackT from '../utils/typing';
+import {IMethodSendOptions} from './contract';
+import {MakeSigned} from './trx';
 
 // ! This file shows [almost] proper overloads for
 // - methods accepting callback
@@ -112,7 +114,7 @@ export default class SideChain<T extends TronWeb> {
     signTransaction<T extends ITransaction>(
         priKeyBytes: string | Uint8Array | Buffer | number[],
         transaction: T,
-    ): T {
+    ): MakeSigned<T> {
         if (typeof priKeyBytes === 'string')
             priKeyBytes = this.utils.code.hexStr2byteArray(priKeyBytes);
 
@@ -135,7 +137,7 @@ export default class SideChain<T extends TronWeb> {
         } else {
             transaction.signature = [signature];
         }
-        return transaction;
+        return transaction as MakeSigned<T>;
     }
 
     async multiSign(
@@ -143,19 +145,19 @@ export default class SideChain<T extends TronWeb> {
         privateKey?: string,
         permissionId?: number,
         callback?: undefined,
-    ): Promise<ITransaction>;
+    ): Promise<MakeSigned<ITransaction>>;
     async multiSign(
         transaction: ITransaction,
-        privateKey: string,
+        privateKey: string | undefined,
         permissionId: number | undefined | null,
-        callback?: _CallbackT<ITransaction>,
+        callback?: _CallbackT<MakeSigned<ITransaction>>,
     ): Promise<void>;
     async multiSign(
         transaction: ITransaction,
         privateKey: string = this.sidechain.defaultPrivateKey,
         permissionId?: number,
-        callback?: _CallbackT<ITransaction>,
-    ): Promise<void | ITransaction> {
+        callback?: _CallbackT<MakeSigned<ITransaction>>,
+    ): Promise<void | MakeSigned<ITransaction>> {
         // if (this.utils.isFunction(permissionId)) {
         //     callback = permissionId;
         //     permissionId = 0;
@@ -241,21 +243,21 @@ export default class SideChain<T extends TronWeb> {
         useTronHeader?: boolean,
         multisig?: boolean,
         callback?: undefined,
-    ): Promise<T>;
+    ): Promise<MakeSigned<T>>;
     async sign<T extends string | ITransaction>(
         transaction: T,
         privateKey: string,
         useTronHeader: boolean,
         multisig: boolean,
-        callback: _CallbackT<T>,
+        callback: _CallbackT<MakeSigned<T>>,
     ): Promise<void>;
     async sign<T extends string | ITransaction>(
         transaction: T,
         privateKey: string = this.sidechain.defaultPrivateKey,
         useTronHeader = true,
         multisig = false,
-        callback?: _CallbackT<T>,
-    ): Promise<void | T> {
+        callback?: _CallbackT<MakeSigned<T>>,
+    ): Promise<void | MakeSigned<T>> {
         // if (this.utils.isFunction(multisig)) {
         //     callback = multisig;
         //     multisig = false;
@@ -340,7 +342,7 @@ export default class SideChain<T extends TronWeb> {
         callValue: number,
         depositFee: number,
         feeLimit: number,
-        options?: Record<string, unknown>,
+        options?: Record<string, unknown>, // FIXME: iface (almost ContractOptions)
         privateKey?: string,
         callback?: undefined,
     ): Promise<any>;
@@ -348,8 +350,8 @@ export default class SideChain<T extends TronWeb> {
         callValue: number,
         depositFee: number,
         feeLimit: number,
-        options: Record<string, unknown>,
-        privateKey: string,
+        options: Record<string, unknown> | undefined,
+        privateKey: string | undefined,
         callback: _CallbackT<any>,
     ): Promise<void>;
     async depositTrx(
@@ -437,8 +439,8 @@ export default class SideChain<T extends TronWeb> {
         tokenValue: number,
         depositFee: number,
         feeLimit: number,
-        options: Record<string, unknown>,
-        privateKey: string,
+        options: Record<string, unknown> | undefined,
+        privateKey: string | undefined,
         callback: _CallbackT<any>,
     ): Promise<void>;
     async depositTrc10(
@@ -538,8 +540,8 @@ export default class SideChain<T extends TronWeb> {
         fee: number,
         feeLimit: number,
         contractAddress: string,
-        options: Record<string, unknown>,
-        privateKey: string,
+        options: Record<string, unknown> | undefined,
+        privateKey: string | undefined,
         callback: _CallbackT<IDepositTrc>,
     ): Promise<void>;
     async depositTrc(
@@ -673,8 +675,8 @@ export default class SideChain<T extends TronWeb> {
         num: number,
         feeLimit: number,
         contractAddress: string,
-        options: Record<string, unknown>,
-        privateKey: string,
+        options: Record<string, unknown> | undefined,
+        privateKey: string | undefined,
         callback: _CallbackT<IDepositTrc>,
     ): Promise<void>;
     async approveTrc20(
@@ -710,8 +712,8 @@ export default class SideChain<T extends TronWeb> {
         id: number,
         feeLimit: number,
         contractAddress: string,
-        options: Record<string, unknown>,
-        privateKey: string,
+        options: Record<string, unknown> | undefined,
+        privateKey: string | undefined,
         callback: _CallbackT<IDepositTrc>,
     ): Promise<void>;
     async approveTrc721(
@@ -749,8 +751,8 @@ export default class SideChain<T extends TronWeb> {
         depositFee: number,
         feeLimit: number,
         contractAddress: string,
-        options: Record<string, unknown>,
-        privateKey: string,
+        options: Record<string, unknown> | undefined,
+        privateKey: string | undefined,
         callback: _CallbackT<IDepositTrc>,
     ): Promise<void>;
     async depositTrc20(
@@ -789,8 +791,8 @@ export default class SideChain<T extends TronWeb> {
         depositFee: number,
         feeLimit: number,
         contractAddress: string,
-        options: Record<string, unknown>,
-        privateKey: string,
+        options: Record<string, unknown> | undefined,
+        privateKey: string | undefined,
         callback: _CallbackT<IDepositTrc>,
     ): Promise<void>;
     async depositTrc721(
@@ -832,8 +834,8 @@ export default class SideChain<T extends TronWeb> {
         mappingFee: number,
         feeLimit: number,
         functionSelector: string,
-        options: Record<string, unknown>,
-        privateKey: string,
+        options: Record<string, unknown> | undefined,
+        privateKey: string | undefined,
         callback: _CallbackT<IMappingTrc>,
     ): Promise<void>;
     async mappingTrc(
@@ -929,8 +931,8 @@ export default class SideChain<T extends TronWeb> {
         trxHash: string,
         mappingFee: number,
         feeLimit: number,
-        options: Record<string, unknown>,
-        privateKey: string,
+        options: Record<string, unknown> | undefined,
+        privateKey: string | undefined,
         callback: _CallbackT<IMappingTrc>,
     ): Promise<void>;
     async mappingTrc20(
@@ -965,8 +967,8 @@ export default class SideChain<T extends TronWeb> {
         trxHash: string,
         mappingFee: number,
         feeLimit: number,
-        options: Record<string, unknown>,
-        privateKey: string,
+        options: Record<string, unknown> | undefined,
+        privateKey: string | undefined,
         callback: _CallbackT<IMappingTrc>,
     ): Promise<void>;
     async mappingTrc721(
@@ -1184,10 +1186,7 @@ export default class SideChain<T extends TronWeb> {
         withdrawFee: number,
         feeLimit: number,
         contractAddress: string,
-        options?: ITriggerContractOptions & {
-            shouldPollResponse?: boolean;
-            rawResponse?: boolean;
-        },
+        options?: ITriggerContractOptions & IMethodSendOptions,
         privateKey?: string,
         callback?: undefined,
     ): Promise<any>;
@@ -1197,10 +1196,7 @@ export default class SideChain<T extends TronWeb> {
         withdrawFee: number,
         feeLimit: number,
         contractAddress: string,
-        options: ITriggerContractOptions & {
-            shouldPollResponse?: boolean;
-            rawResponse?: boolean;
-        },
+        options: ITriggerContractOptions & IMethodSendOptions,
         privateKey: string,
         callback: _CallbackT<any>,
     ): Promise<void>;
@@ -1210,10 +1206,8 @@ export default class SideChain<T extends TronWeb> {
         withdrawFee: number,
         feeLimit: number,
         contractAddress: string,
-        options: ITriggerContractOptions & {
-            shouldPollResponse?: boolean;
-            rawResponse?: boolean;
-        } = {},
+        // FIXME: these options have to be merged
+        options: ITriggerContractOptions & IMethodSendOptions = {},
         privateKey: string = this.mainchain.defaultPrivateKey,
         callback?: _CallbackT<any>,
     ): Promise<void | any> {
@@ -1279,113 +1273,25 @@ export default class SideChain<T extends TronWeb> {
             ...options,
             callValue: withdrawFee,
         };
-        const parameters = [
-            {
-                type: 'uint256',
-                value: numOrId,
-            },
-        ];
 
-        try {
-            const address = privateKey
-                ? this.sidechain.address.fromPrivateKey(privateKey)
-                : this.sidechain.defaultAddress.base58;
-            const transaction =
-                await this.sidechain.transactionBuilder.triggerSmartContract(
-                    contractAddress,
-                    functionSelector,
-                    options,
-                    parameters,
-                    this.sidechain.address.toHex(address),
-                );
-            if (!transaction.result || !transaction.result.result)
-                return callback(
-                    'Unknown error: ' +
-                        JSON.stringify(transaction.transaction, null, 2),
-                );
-
-            const signedTransaction = await this.sidechain.trx.sign(
-                transaction.transaction,
-                privateKey,
-            );
-
-            if (!signedTransaction.signature) {
-                if (!privateKey)
-                    return callback('Transaction was not signed properly');
-
-                return callback('Invalid private key provided');
-            }
-
-            const broadcast = await this.sidechain.trx.sendRawTransaction(
-                signedTransaction,
-            );
-            if (broadcast.code) {
-                const err = {
-                    error: broadcast.code,
-                    message: broadcast.code,
-                };
-                if (broadcast.message)
-                    err.message = this.sidechain.toUtf8(broadcast.message);
-                return callback(err);
-            }
-
-            if (!options.shouldPollResponse)
-                return callback(null, signedTransaction.txID);
-
-            const checkResult = async (index = 0) => {
-                if (index === 20)
-                    return callback({
-                        error: 'Cannot find result in solidity node',
-                        transaction: signedTransaction,
-                    });
-
-                const output = await this.sidechain.trx.getTransactionInfo(
-                    signedTransaction.txID,
-                );
-
-                if (!Object.keys(output).length)
-                    return setTimeout(() => {
-                        checkResult(index + 1);
-                    }, 3000);
-
-                // FIXME: either documentation is lying to me or it's a mistake
-                // @ts-ignore
-                if (output.result && output.result === 'FAILED')
-                    return callback({
-                        // @ts-ignore
-                        error: this.sidechain.toUtf8(output.resMessage),
-                        transaction: signedTransaction,
-                        output,
-                    });
-
-                if (!this.utils.hasProperty(output, 'contractResult'))
-                    return callback({
-                        error:
-                            'Failed to execute: ' +
-                            JSON.stringify(output, null, 2),
-                        transaction: signedTransaction,
-                        output,
-                    });
-
-                if (options.rawResponse) return callback(null, output);
-
-                // FIXME: WTF? Undeclared symbol.
-                // @ts-ignore
-                let decoded = decodeOutput(
-                    // @ts-ignore
-                    this.outputs,
-                    '0x' + output.contractResult[0],
-                );
-
-                if (decoded.length === 1) decoded = decoded[0];
-
-                return callback(null, decoded);
-            };
-
-            checkResult();
-        } catch (ex) {
-            return callback(ex);
-        }
+        const contract = this.sidechain.contract(
+            [
+                {
+                    name: functionSelector.split('(')[0],
+                    type: 'function',
+                    stateMutability: 'nonpayable',
+                    inputs: [{type: 'uint256', name: ''}],
+                    outputs: [],
+                },
+            ],
+            contractAddress,
+        );
+        const method = contract.methods[functionSelector];
+        return (await method(numOrId).send(
+            options,
+            privateKey,
+            callback,
+        )) as void;
     }
 
     async withdrawTrc20(
@@ -1393,10 +1299,7 @@ export default class SideChain<T extends TronWeb> {
         withdrawFee: number,
         feeLimit: number,
         contractAddress: string,
-        options?: ITriggerContractOptions & {
-            shouldPollResponse?: boolean;
-            rawResponse?: boolean;
-        },
+        options?: ITriggerContractOptions & IMethodSendOptions,
         privateKey?: string,
         callback?: undefined,
     ): Promise<any>;
@@ -1405,10 +1308,7 @@ export default class SideChain<T extends TronWeb> {
         withdrawFee: number,
         feeLimit: number,
         contractAddress: string,
-        options: ITriggerContractOptions & {
-            shouldPollResponse?: boolean;
-            rawResponse?: boolean;
-        },
+        options: ITriggerContractOptions & IMethodSendOptions,
         privateKey: string,
         callback: _CallbackT<any>,
     ): Promise<void>;
@@ -1417,10 +1317,7 @@ export default class SideChain<T extends TronWeb> {
         withdrawFee: number,
         feeLimit: number,
         contractAddress: string,
-        options: ITriggerContractOptions & {
-            shouldPollResponse?: boolean;
-            rawResponse?: boolean;
-        } = {},
+        options: ITriggerContractOptions & IMethodSendOptions = {},
         privateKey: string = this.mainchain.defaultPrivateKey,
         callback?: _CallbackT<any>,
     ): Promise<void | any> {
@@ -1441,10 +1338,7 @@ export default class SideChain<T extends TronWeb> {
         withdrawFee: number,
         feeLimit: number,
         contractAddress: string,
-        options?: ITriggerContractOptions & {
-            shouldPollResponse?: boolean;
-            rawResponse?: boolean;
-        },
+        options?: ITriggerContractOptions & IMethodSendOptions,
         privateKey?: string,
         callback?: undefined,
     ): Promise<any>;
@@ -1453,10 +1347,7 @@ export default class SideChain<T extends TronWeb> {
         withdrawFee: number,
         feeLimit: number,
         contractAddress: string,
-        options: ITriggerContractOptions & {
-            shouldPollResponse?: boolean;
-            rawResponse?: boolean;
-        },
+        options: ITriggerContractOptions & IMethodSendOptions,
         privateKey: string,
         callback: _CallbackT<any>,
     ): Promise<void>;
@@ -1465,10 +1356,7 @@ export default class SideChain<T extends TronWeb> {
         withdrawFee: number,
         feeLimit: number,
         contractAddress: string,
-        options: ITriggerContractOptions & {
-            shouldPollResponse?: boolean;
-            rawResponse?: boolean;
-        } = {},
+        options: ITriggerContractOptions & IMethodSendOptions = {},
         privateKey: string = this.mainchain.defaultPrivateKey,
         callback?: _CallbackT<any>,
     ): Promise<void | any> {
@@ -1590,10 +1478,7 @@ export default class SideChain<T extends TronWeb> {
         nonce: number,
         retryWithdrawFee: number,
         feeLimit: number,
-        options?: ITriggerContractOptions & {
-            shouldPollResponse?: boolean;
-            rawResponse?: boolean;
-        },
+        options?: ITriggerContractOptions & IMethodSendOptions,
         privateKey?: string,
         callback?: undefined,
     ): Promise<any>;
@@ -1601,10 +1486,7 @@ export default class SideChain<T extends TronWeb> {
         nonce: number,
         retryWithdrawFee: number,
         feeLimit: number,
-        options: ITriggerContractOptions & {
-            shouldPollResponse?: boolean;
-            rawResponse?: boolean;
-        },
+        options: ITriggerContractOptions & IMethodSendOptions,
         privateKey: string,
         callback: _CallbackT<any>,
     ): Promise<void>;
@@ -1612,10 +1494,7 @@ export default class SideChain<T extends TronWeb> {
         nonce: number,
         retryWithdrawFee: number,
         feeLimit: number,
-        options: ITriggerContractOptions & {
-            shouldPollResponse?: boolean;
-            rawResponse?: boolean;
-        } = {},
+        options: ITriggerContractOptions & IMethodSendOptions = {},
         privateKey: string = this.mainchain.defaultPrivateKey,
         callback?: _CallbackT<any>,
     ): Promise<void | any> {
