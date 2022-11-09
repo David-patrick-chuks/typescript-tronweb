@@ -12,7 +12,7 @@ module.exports = {
     extends: [
         'eslint:recommended',
         'plugin:@typescript-eslint/recommended',
-        'prettier',
+        'eslint-config-prettier',
     ],
     root: true,
     parserOptions: {
@@ -21,18 +21,6 @@ module.exports = {
     parser: '@typescript-eslint/parser',
     plugins: ['@typescript-eslint'],
     rules: {
-        indent: [
-            1,
-            4,
-            {
-                SwitchCase: 1,
-                FunctionDeclaration: {parameters: 'first'},
-                FunctionExpression: {parameters: 'first'},
-                offsetTernaryExpressions: true,
-                MemberExpression: 'off',
-                CallExpression: {arguments: 'first'},
-            },
-        ],
         'linebreak-style': [2, 'unix'],
         quotes: [1, 'single', 'avoid-escape'],
         semi: [2, 'always'],
