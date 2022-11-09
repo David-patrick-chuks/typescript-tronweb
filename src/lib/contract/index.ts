@@ -4,6 +4,7 @@ import Method from './method';
 import {ContractOptions as ExtendedContractOptions} from '../transactionBuilder';
 import _CallbackT from '../../utils/typing';
 import {WithTronwebAndInjectpromise} from '../../../src/utils/_base';
+export {IMethodSendOptions} from './method';
 
 export interface IAbiItem {
     name: string;
@@ -54,12 +55,6 @@ export interface ContractOptions {
     sort?: string;
     filters?: unknown | unknown[];
     resourceNode?: string;
-}
-
-export interface IMethodSendOptions {
-    shouldPollResponse?: boolean;
-    rawResponse?: boolean;
-    keepTxID?: boolean;
 }
 
 class _Contract extends WithTronwebAndInjectpromise {

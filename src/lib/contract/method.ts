@@ -2,9 +2,21 @@ import utils from '../../utils';
 import Contract from '.';
 import {IFuncAbi, IAbiItem} from '.';
 import {encodeParamsV2ByABI, decodeParamsV2ByABI} from '../../utils/abi';
-import {ContractOptions, ITriggerConstantContract} from '../transactionBuilder';
+import {
+    ContractOptions,
+    ITriggerConstantContract,
+    ITriggerContractOptions,
+} from '../transactionBuilder';
 import _CallbackT from '../../utils/typing';
 import {WithTronwebAndInjectpromise} from '../../../src/utils/_base';
+
+export interface IMethodSendOptions {
+    shouldPollResponse?: boolean;
+    maxRetries?: number; // Default: 20
+    pollingInterval?: number; // Default: 3000 [ms]
+    rawResponse?: boolean;
+    keepTxID?: boolean;
+}
 
 const getFunctionSelector = (abi) => {
     abi.stateMutability = abi.stateMutability
@@ -110,11 +122,7 @@ export default class Method extends WithTronwebAndInjectpromise {
     async _call(
         types: string[],
         args: unknown[],
-        options: {
-            [k in keyof ContractOptions]?: ContractOptions[k];
-        } & {
-            _isConstant?: boolean;
-        } = {},
+        options: ITriggerContractOptions = {},
         callback?: _CallbackT<any>,
     ) {
         // if (utils.isFunction(options)) {
@@ -222,9 +230,7 @@ export default class Method extends WithTronwebAndInjectpromise {
         args: unknown[],
         options: {
             [k in keyof ContractOptions]?: ContractOptions[k];
-        } & {
-            _isConstant?: boolean;
-        } = {},
+        } & IMethodSendOptions = {},
         privateKey: string = this.tronWeb.defaultPrivateKey,
         callback?: _CallbackT<any>,
     ) {
@@ -270,12 +276,7 @@ export default class Method extends WithTronwebAndInjectpromise {
             options.callValue = 0;
 
         // TODO: this intersection may be not needed after final options cleanup
-        const final_options: ContractOptions & {
-            _isConstant: boolean;
-            from: string;
-            keepTxID?: boolean;
-            rawResponse?: boolean;
-        } = {
+        const final_options: ContractOptions & IMethodSendOptions = {
             ...this.defaultOptions,
             from: this.tronWeb.defaultAddress.hex,
             ...options,
@@ -335,8 +336,10 @@ export default class Method extends WithTronwebAndInjectpromise {
             if (!final_options.shouldPollResponse)
                 return callback(null, signedTransaction.txID);
 
+            const {maxRetries = 20, pollingInterval = 3_000} = options;
+
             const checkResult = async (index = 0) => {
-                if (index === 20)
+                if (index === maxRetries - 1)
                     return callback({
                         error: 'Cannot find result in solidity node',
                         transaction: signedTransaction,
@@ -349,7 +352,7 @@ export default class Method extends WithTronwebAndInjectpromise {
                 if (!Object.keys(output).length)
                     return setTimeout(() => {
                         checkResult(index + 1);
-                    }, 3000);
+                    }, pollingInterval);
 
                 if ('result' in output && output.result === 'FAILED')
                     return callback({

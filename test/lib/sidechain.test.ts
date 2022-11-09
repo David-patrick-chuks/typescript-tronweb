@@ -53,7 +53,12 @@ describe('TronWeb.sidechain', function () {
                     callValue,
                     DEPOSIT_FEE,
                     FEE_LIMIT,
-                    {shouldPollResponse: true, keepTxID: true},
+                    {
+                        shouldPollResponse: true,
+                        keepTxID: true,
+                        maxRetries: 50,
+                        pollingInterval: 3000,
+                    },
                 );
                 assert.equal(txID.length, 64);
 
@@ -142,7 +147,12 @@ describe('TronWeb.sidechain', function () {
                     tokenValue,
                     DEPOSIT_FEE,
                     FEE_LIMIT,
-                    {shouldPollResponse: true, keepTxID: true},
+                    {
+                        shouldPollResponse: true,
+                        keepTxID: true,
+                        maxRetries: 50,
+                        pollingInterval: 3000,
+                    },
                 );
                 assert.equal(txID.length, 64);
 
@@ -249,14 +259,24 @@ describe('TronWeb.sidechain', function () {
                 // only mapping once
                 // can check the mapping contract address in sidechain via call
                 // mainToSideContractMap(address) of mainchain gateway
-                // const mappingResult = await tronWeb.sidechain!.mappingTrc20(HASH20, MAPPING_FEE, FEE_LIMIT, {shouldPollResponse: true, keepTxID: true});
+                // const mappingResult = await tronWeb.sidechain!.mappingTrc20(
+                //     HASH20,
+                //     MAPPING_FEE,
+                //     FEE_LIMIT,
+                //     {shouldPollResponse: true, keepTxID: true, maxRetries: 50, pollingInterval: 3000},
+                // );
 
                 // Approve
                 let [txID] = await tronWeb.sidechain!.approveTrc20(
                     num,
                     FEE_LIMIT,
                     CONTRACT_ADDRESS20,
-                    {shouldPollResponse: true, keepTxID: true},
+                    {
+                        shouldPollResponse: true,
+                        keepTxID: true,
+                        maxRetries: 50,
+                        pollingInterval: 3000,
+                    },
                 );
                 assert.equal(txID.length, 64);
 
@@ -276,7 +296,12 @@ describe('TronWeb.sidechain', function () {
                     DEPOSIT_FEE,
                     FEE_LIMIT,
                     CONTRACT_ADDRESS20,
-                    {shouldPollResponse: true, keepTxID: true},
+                    {
+                        shouldPollResponse: true,
+                        keepTxID: true,
+                        maxRetries: 50,
+                        pollingInterval: 3000,
+                    },
                 );
                 assert.equal(txID.length, 64);
 
@@ -384,7 +409,12 @@ describe('TronWeb.sidechain', function () {
                     TRC721_ID,
                     FEE_LIMIT,
                     CONTRACT_ADDRESS721,
-                    {shouldPollResponse: true, keepTxID: true},
+                    {
+                        shouldPollResponse: true,
+                        keepTxID: true,
+                        maxRetries: 50,
+                        pollingInterval: 3000,
+                    },
                 );
 
                 // check the trc721 balance of mainchain before deposit
@@ -402,7 +432,12 @@ describe('TronWeb.sidechain', function () {
                     DEPOSIT_FEE,
                     FEE_LIMIT,
                     CONTRACT_ADDRESS721,
-                    {shouldPollResponse: true, keepTxID: true},
+                    {
+                        shouldPollResponse: true,
+                        keepTxID: true,
+                        maxRetries: 50,
+                        pollingInterval: 3000,
+                    },
                 );
                 assert.equal(txID.length, 64);
 
