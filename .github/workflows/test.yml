@@ -37,8 +37,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: ['10.x', '12.x', '14.x', '16.x', '18.x']
-      # fail-fast: false
+        node-version: ['12.x', '14.x', '16.x', '18.x']
+      fail-fast: false
 
     services:
       tronnet:
@@ -59,7 +59,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: build
-        run: npm i && npm run build
+        run: npm i
       - name: run
         run: npm test
         env:
