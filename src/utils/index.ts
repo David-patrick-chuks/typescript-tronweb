@@ -145,9 +145,9 @@ const utils = {
         return res;
     },
 
-    isNotNullOrUndefined(
-        val: any,
-    ): val is Exclude<Exclude<typeof val, null>, undefined> {
+    isNotNullOrUndefined<T>(
+        val: T,
+    ): val is Exclude<Exclude<T, null>, undefined> {
         return val !== null && typeof val !== 'undefined';
     },
 
