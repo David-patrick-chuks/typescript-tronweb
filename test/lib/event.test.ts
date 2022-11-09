@@ -77,6 +77,7 @@ describe('TronWeb.lib.event', async function () {
         );
 
         contractAddress = result.receipt.transaction.contract_address;
+        await wait(1);
         contract = await tronWeb.contract().at(contractAddress);
     });
 

@@ -9,12 +9,14 @@ export function encode58(buffer: Buffer | Uint8Array | string) {
     if (buffer.length === 0) return '';
 
     let i, j;
-    const digits = [0];
+    // Lines below [ab]use implicit string/number conversion
+    // In fact it is `(string | number)[]`
+    const digits: any[] = [0];
 
     for (i = 0; i < buffer.length; i++) {
         for (j = 0; j < digits.length; j++) digits[j] <<= 8;
 
-        digits[0] += +buffer[i];
+        digits[0] += buffer[i];
         let carry = 0;
 
         for (j = 0; j < digits.length; ++j) {
@@ -22,6 +24,7 @@ export function encode58(buffer: Buffer | Uint8Array | string) {
             carry = (digits[j] / BASE) | 0;
             digits[j] %= BASE;
         }
+        // Now digits is number[] strictly
 
         while (carry) {
             digits.push(carry % BASE);
@@ -40,9 +43,7 @@ export function encode58(buffer: Buffer | Uint8Array | string) {
 export function decode58(string: string): Uint8Array {
     if (string.length === 0) return new Uint8Array();
 
-    let i;
-    let j;
-
+    let i, j;
     const bytes = [0];
 
     for (i = 0; i < string.length; i++) {
