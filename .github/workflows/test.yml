@@ -1,0 +1,66 @@
+name: Pull Request & Push to Master Branch
+
+on:
+  push:
+    branches:
+      master
+  pull_request:
+    branches:
+      master
+  workflow_dispatch:
+
+
+
+jobs:
+  # lint:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       python-version: ['3.8', '3.9', '3.10']
+  #     fail-fast: false
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #     - name: Set up Python ${{ matrix.python-version }}
+  #       uses: actions/setup-python@v3
+  #       with:
+  #         python-version: ${{ matrix.python-version }}
+  #     - name: Install dependencies
+  #       run: |
+  #         pip install pre-commit
+  #     - name: Run pre-commit
+  #       run: |
+  #         pre-commit install
+  #         pre-commit run --all-files -v
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: ['10.x', '12.x', '14.x', '16.x']
+      # fail-fast: false
+
+    services:
+      tronnet:
+        image: trontools/quickstart
+        ports:
+          - 9090:9090
+        env:
+          MNEMONIC: ${{ secrets.MNEMONIC }}
+        options: >-
+           -e "mnemonic=$MNEMONIC"
+           -e 'defaultBalance=1000000'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: build
+        run: npm i && npm run build
+      - name: run
+        run: npm test
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
