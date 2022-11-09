@@ -1,16 +1,13 @@
 export {};
-// Alias of TronWeb
 import {assert} from 'chai';
-// import txPars from '../helpers/txPars';
-// import jlog from '../helpers/jlog';
 import assertThrow from '../helpers/assertThrow';
 import wait from '../helpers/wait';
 import broadcaster from '../helpers/broadcaster';
-// import pollAccountFor from '../helpers/pollAccountFor';
-// import _ from 'lodash';
-import tronWebBuilder from '../helpers/tronWebBuilder';
-import {IAccts, TronWeb} from '../helpers/tronWebBuilder';
-// import assertEqualHex from '../helpers/assertEqualHex';
+import {
+    default as tronWebBuilder,
+    IAccts,
+    TronWeb,
+} from '../helpers/tronWebBuilder';
 import waitChainData from '../helpers/waitChainData';
 import {
     ADDRESS_BASE58,
@@ -25,11 +22,10 @@ import {
     ISignedTransaction,
 } from '../../src/lib/transactionBuilder';
 import {IToken, IExchange, IProposal} from '../../src/lib/trx';
-import TronWebRef from '../../src/index';
 
 describe('TronWeb.trx', function () {
     let accounts: IAccts;
-    let tronWeb: TronWebRef;
+    let tronWeb: TronWeb;
 
     before(async function () {
         tronWeb = tronWebBuilder.createInstance();

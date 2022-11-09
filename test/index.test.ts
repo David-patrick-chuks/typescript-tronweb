@@ -1,5 +1,3 @@
-export {};
-
 import {assert} from 'chai';
 import jwt from 'jsonwebtoken';
 import {
@@ -19,7 +17,6 @@ import {
 } from './helpers/config';
 import tronWebBuilder from './helpers/tronWebBuilder';
 import {TronWeb} from './helpers/tronWebBuilder';
-// import log from './helpers/log';
 import BigNumber from 'bignumber.js';
 import broadcaster from './helpers/broadcaster';
 import wait from './helpers/wait';

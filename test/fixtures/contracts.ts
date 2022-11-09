@@ -1,4 +1,4 @@
-import {IAbi} from '../../src/lib/contract';
+import {IAbi} from '../../src/lib/contract/index';
 
 export const testRevert = {
     /*

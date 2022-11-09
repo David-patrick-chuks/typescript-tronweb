@@ -1,14 +1,9 @@
 import {assert} from 'chai';
-// import {FULL_NODE_API} from '../helpers/config';
-// import assertThrow from '../helpers/assertThrow';
 import tronWebBuilder from '../helpers/tronWebBuilder';
-import {IAccts, TronWeb as RefTronWeb} from '../helpers/tronWebBuilder';
-// import jlog from '../helpers/jlog';
+import {IAccts, TronWeb} from '../helpers/tronWebBuilder';
 import broadcaster from '../helpers/broadcaster';
 import wait from '../helpers/wait';
-
-import Contract from '../../src/lib/contract';
-import TronWeb from '../../src';
+import Contract from '../../src/lib/contract/index';
 
 describe('TronWeb.lib.event', async function () {
     let accounts: IAccts;
@@ -20,7 +15,6 @@ describe('TronWeb.lib.event', async function () {
     before(async function () {
         tronWeb = tronWebBuilder.createInstance();
         accounts = await tronWebBuilder.getTestAccounts(-1);
-        console.log(accounts);
 
         const result = await broadcaster(
             tronWeb.transactionBuilder.createSmartContract(
@@ -83,7 +77,7 @@ describe('TronWeb.lib.event', async function () {
 
     describe('#constructor()', function () {
         it('should have been set a full instance in tronWeb', function () {
-            assert.instanceOf(tronWeb.event, RefTronWeb.Event);
+            assert.instanceOf(tronWeb.event, TronWeb.Event);
         });
     });
 

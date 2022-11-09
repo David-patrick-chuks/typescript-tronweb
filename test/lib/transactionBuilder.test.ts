@@ -1,13 +1,14 @@
-export {};
 import {assert} from 'chai';
 import txPars from '../helpers/txPars';
-// import jlog from '../helpers/jlog';
 import assertThrow from '../helpers/assertThrow';
 import wait from '../helpers/wait';
 import broadcaster from '../helpers/broadcaster';
-// import pollAccountFor from '../helpers/pollAccountFor';
 import _ from 'lodash';
-import {default as tronWebBuilder, IAccts} from '../helpers/tronWebBuilder';
+import {
+    default as tronWebBuilder,
+    IAccts,
+    TronWeb,
+} from '../helpers/tronWebBuilder';
 import assertEqualHex from '../helpers/assertEqualHex';
 import {
     testRevert,
@@ -15,18 +16,15 @@ import {
     arrayParam,
     rawParam,
     funcABIV2,
-    // funcABIV2_1,
     funcABIV2_2,
     funcABIV2_3,
     funcABIV2_4,
 } from '../fixtures/contracts';
 import waitChainData from '../helpers/waitChainData';
 import {equals, getValues} from '../helpers/testUtils';
-import TronWebType from '../../src/index';
 import {IAccount} from '../../src/utils/accounts';
 import {IProposal} from '../../src/lib/trx';
 
-const TronWeb = tronWebBuilder.TronWeb;
 import {
     ADDRESS_HEX,
     ADDRESS_BASE58,
@@ -39,7 +37,7 @@ import {
 
 describe('TronWeb.transactionBuilder', function () {
     let accounts: IAccts;
-    let tronWeb: TronWebType;
+    let tronWeb: TronWeb;
     let emptyAccount: IAccount;
     let isAllowSameTokenNameApproved: boolean;
 

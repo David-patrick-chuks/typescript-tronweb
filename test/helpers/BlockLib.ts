@@ -1,6 +1,3 @@
-export {};
-
-// type-only, so can safely import from actual .ts
 import {IBlock} from '../../src/lib/trx';
 import _CallbackT from '../../src/utils/typing';
 import {WithTronwebAndInjectpromise} from '../../src/utils/_base';

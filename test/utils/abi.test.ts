@@ -1,9 +1,6 @@
-export {};
 import {assert} from 'chai';
-// import {ADDRESS_HEX, ADDRESS_BASE58} from '../helpers/config';
 import tronWebBuilder from '../helpers/tronWebBuilder';
 import {equals, getValues} from '../helpers/testUtils';
-// import ethers from 'ethers';
 import {loadTests} from '../testcases/src/disk-utils';
 
 describe('TronWeb.utils.abi', function () {

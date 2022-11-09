@@ -12,3 +12,4 @@ example/
 test/lib/dist/
 .eslintcache
 /proto/
+.nyc_output

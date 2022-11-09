@@ -5,16 +5,14 @@ export default async function (
     expectedError?: string | null,
     expectedErrorContains?: string | string[],
 ) {
-    let errMsg;
     try {
         await func;
-    } catch (err) {
-        if (err && typeof err === 'object') {
+    } catch (err: any) {
+        let errMsg: string = err.toString();
+        if (err && typeof err === 'object')
             if ('message' in err) errMsg = err['message'];
             else if ('error' in err) errMsg = err['error'];
-        } else {
-            errMsg = err;
-        }
+
         if (expectedError) {
             assert.equal(errMsg, expectedError);
         } else if (expectedErrorContains) {

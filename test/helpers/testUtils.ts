@@ -1,4 +1,4 @@
-import TronWeb from '../setup/TronWeb';
+import TronWeb from '../../src/index';
 import {BigNumber, utils} from 'ethers';
 
 const bnify = BigNumber.from;

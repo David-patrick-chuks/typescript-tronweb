@@ -1,9 +1,6 @@
-export {};
 import {assert} from 'chai';
-// import wait from '../../helpers/wait';
 import assertThrow from '../../helpers/assertThrow';
 import broadcaster from '../../helpers/broadcaster';
-// import _ from 'lodash';
 import tronWebBuilder from '../../helpers/tronWebBuilder';
 import {TronWeb, IAccts} from '../../helpers/tronWebBuilder';
 
