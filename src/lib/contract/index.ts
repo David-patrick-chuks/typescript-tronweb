@@ -5,7 +5,7 @@ import _CallbackT from '../../utils/typing';
 import {ContractOptions as ExtendedContractOptions} from '../transactionBuilder';
 import Method from './method';
 
-export {IMethodSendOptions} from './method';
+export type {IMethodSendOptions} from './method';
 
 export interface IAbiItem {
     name: string;

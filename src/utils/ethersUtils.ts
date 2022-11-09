@@ -1,7 +1,10 @@
-import {BytesLike, utils} from 'ethers';
+import type {BytesLike} from '@ethersproject/bytes';
+import {utils} from 'ethers';
 
-export {Wallet as ethersWallet, Wordlist, Bytes, BytesLike} from 'ethers';
-export {Mnemonic} from '@ethersproject/hdnode';
+export {Wallet as ethersWallet} from 'ethers';
+export type {Wordlist} from 'ethers';
+export type {Bytes, BytesLike} from '@ethersproject/bytes';
+export type {Mnemonic} from '@ethersproject/hdnode';
 
 const {
     keccak256,

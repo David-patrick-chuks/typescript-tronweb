@@ -14,43 +14,24 @@ const baseConfig = {
     entry: path.resolve(__dirname, 'src', 'index.ts'),
     module: {
         rules: [
-            // {
-            //     test: /\.ts$/,
-            //     exclude: /(node_modules|bower_components)/,
-            //     use: {
-            //         loader: 'babel-loader',
-            //         options: {
-            //             presets: [
-            //                 ['@babel/env', {
-            //                     targets: {
-            //                         browsers: [
-            //                             '>0.25%',
-            //                             'not dead',
-            //                         ],
-            //                     },
-            //                 }],
-            //             ],
-            //             plugins: basePlugins,
-            //         },
-            //     },
-            // },
             {
                 test: /\.ts$/,
                 exclude: /(node_modules|bower_components)/,
                 use: {
-                    loader: 'ts-loader',
+                    loader: 'babel-loader',
                     options: {
-                        // presets: [
-                        //     ['@babel/env', {
-                        //         targets: {
-                        //             browsers: [
-                        //                 '>0.25%',
-                        //                 'not dead'
-                        //             ]
-                        //         }
-                        //     }]
-                        // ],
-                        // plugins: basePlugins
+                        presets: [
+                            '@babel/preset-typescript',
+                            [
+                                '@babel/env',
+                                {
+                                    targets: {
+                                        browsers: ['>0.25%', 'not dead'],
+                                    },
+                                },
+                            ],
+                        ],
+                        plugins: basePlugins,
                     },
                 },
             },
@@ -79,28 +60,32 @@ module.exports = [
             libraryTarget: 'commonjs2',
             libraryExport: 'default',
         },
-        // module: {
-        //     rules: [
-        //         {
-        //             test: /\.js$/,
-        //             exclude: /(node_modules|bower_components)/,
-        //             use: {
-        //                 loader: 'babel-loader',
-        //                 options: {
-        //                     presets: [
-        //                         ['@babel/env', {
-        //                             targets: {
-        //                                 node: 6,
-        //                             },
-        //                             forceAllTransforms: true,
-        //                         }],
-        //                     ],
-        //                     plugins: nodePlugins,
-        //                 },
-        //             },
-        //         },
-        //     ],
-        // },
+        module: {
+            rules: [
+                {
+                    test: /\.ts$/,
+                    exclude: /(node_modules|bower_components)/,
+                    use: {
+                        loader: 'babel-loader',
+                        options: {
+                            presets: [
+                                '@babel/preset-typescript',
+                                [
+                                    '@babel/env',
+                                    {
+                                        targets: {
+                                            node: 'current',
+                                        },
+                                        forceAllTransforms: true,
+                                    },
+                                ],
+                            ],
+                            plugins: nodePlugins,
+                        },
+                    },
+                },
+            ],
+        },
         externals: [externals()],
         target: 'node',
     },
