@@ -1,24 +1,25 @@
+import BigNumber from 'bignumber.js';
 import {assert} from 'chai';
 import jwt from 'jsonwebtoken';
+
+import broadcaster from './helpers/broadcaster';
 import {
-    ADDRESS_HEX,
     ADDRESS_BASE58,
-    FULL_NODE_API,
-    SOLIDITY_NODE_API,
+    ADDRESS_HEX,
     EVENT_API,
+    FULL_NODE_API,
     PRIVATE_KEY,
     SIDE_CHAIN,
+    SOLIDITY_NODE_API,
     SUN_NETWORK,
     TEST_TRON_GRID_API,
-    TEST_TRON_HEADER_API_KEY,
     TEST_TRON_HEADER_API_JWT_KEY,
+    TEST_TRON_HEADER_API_KEY,
     TEST_TRON_HEADER_JWT_ID,
     TEST_TRON_HEADER_JWT_PRIVATE_KEY,
 } from './helpers/config';
 import tronWebBuilder from './helpers/tronWebBuilder';
 import {TronWeb} from './helpers/tronWebBuilder';
-import BigNumber from 'bignumber.js';
-import broadcaster from './helpers/broadcaster';
 import wait from './helpers/wait';
 
 const HttpProvider = TronWeb.providers.HttpProvider;

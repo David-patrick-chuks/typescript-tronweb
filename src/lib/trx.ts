@@ -1,17 +1,17 @@
-import utils from '../utils';
 import TronWeb from '..';
-import {
-    keccak256,
-    toUtf8Bytes,
-    recoverAddress,
-    SigningKey,
-} from '../utils/ethersUtils';
-import {ADDRESS_PREFIX} from '../utils/address';
-import Validator from '../paramValidator';
-import {ITransaction, ISignedTransaction} from './transactionBuilder';
-import _CallbackT from '../utils/typing';
 import {WithTronwebAndInjectpromise} from '../../src/utils/_base';
+import Validator from '../paramValidator';
+import utils from '../utils';
+import {ADDRESS_PREFIX} from '../utils/address';
 import {IDomain, TypedDataTypes} from '../utils/crypto';
+import {
+    SigningKey,
+    keccak256,
+    recoverAddress,
+    toUtf8Bytes,
+} from '../utils/ethersUtils';
+import _CallbackT from '../utils/typing';
+import {ISignedTransaction, ITransaction} from './transactionBuilder';
 
 const TRX_MESSAGE_HEADER = '\x19TRON Signed Message:\n32';
 // it should be: '\x15TRON Signed Message:\n32';

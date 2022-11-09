@@ -1,4 +1,5 @@
 import {assert} from 'chai';
+
 import {getInstance} from './tronWebBuilder';
 
 export default async function (result, string) {

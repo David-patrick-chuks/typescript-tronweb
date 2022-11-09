@@ -1,23 +1,23 @@
-import providers from './lib/providers';
-import {HttpProvider} from './lib/providers';
-import utils from './utils';
 import BigNumber from 'bignumber.js';
 import EventEmitter from 'eventemitter3';
-import {version} from '../package.json';
-import semver from 'semver';
 import injectpromise from 'injectpromise';
+import semver from 'semver';
 
+import {version} from '../package.json';
+import {default as Contract, IAbi} from './lib/contract';
+import {ContractOptions} from './lib/contract';
+import Event from './lib/event';
+import Plugin from './lib/plugin';
+import providers from './lib/providers';
+import {HttpProvider} from './lib/providers';
+import SideChain from './lib/sidechain';
+import {IChainOptions} from './lib/sidechain';
 import TransactionBuilder from './lib/transactionBuilder';
 import Trx from './lib/trx';
 import {BlockT} from './lib/trx';
-import {default as Contract, IAbi} from './lib/contract';
-import Plugin from './lib/plugin';
-import Event from './lib/event';
-import {ContractOptions} from './lib/contract';
-import SideChain from './lib/sidechain';
-import {IChainOptions} from './lib/sidechain';
-import {keccak256} from './utils/ethersUtils';
+import utils from './utils';
 import {ADDRESS_PREFIX, TRON_BIP39_PATH_INDEX_0} from './utils/address';
+import {keccak256} from './utils/ethersUtils';
 import _CallbackT from './utils/typing';
 
 const DEFAULT_VERSION = '3.5.0';

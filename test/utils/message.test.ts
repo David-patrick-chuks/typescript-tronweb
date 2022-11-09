@@ -1,4 +1,5 @@
 import {assert} from 'chai';
+
 import {TronWeb} from '../helpers/tronWebBuilder';
 import tests from '../testcases/src/sign-message';
 

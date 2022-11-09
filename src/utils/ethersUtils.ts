@@ -1,4 +1,5 @@
-import {utils, BytesLike} from 'ethers';
+import {BytesLike, utils} from 'ethers';
+
 export {Wallet as ethersWallet, Wordlist, Bytes, BytesLike} from 'ethers';
 export {Mnemonic} from '@ethersproject/hdnode';
 

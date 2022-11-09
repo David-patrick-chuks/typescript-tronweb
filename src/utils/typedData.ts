@@ -1,12 +1,12 @@
-import TronWeb from '..';
-import {ADDRESS_PREFIX_REGEX} from './address';
-
 import {BigNumber} from '@ethersproject/bignumber';
-import {arrayify, hexConcat, hexlify, hexZeroPad} from '@ethersproject/bytes';
+import {arrayify, hexConcat, hexZeroPad, hexlify} from '@ethersproject/bytes';
 import {keccak256} from '@ethersproject/keccak256';
+import {Logger} from '@ethersproject/logger';
 import {deepCopy, defineReadOnly, shallowCopy} from '@ethersproject/properties';
 import {toUtf8Bytes} from '@ethersproject/strings';
-import {Logger} from '@ethersproject/logger';
+
+import TronWeb from '..';
+import {ADDRESS_PREFIX_REGEX} from './address';
 
 const version = 'tronweb/hash/5.4.0';
 const logger = new Logger(version);

@@ -1,27 +1,29 @@
-export {};
 import {assert} from 'chai';
+
+import {
+    ISignedTransaction,
+    ITransaction,
+} from '../../src/lib/transactionBuilder';
+import {IExchange, IProposal, IToken} from '../../src/lib/trx';
+import {testRevert as testRevertContract} from '../fixtures/contracts';
 import assertThrow from '../helpers/assertThrow';
-import wait from '../helpers/wait';
 import broadcaster from '../helpers/broadcaster';
 import {
-    default as tronWebBuilder,
+    ADDRESS_BASE58,
+    FULL_NODE_API,
+    PRIVATE_KEY,
+    SIGNED_HEX_TRANSACTION,
+    getTokenOptions,
+} from '../helpers/config';
+import {
     IAccts,
     TronWeb,
+    default as tronWebBuilder,
 } from '../helpers/tronWebBuilder';
+import wait from '../helpers/wait';
 import waitChainData from '../helpers/waitChainData';
-import {
-    ADDRESS_BASE58,
-    PRIVATE_KEY,
-    getTokenOptions,
-    SIGNED_HEX_TRANSACTION,
-    FULL_NODE_API,
-} from '../helpers/config';
-import {testRevert as testRevertContract} from '../fixtures/contracts';
-import {
-    ITransaction,
-    ISignedTransaction,
-} from '../../src/lib/transactionBuilder';
-import {IToken, IExchange, IProposal} from '../../src/lib/trx';
+
+export {};
 
 describe('TronWeb.trx', function () {
     this.retries(2); // We'll fail sometimes anyway - even with docker node

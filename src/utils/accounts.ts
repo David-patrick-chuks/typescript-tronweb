@@ -1,13 +1,13 @@
+import {TRON_BIP39_PATH_INDEX_0} from './address';
 import {byteArray2hexStr} from './bytes';
 import {
-    getBase58CheckAddress,
     genPriKey,
     getAddressFromPriKey,
+    getBase58CheckAddress,
     getPubKeyFromPriKey,
     pkToAddress,
 } from './crypto';
-import {ethersWallet, Wordlist, Mnemonic} from './ethersUtils';
-import {TRON_BIP39_PATH_INDEX_0} from './address';
+import {Mnemonic, Wordlist, ethersWallet} from './ethersUtils';
 import utils from './index';
 
 const INVALID_TRON_PATH_ERROR_MSG = 'Invalid tron path provided';

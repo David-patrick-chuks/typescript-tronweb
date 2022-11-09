@@ -1,9 +1,10 @@
-import utils from '../utils';
-import * as providers from './providers';
-import {ContractOptions} from './contract';
 import querystring from 'querystring';
-import _CallbackT from '../utils/typing';
+
 import {WithTronwebAndInjectpromise} from '../../src/utils/_base';
+import utils from '../utils';
+import _CallbackT from '../utils/typing';
+import {ContractOptions} from './contract';
+import * as providers from './providers';
 
 export default class Event extends WithTronwebAndInjectpromise {
     setServer(

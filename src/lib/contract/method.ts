@@ -1,14 +1,14 @@
-import utils from '../../utils';
 import Contract from '.';
-import {IFuncAbi, IAbiItem} from '.';
-import {encodeParamsV2ByABI, decodeParamsV2ByABI} from '../../utils/abi';
+import {IAbiItem, IFuncAbi} from '.';
+import utils from '../../utils';
+import {WithTronwebAndInjectpromise} from '../../utils/_base';
+import {decodeParamsV2ByABI, encodeParamsV2ByABI} from '../../utils/abi';
+import _CallbackT from '../../utils/typing';
 import {
     ContractOptions,
     ITriggerConstantContract,
     ITriggerContractOptions,
 } from '../transactionBuilder';
-import _CallbackT from '../../utils/typing';
-import {WithTronwebAndInjectpromise} from '../../../src/utils/_base';
 
 export interface IMethodSendOptions {
     shouldPollResponse?: boolean;

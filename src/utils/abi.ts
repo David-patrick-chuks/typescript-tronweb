@@ -1,6 +1,6 @@
+import TronWeb from '..';
 import {ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX} from './address';
 import {AbiCoder} from './ethersUtils';
-import TronWeb from '..';
 
 const abiCoder = new AbiCoder();
 

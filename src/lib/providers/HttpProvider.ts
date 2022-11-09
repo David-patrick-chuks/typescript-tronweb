@@ -1,5 +1,6 @@
 import axios from 'axios';
 import {AxiosInstance, Method} from 'axios';
+
 import utils from '../../utils';
 
 export class HttpProvider {

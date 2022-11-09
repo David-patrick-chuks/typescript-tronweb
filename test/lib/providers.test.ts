@@ -1,7 +1,8 @@
 import {assert} from 'chai';
-import {FULL_NODE_API} from '../helpers/config';
+
 import assertThrow from '../helpers/assertThrow';
-import {default as tronWebBuilder, TronWeb} from '../helpers/tronWebBuilder';
+import {FULL_NODE_API} from '../helpers/config';
+import {TronWeb, default as tronWebBuilder} from '../helpers/tronWebBuilder';
 
 describe('TronWeb.lib.providers', async function () {
     describe('#constructor()', function () {

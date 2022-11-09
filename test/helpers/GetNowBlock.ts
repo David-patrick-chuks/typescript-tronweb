@@ -1,5 +1,6 @@
-let someParameter;
 import {WithTronwebAndInjectpromise} from '../../src/utils/_base';
+
+let someParameter;
 
 export default class GetNowBlock extends WithTronwebAndInjectpromise {
     async someMethod(callback) {

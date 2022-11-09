@@ -1,6 +1,7 @@
-import {assert} from 'chai';
-import {createInstance} from '../helpers/tronWebBuilder';
 import BigNumber from 'bignumber.js';
+import {assert} from 'chai';
+
+import {createInstance} from '../helpers/tronWebBuilder';
 
 describe('TronWeb.utils', function () {
     describe('#isValidURL()', function () {

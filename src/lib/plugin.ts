@@ -1,6 +1,7 @@
+import semver from 'semver';
+
 import TronWeb from '..';
 import utils from '../utils';
-import semver from 'semver';
 
 export interface IPluginRegisterResult {
     libs: string[];

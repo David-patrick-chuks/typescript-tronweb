@@ -1,6 +1,6 @@
 import {IBlock} from '../../src/lib/trx';
-import _CallbackT from '../../src/utils/typing';
 import {WithTronwebAndInjectpromise} from '../../src/utils/_base';
+import _CallbackT from '../../src/utils/typing';
 
 export default class BlockLib extends WithTronwebAndInjectpromise {
     async getCurrent(callback?: undefined): Promise<IBlock>;

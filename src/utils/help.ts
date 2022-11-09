@@ -1,9 +1,9 @@
-import {hexStr2byteArray} from './code';
 import {ADDRESS_PREFIX} from './address';
+import {hexStr2byteArray} from './code';
 import {
-    getBase58CheckAddress,
-    decodeBase58Address,
     byteArray2hexStr,
+    decodeBase58Address,
+    getBase58CheckAddress,
 } from './crypto';
 
 export function hexStringToBase58(sHexString: string): string {

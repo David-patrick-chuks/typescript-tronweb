@@ -1,5 +1,5 @@
-import {createInstanceSide} from './tronWebBuilder';
 import {PRIVATE_KEY} from './config';
+import {createInstanceSide} from './tronWebBuilder';
 import wait from './wait';
 
 const tronWeb = createInstanceSide();

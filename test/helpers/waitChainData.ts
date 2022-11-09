@@ -1,6 +1,8 @@
+import chalk from 'chalk';
+
 import {createInstance} from './tronWebBuilder';
 import wait from './wait';
-import chalk from 'chalk';
+
 // import jlog from './jlog';
 
 const tronWeb = createInstance();

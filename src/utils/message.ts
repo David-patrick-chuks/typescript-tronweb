@@ -2,12 +2,12 @@ import {ADDRESS_PREFIX} from './address';
 import {hexStr2byteArray} from './code';
 import {getBase58CheckAddress} from './crypto';
 import {
-    keccak256,
-    toUtf8Bytes,
-    concat,
-    recoverAddress,
     SigningKey,
+    concat,
     joinSignature,
+    keccak256,
+    recoverAddress,
+    toUtf8Bytes,
 } from './ethersUtils';
 
 export const TRON_MESSAGE_PREFIX = '\x19TRON Signed Message:\n';

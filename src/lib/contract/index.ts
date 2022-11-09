@@ -1,9 +1,10 @@
 import TronWeb from '../..';
-import utils from '../../utils';
-import Method from './method';
-import {ContractOptions as ExtendedContractOptions} from '../transactionBuilder';
-import _CallbackT from '../../utils/typing';
 import {WithTronwebAndInjectpromise} from '../../../src/utils/_base';
+import utils from '../../utils';
+import _CallbackT from '../../utils/typing';
+import {ContractOptions as ExtendedContractOptions} from '../transactionBuilder';
+import Method from './method';
+
 export {IMethodSendOptions} from './method';
 
 export interface IAbiItem {

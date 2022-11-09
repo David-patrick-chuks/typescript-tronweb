@@ -1,9 +1,10 @@
 import {assert} from 'chai';
+
+import Contract from '../../src/lib/contract/index';
+import broadcaster from '../helpers/broadcaster';
 import tronWebBuilder from '../helpers/tronWebBuilder';
 import {IAccts, TronWeb} from '../helpers/tronWebBuilder';
-import broadcaster from '../helpers/broadcaster';
 import wait from '../helpers/wait';
-import Contract from '../../src/lib/contract/index';
 
 describe('TronWeb.lib.event', async function () {
     let accounts: IAccts;

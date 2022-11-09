@@ -1,16 +1,16 @@
-import {ADDRESS_PREFIX} from './address';
+import BigNumber from 'bignumber.js';
+import validator from 'validator';
+
+import * as abi from './abi';
 import * as accounts from './accounts';
+import {ADDRESS_PREFIX} from './address';
 import * as base58 from './base58';
 import * as bytes from './bytes';
-import * as crypto from './crypto';
 import * as code from './code';
-import * as abi from './abi';
-import * as message from './message';
+import * as crypto from './crypto';
 import * as ethersUtils from './ethersUtils';
+import * as message from './message';
 import {TypedDataEncoder as _TypedDataEncoder} from './typedData';
-
-import validator from 'validator';
-import BigNumber from 'bignumber.js';
 
 const utils = {
     isValidURL(url: any): url is string {
@@ -141,9 +141,7 @@ const utils = {
 
     padLeft(input: any, padding: string, amount: number): string {
         let res = input.toString();
-
         while (res.length < amount) res = padding + res;
-
         return res;
     },
 

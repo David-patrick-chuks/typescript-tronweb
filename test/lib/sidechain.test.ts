@@ -7,33 +7,31 @@
  * cannot be mapped multiple times. In other places it is followed
  * by one final test with proper expectations checking
  */
-
 import {assert} from 'chai';
 
 import assertThrow from '../helpers/assertThrow';
-import tronWebBuilder from '../helpers/tronWebBuilder';
-import wait from '../helpers/wait';
 import {
-    PRIVATE_KEY,
-    // CONSUME_USER_RESOURCE_PERCENT,
-    DEPOSIT_FEE,
-    WITHDRAW_FEE,
-    MAPPING_FEE,
-    FEE_LIMIT,
-    TOKEN_ID,
-    CONTRACT_ADDRESS20,
-    CONTRACT_ADDRESS721,
     ADDRESS20_MAPPING,
     ADDRESS721_MAPPING,
+    CONTRACT_ADDRESS20,
+    CONTRACT_ADDRESS721, // CONSUME_USER_RESOURCE_PERCENT,
+    DEPOSIT_FEE,
+    FEE_LIMIT,
     HASH20,
     HASH721,
-    RETRY_MAPPING_FEE,
-    RETRY_DEPOSIT_FEE,
-    RETRY_WITHDRAW_FEE,
-    TRC721_ID,
+    MAPPING_FEE,
     NONCE,
+    PRIVATE_KEY,
+    RETRY_DEPOSIT_FEE,
+    RETRY_MAPPING_FEE,
+    RETRY_WITHDRAW_FEE,
     SIDE_CHAIN,
+    TOKEN_ID,
+    TRC721_ID,
+    WITHDRAW_FEE,
 } from '../helpers/config';
+import tronWebBuilder from '../helpers/tronWebBuilder';
+import wait from '../helpers/wait';
 
 describe('TronWeb.sidechain', function () {
     describe('#deposit', function () {

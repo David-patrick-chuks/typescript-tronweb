@@ -1,39 +1,39 @@
 import {assert} from 'chai';
-import txPars from '../helpers/txPars';
-import assertThrow from '../helpers/assertThrow';
-import wait from '../helpers/wait';
-import broadcaster from '../helpers/broadcaster';
 import _ from 'lodash';
+
+import {IProposal} from '../../src/lib/trx';
+import {IAccount} from '../../src/utils/accounts';
 import {
-    default as tronWebBuilder,
-    IAccts,
-    TronWeb,
-} from '../helpers/tronWebBuilder';
-import assertEqualHex from '../helpers/assertEqualHex';
-import {
-    testRevert,
-    testConstant,
     arrayParam,
-    rawParam,
     funcABIV2,
     funcABIV2_2,
     funcABIV2_3,
     funcABIV2_4,
+    rawParam,
+    testConstant,
+    testRevert,
 } from '../fixtures/contracts';
-import waitChainData from '../helpers/waitChainData';
-import {equals, getValues} from '../helpers/testUtils';
-import {IAccount} from '../../src/utils/accounts';
-import {IProposal} from '../../src/lib/trx';
-
+import assertEqualHex from '../helpers/assertEqualHex';
+import assertThrow from '../helpers/assertThrow';
+import broadcaster from '../helpers/broadcaster';
 import {
-    ADDRESS_HEX,
     ADDRESS_BASE58,
-    UPDATED_TEST_TOKEN_OPTIONS,
-    PRIVATE_KEY,
+    ADDRESS_HEX,
     FULL_NODE_API,
+    PRIVATE_KEY,
+    UPDATED_TEST_TOKEN_OPTIONS,
     getTokenOptions,
     isProposalApproved,
 } from '../helpers/config';
+import {equals, getValues} from '../helpers/testUtils';
+import {
+    IAccts,
+    TronWeb,
+    default as tronWebBuilder,
+} from '../helpers/tronWebBuilder';
+import txPars from '../helpers/txPars';
+import wait from '../helpers/wait';
+import waitChainData from '../helpers/waitChainData';
 
 describe('TronWeb.transactionBuilder', function () {
     let accounts: IAccts;

@@ -1,14 +1,14 @@
 import TronWeb from '..';
-import utils from '../utils';
-import {AbiCoder} from '../utils/ethersUtils';
 import Validator from '../paramValidator';
-import {ADDRESS_PREFIX_REGEX} from '../utils/address';
-import {encodeParamsV2ByABI} from '../utils/abi';
-import {ContractOptions as OtherContractOptions} from './contract';
-import {ResourceT, ILog} from './trx';
-import _CallbackT from '../utils/typing';
+import utils from '../utils';
 import {WithTronwebAndInjectpromise} from '../utils/_base';
+import {encodeParamsV2ByABI} from '../utils/abi';
+import {ADDRESS_PREFIX_REGEX} from '../utils/address';
+import {AbiCoder} from '../utils/ethersUtils';
+import _CallbackT from '../utils/typing';
+import {ContractOptions as OtherContractOptions} from './contract';
 import {IAbi} from './contract';
+import {ILog, ResourceT} from './trx';
 
 const INVALID_RESOURCE_MESSAGE =
     'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY';

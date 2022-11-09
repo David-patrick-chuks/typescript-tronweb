@@ -1,12 +1,17 @@
-import {ADDRESS_PREFIX, ADDRESS_PREFIX_BYTE, ADDRESS_SIZE} from './address';
-import {base64EncodeToString} from './code';
-import {base64DecodeFromString, hexStr2byteArray} from './code';
-import {encode58, decode58} from './base58';
-import {byte2hexStr, byteArray2hexStr} from './bytes';
 import {ec as EC} from 'elliptic';
-import {keccak256, sha256 as ethSha256, SigningKey} from './ethersUtils';
+
+import {ISignedTransaction, ITransaction} from '../lib/transactionBuilder';
+import {ADDRESS_PREFIX, ADDRESS_PREFIX_BYTE, ADDRESS_SIZE} from './address';
+import {decode58, encode58} from './base58';
+import {byte2hexStr, byteArray2hexStr} from './bytes';
+import {
+    base64DecodeFromString,
+    base64EncodeToString,
+    hexStr2byteArray,
+} from './code';
+import {SigningKey, sha256 as ethSha256, keccak256} from './ethersUtils';
 import {TypedDataEncoder} from './typedData';
-import {ITransaction, ISignedTransaction} from '../lib/transactionBuilder';
+
 export {byteArray2hexStr} from './bytes';
 
 export interface IDomain {

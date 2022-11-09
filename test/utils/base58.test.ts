@@ -1,4 +1,5 @@
 import {assert} from 'chai';
+
 import {createInstance} from '../helpers/tronWebBuilder';
 
 describe('TronWeb.utils.base58', function () {

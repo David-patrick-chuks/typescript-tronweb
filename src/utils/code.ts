@@ -1,10 +1,10 @@
 import {
-    byte2hexStr,
-    bytesToString,
-    hextoString,
-    byteArray2hexStr,
     base64DecodeFromString,
     base64EncodeToString,
+    byte2hexStr,
+    byteArray2hexStr,
+    bytesToString,
+    hextoString,
 } from './bytes';
 
 export const bin2String = bytesToString;

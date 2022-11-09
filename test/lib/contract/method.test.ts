@@ -1,13 +1,13 @@
 import {assert} from 'chai';
-import assertThrow from '../../helpers/assertThrow';
-import broadcaster from '../../helpers/broadcaster';
-import tronWebBuilder from '../../helpers/tronWebBuilder';
-import {TronWeb, IAccts} from '../../helpers/tronWebBuilder';
 
 import {
     testRevert as testRevertContract,
     testSetVal as testSetValContract,
 } from '../../fixtures/contracts';
+import assertThrow from '../../helpers/assertThrow';
+import broadcaster from '../../helpers/broadcaster';
+import tronWebBuilder from '../../helpers/tronWebBuilder';
+import {IAccts, TronWeb} from '../../helpers/tronWebBuilder';
 
 describe('#contract.method', function () {
     let accounts: IAccts;

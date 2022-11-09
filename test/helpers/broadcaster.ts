@@ -1,5 +1,5 @@
-import {createInstance} from '../helpers/tronWebBuilder';
 import {ITransaction} from '../../src/lib/transactionBuilder';
+import {createInstance} from '../helpers/tronWebBuilder';
 
 async function broadcastVerbose<T extends ITransaction>(
     func: null,

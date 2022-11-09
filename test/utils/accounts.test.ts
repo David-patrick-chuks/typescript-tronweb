@@ -1,6 +1,7 @@
 import {assert} from 'chai';
-import {createInstance} from '../helpers/tronWebBuilder';
+
 import assertThrow from '../helpers/assertThrow';
+import {createInstance} from '../helpers/tronWebBuilder';
 
 describe('TronWeb.utils.accounts', function () {
     describe('#generateAccount()', function () {

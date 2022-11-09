@@ -1,5 +1,6 @@
-import TronWeb from '../../src';
 import injectpromise from 'injectpromise';
+
+import TronWeb from '../../src';
 
 export class WithTronwebAndInjectpromise {
     tronWeb: TronWeb;

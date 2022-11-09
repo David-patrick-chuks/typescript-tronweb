@@ -1,14 +1,14 @@
 import injectpromise from 'injectpromise';
-import Validator from '../paramValidator';
+
 import TronWeb from '..';
-import {HttpProvider} from './providers';
-import {
-    ITransaction,
-    // ContractOptions,
-    ITriggerContractOptions,
-} from './transactionBuilder';
+import Validator from '../paramValidator';
 import _CallbackT from '../utils/typing';
 import {IMethodSendOptions} from './contract';
+import {HttpProvider} from './providers';
+import {
+    ITransaction, // ContractOptions,
+    ITriggerContractOptions,
+} from './transactionBuilder';
 import {MakeSigned} from './trx';
 
 // ! This file shows [almost] proper overloads for

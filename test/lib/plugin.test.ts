@@ -1,7 +1,8 @@
 import {assert} from 'chai';
-import {default as tronWebBuilder, TronWeb} from '../helpers/tronWebBuilder';
-import GetNowBlock from '../helpers/GetNowBlock';
+
 import BlockLib from '../helpers/BlockLib';
+import GetNowBlock from '../helpers/GetNowBlock';
+import {TronWeb, default as tronWebBuilder} from '../helpers/tronWebBuilder';
 
 describe('TronWeb.lib.plugin', async function () {
     let tronWeb: TronWeb;

@@ -1,6 +1,7 @@
 import {assert} from 'chai';
-import tronWebBuilder from '../helpers/tronWebBuilder';
+
 import {equals, getValues} from '../helpers/testUtils';
+import tronWebBuilder from '../helpers/tronWebBuilder';
 import {loadTests} from '../testcases/src/disk-utils';
 
 describe('TronWeb.utils.abi', function () {

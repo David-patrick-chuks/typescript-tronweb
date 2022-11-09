@@ -1,6 +1,7 @@
 import _ from 'lodash';
-import wait from './wait';
+
 import {createInstance} from './tronWebBuilder';
+import wait from './wait';
 
 export default async function pollAccountFor(
     address,
