@@ -1,3 +1,3 @@
 // @ts-ignore
-import TronWeb from '../../dist/src/index.js';
+import TronWeb from '../../dist/TronWeb.node.js';
 export default TronWeb;
