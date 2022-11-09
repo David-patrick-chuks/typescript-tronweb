@@ -24,6 +24,8 @@ import {
 import {IToken, IExchange, IProposal} from '../../src/lib/trx';
 
 describe('TronWeb.trx', function () {
+    this.retries(2); // We'll fail sometimes anyway - even with docker node
+
     let accounts: IAccts;
     let tronWeb: TronWeb;
 

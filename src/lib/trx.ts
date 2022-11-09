@@ -2041,7 +2041,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
     sendRawTransaction(
         signedTransaction: ITransaction,
         options: _PureObject | undefined | null | string,
-        callback?: _CallbackT<IBroadcastResult>,
+        callback: _CallbackT<IBroadcastResult>,
     ): void;
     sendRawTransaction(
         signedTransaction: ITransaction,
