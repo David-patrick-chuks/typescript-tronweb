@@ -45,9 +45,6 @@ const baseConfig = {
         },
     },
     devtool: 'source-map',
-    node: {
-        fs: 'empty',
-    },
     mode,
 };
 
@@ -91,9 +88,6 @@ module.exports = [
         },
         externals: [externals()],
         target: 'node',
-        node: {
-            fs: 'empty',
-        },
     },
     {
         ...baseConfig,
