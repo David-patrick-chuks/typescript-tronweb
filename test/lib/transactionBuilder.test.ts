@@ -1324,7 +1324,7 @@ describe('TronWeb.transactionBuilder', function () {
     describe('#deleteProposal', async function () {
         let proposals: IProposal[];
 
-        before(async function () {
+        beforeEach(async function () {
             this.timeout(20000);
 
             const parameters = [
@@ -1337,7 +1337,9 @@ describe('TronWeb.transactionBuilder', function () {
                 PRIVATE_KEY,
             );
 
-            proposals = await tronWeb.trx.listProposals();
+            proposals = (await tronWeb.trx.listProposals()).filter(
+                (p) => p.state !== 'CANCELLED',
+            );
         });
 
         after(async function () {
