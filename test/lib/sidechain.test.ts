@@ -34,6 +34,8 @@ import tronWebBuilder from '../helpers/tronWebBuilder';
 import wait from '../helpers/wait';
 
 describe('TronWeb.sidechain [ONLINE]', function () {
+    this.retries(1); // Let it retry once (SERVER_BUSY, etc)
+
     const _tronWeb = tronWebBuilder.createInstanceSide();
     const address = _tronWeb.address.fromPrivateKey(PRIVATE_KEY);
     let tokenId: number;
