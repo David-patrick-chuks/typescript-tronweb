@@ -22,12 +22,11 @@ jobs:
             - name: Run pre-commit
               run: pre-commit run --all-files -v
 
-    test:
+    test-local:
         runs-on: ubuntu-latest
         strategy:
             matrix:
                 node-version: ['14.x', '16.x', '18.x', '19.x']
-            max-parallel: 1
             fail-fast: false
         services:
             tronnet:
@@ -47,7 +46,28 @@ jobs:
             - name: build
               run: npm i
             - name: run
-              run: npm test
+              run: npm run test -- -g '\[ONLINE\]' --invert
+              env:
+                  PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+
+    test-online:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                node-version: ['14.x', '16.x', '18.x', '19.x']
+            max-parallel: 1
+            fail-fast: false
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v3
+              with:
+                  node-version: ${{ matrix.node-version }}
+            - name: build
+              run: npm i
+            - name: run
+              run: npm run test -- -g '\[ONLINE\]'
               env:
                   PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
 

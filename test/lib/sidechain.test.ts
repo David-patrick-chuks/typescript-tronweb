@@ -33,7 +33,7 @@ import {
 import tronWebBuilder from '../helpers/tronWebBuilder';
 import wait from '../helpers/wait';
 
-describe('TronWeb.sidechain', function () {
+describe('TronWeb.sidechain [ONLINE]', function () {
     const _tronWeb = tronWebBuilder.createInstanceSide();
     const address = _tronWeb.address.fromPrivateKey(PRIVATE_KEY);
     let tokenId: number;
