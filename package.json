@@ -9,6 +9,8 @@
         "newaccount": "npx ts-node test/helpers/newAccounts 50",
         "do-test": "TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\"}' npx nyc mocha --colors -r ts-node/register -r source-map-support/register --timeout 180000",
         "test": "npm run-script newaccount && npm run-script do-test 'test/*/**.test.ts'",
+        "test:local": "npm run-script newaccount && npm run-script do-test -- -g '\\[ONLINE\\]' --invert 'test/*/**.test.ts'",
+        "test:online": "npm run-script do-test -- -g '\\[ONLINE\\]' 'test/*/**.test.ts'",
         "test:browser": "npm run-script newaccount && npx karma start --single-run --browsers ChromeHeadless",
         "coverage": "npm run-script test:browser && npm run-script test",
         "btest": "npm run build:dev && npm run test"

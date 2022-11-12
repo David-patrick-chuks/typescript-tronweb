@@ -46,7 +46,7 @@ jobs:
             - name: build
               run: npm i
             - name: run
-              run: npm run test -- -g '\[ONLINE\]' --invert
+              run: npm run test:local
               env:
                   PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
 
@@ -67,7 +67,7 @@ jobs:
             - name: build
               run: npm i
             - name: run
-              run: npm run test -- -g '\[ONLINE\]'
+              run: npm run test:online
               env:
                   PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
 
