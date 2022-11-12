@@ -34,6 +34,18 @@ import tronWebBuilder from '../helpers/tronWebBuilder';
 import wait from '../helpers/wait';
 
 describe('TronWeb.sidechain', function () {
+    const _tronWeb = tronWebBuilder.createInstanceSide();
+    const address = _tronWeb.address.fromPrivateKey(PRIVATE_KEY);
+    let tokenId: number;
+
+    before(async function () {
+        tokenId = Date.now();
+        const contractInstance = await _tronWeb
+            .contract()
+            .at(CONTRACT_ADDRESS721);
+
+        await contractInstance.mint(address, tokenId).send(PRIVATE_KEY);
+    });
     describe('#deposit', function () {
         describe('#depositTrx()', function () {
             const tronWeb = tronWebBuilder.createInstanceSide();
@@ -293,7 +305,6 @@ describe('TronWeb.sidechain', function () {
                 const contractInstance = await tronWeb
                     .contract()
                     .at(CONTRACT_ADDRESS20);
-                const address = tronWeb.address.fromPrivateKey(PRIVATE_KEY);
 
                 const dataBefore = await contractInstance
                     .balanceOf(address)
@@ -416,11 +427,9 @@ describe('TronWeb.sidechain', function () {
             const tronWeb = tronWebBuilder.createInstanceSide();
 
             it('should check the trc721 balance after depositTrc721', async function () {
-                const address = tronWeb.address.fromPrivateKey(PRIVATE_KEY);
-
                 // Approve
                 await tronWeb.sidechain!.approveTrc721(
-                    TRC721_ID,
+                    tokenId,
                     FEE_LIMIT,
                     CONTRACT_ADDRESS721,
                     {
@@ -442,7 +451,7 @@ describe('TronWeb.sidechain', function () {
 
                 // Deposit
                 const [txID] = await tronWeb.sidechain!.depositTrc721(
-                    TRC721_ID,
+                    tokenId,
                     DEPOSIT_FEE,
                     FEE_LIMIT,
                     CONTRACT_ADDRESS721,
@@ -800,7 +809,6 @@ describe('TronWeb.sidechain', function () {
                     const contractInstance = await tronWeb
                         .contract()
                         .at(CONTRACT_ADDRESS20);
-                    const address = tronWeb.address.fromPrivateKey(PRIVATE_KEY);
                     const dataBefore = await contractInstance
                         .balanceOf(address)
                         .call();
@@ -916,8 +924,6 @@ describe('TronWeb.sidechain', function () {
                 const tronWeb = tronWebBuilder.createInstanceSide();
 
                 it('withdraw trc721 from side chain to main chain', async function () {
-                    const address = tronWeb.address.fromPrivateKey(PRIVATE_KEY);
-
                     // check the trc721 balance of mainchain before deposit
                     const contractInstance = await tronWeb
                         .contract()
@@ -929,7 +935,7 @@ describe('TronWeb.sidechain', function () {
 
                     // Deposit
                     const [txID] = await tronWeb.sidechain!.withdrawTrc721(
-                        TRC721_ID,
+                        tokenId,
                         DEPOSIT_FEE,
                         FEE_LIMIT,
                         ADDRESS721_MAPPING,
