@@ -189,7 +189,7 @@ describe('TronWeb.utils', function () {
                 resourceNode: 'resourceNode',
             };
 
-            const mapped = tronWeb.utils.mapEvent(event);
+            const mapped = tronWeb.utils.mapEvent(event as any);
             for (const key in mapped) assert.equal(mapped[key], expected[key]);
         });
     });

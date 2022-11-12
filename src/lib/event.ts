@@ -6,6 +6,29 @@ import _CallbackT from '../utils/typing';
 import {ContractOptions} from './contract';
 import * as providers from './providers';
 
+export interface IEventResponse {
+    block_number: number;
+    block_timestamp: number;
+    contract_address: string;
+    event_name: string;
+    transaction_id: string;
+    result: Record<string, unknown> | unknown[];
+    resource_Node?: string;
+    _unconfirmed?: boolean;
+    _fingerprint?: string;
+}
+export interface IEvent {
+    block: number;
+    timestamp: number;
+    contract: string;
+    name: string;
+    transaction: string;
+    result: Record<string, unknown> | unknown[];
+    resourceNode?: string;
+    unconfirmed?: boolean;
+    fingerprint?: string;
+}
+
 export default class Event extends WithTronwebAndInjectpromise {
     setServer(
         eventServer: string | providers.HttpProvider | null | undefined,
@@ -34,19 +57,29 @@ export default class Event extends WithTronwebAndInjectpromise {
 
     getEventsByContractAddress(
         contractAddress: string,
-        options?: ContractOptions,
+        options?: ContractOptions & {rawResponse: true},
         callback?: undefined,
-    ): Promise<any[]>;
+    ): Promise<IEventResponse[]>;
     getEventsByContractAddress(
         contractAddress: string,
-        options: ContractOptions,
-        callback: _CallbackT<any[]>,
+        options?: ContractOptions & {rawResponse?: false},
+        callback?: undefined,
+    ): Promise<IEvent[]>;
+    getEventsByContractAddress(
+        contractAddress: string,
+        options: ContractOptions & {rawResponse: true},
+        callback: _CallbackT<IEventResponse[]>,
+    ): void;
+    getEventsByContractAddress(
+        contractAddress: string,
+        options: ContractOptions & {rawResponse?: false},
+        callback: _CallbackT<IEvent[]>,
     ): void;
     getEventsByContractAddress(
         contractAddress: string,
         options: ContractOptions = {},
-        callback?: _CallbackT<any[]>,
-    ): void | Promise<any[]> {
+        callback?: _CallbackT<IEventResponse[]> | _CallbackT<IEvent[]>,
+    ): void | Promise<IEventResponse[]> | Promise<IEvent[]> {
         /* eslint-disable prefer-const */
         let {
             sinceTimestamp,
@@ -156,17 +189,16 @@ export default class Event extends WithTronwebAndInjectpromise {
                     '/',
                 )}?${querystring.stringify(qs)}`,
             )
-            .then((data: unknown[]) => {
+            .then((data) => {
                 if (!data) return callback('Unknown error occurred');
-
                 if (!utils.isArray(data)) return callback(data);
 
-                return callback(
-                    null,
-                    rawResponse === true
-                        ? data
-                        : data.map((event) => utils.mapEvent(event)),
-                );
+                if (rawResponse) return callback(null, data as any);
+                else
+                    return callback(
+                        null,
+                        data.map((event) => utils.mapEvent(event)) as any,
+                    );
             })
             .catch((err: any) =>
                 callback((err.response && err.response.data) || err),
@@ -175,30 +207,34 @@ export default class Event extends WithTronwebAndInjectpromise {
 
     getEventsByTransactionID(
         transactionID: string,
-        options?: {rawResponse?: boolean},
+        options?: {rawResponse: true},
         callback?: undefined,
-    ): Promise<any[]>;
+    ): Promise<IEventResponse[]>;
     getEventsByTransactionID(
         transactionID: string,
-        options: {rawResponse?: boolean},
-        callback: _CallbackT<any[]>,
+        options?: {rawResponse?: false},
+        callback?: undefined,
+    ): Promise<IEvent[]>;
+    getEventsByTransactionID(
+        transactionID: string,
+        options: {rawResponse: true},
+        callback: _CallbackT<IEventResponse[]>,
     ): void;
     getEventsByTransactionID(
         transactionID: string,
-        options: {rawResponse?: boolean} | _CallbackT<any> = {},
-        callback?: _CallbackT<any[]>,
-    ): void | Promise<any[]> {
-        if (utils.isFunction(options)) {
-            callback = options;
-            options = {};
-        }
-        const actualOptions = options as {rawResponse?: boolean};
-
+        options: {rawResponse?: false},
+        callback: _CallbackT<IEvent[]>,
+    ): void;
+    getEventsByTransactionID(
+        transactionID: string,
+        options: {rawResponse?: boolean} = {},
+        callback?: _CallbackT<IEventResponse[]> | _CallbackT<IEvent[]>,
+    ): void | Promise<IEventResponse[]> | Promise<IEvent[]> {
         if (!callback || !utils.isFunction(callback))
             return this.injectPromise(
                 this.getEventsByTransactionID,
                 transactionID,
-                actualOptions,
+                options,
             );
 
         if (!this.tronWeb.eventServer)
@@ -206,18 +242,17 @@ export default class Event extends WithTronwebAndInjectpromise {
 
         return this.tronWeb.eventServer
             .request(`event/transaction/${transactionID}`)
-            .then((data: unknown[]) => {
+            .then((data) => {
                 if (!callback) return null;
 
                 if (!data) return callback('Unknown error occurred');
-
                 if (!utils.isArray(data)) return callback(data);
 
                 return callback(
                     null,
-                    actualOptions.rawResponse === true
+                    options.rawResponse === true
                         ? data
-                        : data.map((event) => utils.mapEvent(event)),
+                        : (data.map((event) => utils.mapEvent(event)) as any),
                 );
             })
             .catch(

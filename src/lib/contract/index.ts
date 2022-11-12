@@ -1,7 +1,12 @@
 import TronWeb from '../..';
 import {WithTronwebAndInjectpromise} from '../../../src/utils/_base';
+import {
+    SmartContract_ABI_Entry_StateMutabilityType as IAbiStateMutability,
+    SmartContract_ABI_Entry_EntryType as IAbiType,
+} from '../../proto/core/contract/smart_contract';
 import utils from '../../utils';
 import _CallbackT from '../../utils/typing';
+import {IEvent} from '../event';
 import {ContractOptions as ExtendedContractOptions} from '../transactionBuilder';
 import Method from './method';
 
@@ -16,11 +21,10 @@ export interface IAbiItem {
 export interface IEventAbiItem extends IAbiItem {
     indexed: boolean;
 }
-// FIXME: split into several depending on stateMutability
 export interface IFuncAbi {
     name: string;
     type: 'function' | 'constructor' | 'receive' | 'fallback';
-    stateMutability: 'pure' | 'view' | 'nonpayable' | 'payable';
+    stateMutability: IAbiStateMutability;
     inputs: IAbiItem[];
     outputs: IAbiItem[];
     constant?: boolean;
@@ -61,8 +65,8 @@ export interface ContractOptions {
 class _Contract extends WithTronwebAndInjectpromise {
     address: string | null;
     abi: IAbi[];
-    eventListener: NodeJS.Timer | null;
-    eventCallback: ((event: unknown) => void) | null;
+    eventListener: NodeJS.Timer | null | undefined;
+    eventCallback: ((event: IEvent) => void) | null | undefined;
     bytecode: unknown;
     deployed: boolean;
     lastBlock: unknown;
@@ -97,10 +101,12 @@ class _Contract extends WithTronwebAndInjectpromise {
     async _getEvents(options: ContractOptions = {}) {
         if (!this.address)
             throw new Error('Contract is not configured with an address');
+        if (options.rawResponse)
+            throw new Error('Cannot parse raw response here.');
 
         const events = await this.tronWeb.event.getEventsByContractAddress(
             this.address,
-            options,
+            options as ContractOptions & {rawResponse?: false},
         );
         const [latestEvent] = events.sort((a, b) => b.block - a.block);
         const newEvents = events.filter((event, index) => {
@@ -133,7 +139,7 @@ class _Contract extends WithTronwebAndInjectpromise {
 
     async _startEventListener(
         options: ContractOptions = {},
-        callback: _CallbackT<any>,
+        callback?: (event: IEvent) => void,
     ) {
         // if (utils.isFunction(options)) {
         //     callback = options;
@@ -321,11 +327,7 @@ class _Contract extends WithTronwebAndInjectpromise {
             this.deployed = true;
 
             this.loadAbi(
-                contract.abi
-                    ? contract.abi.entrys
-                        ? contract.abi.entrys
-                        : []
-                    : [],
+                contract.abi?.entrys ? (contract.abi.entrys as IAbi[]) : [],
             );
 
             return callback(null, this);

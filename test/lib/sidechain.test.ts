@@ -60,12 +60,18 @@ describe('TronWeb.sidechain', function () {
                 );
                 assert.equal(txID.length, 64);
 
-                await wait(5);
-                const balanceAfter =
-                    await tronWeb.sidechain!.sidechain.trx.getUnconfirmedBalance();
+                while (true) {
+                    const balanceAfter =
+                        await tronWeb.sidechain!.sidechain.trx.getUnconfirmedBalance();
 
-                assert.equal(balanceBefore + callValue, balanceAfter);
-            });
+                    try {
+                        assert.equal(balanceBefore + callValue, balanceAfter);
+                        break;
+                    } catch {
+                        await wait(5);
+                    }
+                }
+            }).timeout(5 * 60_000);
 
             it('deposit trx from main chain to side chain', async function () {
                 // TODO: is it possible to define a constructor such that
@@ -154,15 +160,20 @@ describe('TronWeb.sidechain', function () {
                 );
                 assert.equal(txID.length, 64);
 
-                await wait(10);
-                const dataAfter =
-                    await tronWeb.sidechain!.sidechain.trx.getUnconfirmedAccount();
-                const balanceAfter = dataAfter.assetV2.filter(
-                    (item) => item.key === TOKEN_ID.toString(),
-                )[0].value;
-
-                assert.equal(balanceBefore + tokenValue, balanceAfter);
-            });
+                while (true) {
+                    const dataAfter =
+                        await tronWeb.sidechain!.sidechain.trx.getUnconfirmedAccount();
+                    const balanceAfter = dataAfter.assetV2.filter(
+                        (item) => item.key === TOKEN_ID.toString(),
+                    )[0].value;
+                    try {
+                        assert.equal(balanceBefore + tokenValue, balanceAfter);
+                        break;
+                    } catch {
+                        await wait(5);
+                    }
+                }
+            }).timeout(5 * 60_000);
 
             it('deposit trc10 from main chain to side chain', async function () {
                 const txID = await tronWeb.sidechain!.depositTrc10(
@@ -303,14 +314,19 @@ describe('TronWeb.sidechain', function () {
                 );
                 assert.equal(txID.length, 64);
 
-                await wait(10);
-                const dataAfter = await contractInstance
-                    .balanceOf(address)
-                    .call();
-                const balanceAfter = parseInt(dataAfter._hex, 16);
-
-                assert.equal(balanceBefore - num, balanceAfter);
-            }).timeout(0);
+                while (true) {
+                    const dataAfter = await contractInstance
+                        .balanceOf(address)
+                        .call();
+                    const balanceAfter = parseInt(dataAfter._hex, 16);
+                    try {
+                        assert.equal(balanceBefore - num, balanceAfter);
+                        break;
+                    } catch {
+                        await wait(5);
+                    }
+                }
+            }).timeout(5 * 60_000);
 
             it('deposit trc20 from main chain to side chain', async function () {
                 const txID = await tronWeb.sidechain!.depositTrc20(
@@ -439,14 +455,19 @@ describe('TronWeb.sidechain', function () {
                 );
                 assert.equal(txID.length, 64);
 
-                await wait(30);
-                const dataAfter = await contractInstance
-                    .balanceOf(address)
-                    .call();
-                const balanceAfter = parseInt(dataAfter._hex, 16);
-
-                assert.equal(balanceBefore - 1, balanceAfter);
-            }).timeout(0);
+                while (true) {
+                    const dataAfter = await contractInstance
+                        .balanceOf(address)
+                        .call();
+                    const balanceAfter = parseInt(dataAfter._hex, 16);
+                    try {
+                        assert.equal(balanceBefore - 1, balanceAfter);
+                        break;
+                    } catch {
+                        await wait(5);
+                    }
+                }
+            }).timeout(5 * 60_000);
         });
     });
 
@@ -547,7 +568,7 @@ describe('TronWeb.sidechain', function () {
                 const checkResult = await tronWeb.trx.getTransactionInfo(txID);
                 if (checkResult && checkResult.result) break;
             }
-        }).timeout(0); // Sometimes very long on 1st (real) call
+        }).timeout(10 * 60_000); // Sometimes very long on 1st (real) call
 
         it('should get the mapping address after mappingTrc721', async function () {
             const sideGatawayInstance = await tronWeb
@@ -575,10 +596,17 @@ describe('TronWeb.sidechain', function () {
                     {shouldPollResponse: true, keepTxID: true},
                 );
                 assert.equal(txID.length, 64);
-                await wait(10);
 
-                const balanceAfter = await tronWeb.trx.getUnconfirmedBalance();
-                assert.equal(balanceBefore + callValue, balanceAfter);
+                while (true) {
+                    const balanceAfter =
+                        await tronWeb.trx.getUnconfirmedBalance();
+                    try {
+                        assert.equal(balanceBefore + callValue, balanceAfter);
+                        break;
+                    } catch {
+                        await wait(5);
+                    }
+                }
             });
 
             it('withdraw trx from side chain to main chain', async function () {
@@ -659,14 +687,19 @@ describe('TronWeb.sidechain', function () {
                     {shouldPollResponse: true, keepTxID: true},
                 );
                 assert.equal(txID.length, 64);
-                await wait(10);
 
-                const dataAfter = await tronWeb.trx.getUnconfirmedAccount();
-                const balanceAfter = dataAfter.assetV2.filter(
-                    (item) => item.key === TOKEN_ID.toString(),
-                )[0].value;
-
-                assert.equal(balanceBefore + tokenValue, balanceAfter);
+                while (true) {
+                    const dataAfter = await tronWeb.trx.getUnconfirmedAccount();
+                    const balanceAfter = dataAfter.assetV2.filter(
+                        (item) => item.key === TOKEN_ID.toString(),
+                    )[0].value;
+                    try {
+                        assert.equal(balanceBefore + tokenValue, balanceAfter);
+                        break;
+                    } catch {
+                        await wait(5);
+                    }
+                }
             });
 
             it('withdraw trc10 from side chain to main chain', async function () {
@@ -782,13 +815,18 @@ describe('TronWeb.sidechain', function () {
                     );
                     assert.equal(txID.length, 64);
 
-                    await wait(10);
-                    const dataAfter = await contractInstance
-                        .balanceOf(address)
-                        .call();
-                    const balanceAfter = parseInt(dataAfter._hex, 16);
-
-                    assert.equal(balanceBefore + num, balanceAfter);
+                    while (true) {
+                        const dataAfter = await contractInstance
+                            .balanceOf(address)
+                            .call();
+                        const balanceAfter = parseInt(dataAfter._hex, 16);
+                        try {
+                            assert.equal(balanceBefore + num, balanceAfter);
+                            break;
+                        } catch {
+                            await wait(5);
+                        }
+                    }
                 });
 
                 it('withdraw trc20 from side chain to main chain', async function () {
@@ -899,13 +937,18 @@ describe('TronWeb.sidechain', function () {
                     );
                     assert.equal(txID.length, 64);
 
-                    await wait(30);
-                    const dataAfter = await contractInstance
-                        .balanceOf(address)
-                        .call();
-                    const balanceAfter = parseInt(dataAfter._hex, 16);
-
-                    assert.equal(balanceBefore + 1, balanceAfter);
+                    while (true) {
+                        const dataAfter = await contractInstance
+                            .balanceOf(address)
+                            .call();
+                        const balanceAfter = parseInt(dataAfter._hex, 16);
+                        try {
+                            assert.equal(balanceBefore + 1, balanceAfter);
+                            break;
+                        } catch {
+                            await wait(5);
+                        }
+                    }
                 });
             });
         });

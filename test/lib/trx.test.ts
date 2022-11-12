@@ -484,13 +484,13 @@ describe('TronWeb.trx', function () {
                     types,
                     value,
                     (err, signature) => {
+                        assert.isTrue(signature!.startsWith('0x'));
                         tronWeb.trx.verifyTypedData(
                             domain,
                             types,
                             value,
-                            signature,
+                            signature!,
                             (err, result) => {
-                                assert.isTrue(signature.startsWith('0x'));
                                 assert.isTrue(result);
                             },
                         );
@@ -583,13 +583,13 @@ describe('TronWeb.trx', function () {
                 const ownerAddress = accounts.hex[ownerIdx];
                 const ownerPk = accounts.pks[ownerIdx];
                 const ownerPermission = {
-                    type: 0,
+                    type: 0 as 0 | 1 | 2,
                     permission_name: 'owner',
                     threshold,
                     keys: [] as {address: string; weight: number}[],
                 };
                 const activePermission = {
-                    type: 2,
+                    type: 2 as 0 | 1 | 2,
                     permission_name: 'active0',
                     threshold,
                     operations:
@@ -1026,14 +1026,14 @@ describe('TronWeb.trx', function () {
             });
 
             it('should multi-sign a transaction with wrong permission id error', async function () {
+                const transaction =
+                    await tronWeb.transactionBuilder.freezeBalance(
+                        10e5,
+                        3,
+                        'BANDWIDTH',
+                        accounts.b58[ownerIdx],
+                    );
                 try {
-                    const transaction =
-                        await tronWeb.transactionBuilder.freezeBalance(
-                            10e5,
-                            3,
-                            'BANDWIDTH',
-                            accounts.b58[ownerIdx],
-                        );
                     await tronWeb.trx.multiSign(
                         transaction,
                         accounts.pks[ownerIdx],
@@ -1105,7 +1105,7 @@ describe('TronWeb.trx', function () {
             it('should get block by block number', async function () {
                 const block = await tronWeb.trx.getBlock('latest');
                 const blockByNumber = await tronWeb.trx.getBlockByNumber(
-                    block.block_header.raw_data.number,
+                    block.block_header!.raw_data!.number,
                 );
                 assert.equal(block.blockID, blockByNumber.blockID);
             });
@@ -1550,7 +1550,7 @@ describe('TronWeb.trx', function () {
 
             it('should get transaction from block', async function () {
                 this.timeout(10000);
-                for (let i = currBlockNum; i < currBlockNum + 3; )
+                for (let i = currBlockNum; i < currBlockNum + 3; ) {
                     try {
                         const tx = await tronWeb.trx.getTransactionFromBlock(
                             i,
@@ -1558,6 +1558,7 @@ describe('TronWeb.trx', function () {
                         );
                         // assert.equal(tx.txID, transaction.txID);
                         assert.isDefined(tx.txID);
+                        currBlockNum = i;
                         break;
                     } catch (e) {
                         if (e === 'Transaction not found in block') {
@@ -1571,6 +1572,7 @@ describe('TronWeb.trx', function () {
                             break;
                         }
                     }
+                }
             });
 
             it('should throw transaction not found error by transaction from block', async function () {

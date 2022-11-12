@@ -12,6 +12,8 @@ import {
 import {SigningKey, sha256 as ethSha256, keccak256} from './ethersUtils';
 import {TypedDataEncoder} from './typedData';
 
+// import {TransactionExtention as ITransactionExtention} from '../proto/api/api'
+
 export {byteArray2hexStr} from './bytes';
 
 export interface IDomain {

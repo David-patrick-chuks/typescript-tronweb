@@ -11,7 +11,7 @@ export default class GetNowBlock extends WithTronwebAndInjectpromise {
         this.tronWeb.fullNode
             .request('wallet/getnowblock')
             .then((block) => {
-                block.fromPlugin = true;
+                (block as any).fromPlugin = true;
                 callback(null, block);
             })
             .catch((err) => callback(err));

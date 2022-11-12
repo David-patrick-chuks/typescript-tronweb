@@ -123,8 +123,7 @@ describe('TronWeb.lib.event', async function () {
             let events;
             while (true) {
                 events = await tronWeb.event.getEventsByTransactionID(txId);
-                if (events.length) break;
-
+                if (events.length && !events[0].unconfirmed) break;
                 await wait(0.5);
             }
 

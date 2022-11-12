@@ -205,9 +205,10 @@ export default class SideChain<T extends TronWeb> {
                 return callback(signWeight.result.message);
 
             let foundKey = false;
-            signWeight.permission.keys.map((key) => {
-                if (key.address === address) foundKey = true;
-            });
+            if (signWeight.permission)
+                signWeight.permission.keys.map((key) => {
+                    if (key.address === address) foundKey = true;
+                });
 
             if (!foundKey)
                 return callback(privateKey + ' has no permission to sign');
@@ -302,12 +303,13 @@ export default class SideChain<T extends TronWeb> {
             } catch (ex) {
                 callback(ex);
             }
+            return;
         }
 
         if (!this.utils.isObject(transaction))
             return callback('Invalid transaction provided');
 
-        if (!multisig && transaction.signature)
+        if (!multisig && (transaction as ITransaction).signature)
             return callback('Transaction is already signed');
 
         try {
@@ -318,6 +320,7 @@ export default class SideChain<T extends TronWeb> {
                 if (
                     address !==
                     this.sidechain.address.toHex(
+                        // @ts-ignore
                         transaction.raw_data.contract[0].parameter.value
                             .owner_address,
                     )
@@ -328,7 +331,7 @@ export default class SideChain<T extends TronWeb> {
             }
             return callback(
                 null,
-                this.signTransaction(privateKey, transaction),
+                this.signTransaction(privateKey, transaction) as MakeSigned<T>,
             );
         } catch (ex) {
             callback(ex);

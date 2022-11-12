@@ -7,6 +7,7 @@ import {version} from '../package.json';
 import {default as Contract, IAbi} from './lib/contract';
 import {ContractOptions} from './lib/contract';
 import Event from './lib/event';
+import {IEvent, IEventResponse} from './lib/event';
 import Plugin from './lib/plugin';
 import providers from './lib/providers';
 import {HttpProvider} from './lib/providers';
@@ -214,7 +215,7 @@ export default class TronWeb extends EventEmitter {
     async getFullnodeVersion() {
         try {
             const nodeInfo = await this.trx.getNodeInfo();
-            this.fullnodeVersion = nodeInfo.configNodeInfo.codeVersion;
+            this.fullnodeVersion = nodeInfo.configNodeInfo?.codeVersion!;
             if (this.fullnodeVersion.split('.').length === 2)
                 this.fullnodeVersion += '.0';
         } catch (err) {
@@ -385,19 +386,29 @@ export default class TronWeb extends EventEmitter {
 
     getEventResult(
         contractAddress: string,
-        options: ContractOptions,
+        options: ContractOptions & {rawResponse: true},
         callback?: undefined,
-    ): Promise<any>;
+    ): Promise<IEventResponse>;
     getEventResult(
         contractAddress: string,
-        options: ContractOptions,
-        callback: _CallbackT<any>,
+        options: ContractOptions & {rawResponse?: false},
+        callback?: undefined,
+    ): Promise<IEvent>;
+    getEventResult(
+        contractAddress: string,
+        options: ContractOptions & {rawResponse: true},
+        callback: _CallbackT<IEventResponse>,
+    ): void;
+    getEventResult(
+        contractAddress: string,
+        options: ContractOptions & {rawResponse?: false},
+        callback: _CallbackT<IEvent>,
     ): void;
     getEventResult(
         contractAddress: string,
         options: ContractOptions = {},
-        callback?: _CallbackT<any>,
-    ): void | Promise<any> {
+        callback?: _CallbackT<IEvent> | _CallbackT<IEventResponse>,
+    ): void | Promise<IEvent> | Promise<IEventResponse> {
         // getEventResult(...params) {
         // if (typeof params[1] !== 'object') {
         //     params[1] = {
@@ -422,47 +433,43 @@ export default class TronWeb extends EventEmitter {
         //     }
         // }
 
-        if (callback)
-            return this.event.getEventsByContractAddress(
-                contractAddress,
-                options,
-                callback,
-            );
-
         return this.event.getEventsByContractAddress(
             contractAddress,
-            options,
-            callback,
-        );
+            options as any,
+            callback as any,
+        ) as any;
     }
 
     getEventByTransactionID(
         transactionID: string,
-        options: {rawResponse?: boolean},
+        options: ContractOptions & {rawResponse: true},
         callback?: undefined,
-    ): Promise<any>;
+    ): Promise<IEventResponse>;
     getEventByTransactionID(
         transactionID: string,
-        options: {rawResponse?: boolean},
-        callback: _CallbackT<any>,
+        options: ContractOptions & {rawResponse?: false},
+        callback?: undefined,
+    ): Promise<IEvent>;
+    getEventByTransactionID(
+        transactionID: string,
+        options: ContractOptions & {rawResponse: true},
+        callback: _CallbackT<IEventResponse>,
     ): void;
     getEventByTransactionID(
         transactionID: string,
-        options: {rawResponse?: boolean} = {},
-        callback?: _CallbackT<any>,
-    ): void | Promise<any> {
-        if (callback)
-            return this.event.getEventsByTransactionID(
-                transactionID,
-                options,
-                callback,
-            );
-
+        options: ContractOptions & {rawResponse?: false},
+        callback: _CallbackT<IEvent>,
+    ): void;
+    getEventByTransactionID(
+        transactionID: string,
+        options: ContractOptions = {},
+        callback?: _CallbackT<IEvent> | _CallbackT<IEventResponse>,
+    ): void | Promise<IEvent> | Promise<IEventResponse> {
         return this.event.getEventsByTransactionID(
             transactionID,
-            options,
-            callback,
-        );
+            options as any,
+            callback as any,
+        ) as any;
     }
 
     contract(abi: IAbi[] = [], address?: string): Contract {

@@ -80,7 +80,7 @@ describe('TronWeb Instance', function () {
 
             const tronWeb = new TronWeb(fullNode, solidityNode);
 
-            assert.equal(tronWeb.eventServer, false as any);
+            assert.isUndefined(tronWeb.eventServer);
         });
 
         it('should reject an invalid full node URL', function () {
@@ -433,17 +433,18 @@ describe('TronWeb Instance', function () {
             assert.isUndefined(tronWeb.defaultPrivateKey);
             assert.equal(
                 tronWeb.defaultAddress.hex,
-                '41928c9af0651632157ef27a2cf17ca72c575a4d28',
+                ADDRESS_HEX.substr(0, ADDRESS_HEX.length - 1) + '8',
             );
             assert.equal(
                 tronWeb.defaultAddress.base58,
-                'TPL66VK2gCXNCD7EJg9pgJRfqcRbnn4zcp',
+                tronWeb.address.fromHex(
+                    ADDRESS_HEX.substr(0, ADDRESS_HEX.length - 1) + '8',
+                ),
             );
         });
 
         it('should not reset the private key if the address matches', function () {
             const tronWeb = tronWebBuilder.createInstance();
-
             tronWeb.setAddress(ADDRESS_BASE58);
 
             assert.equal(tronWeb.defaultPrivateKey, PRIVATE_KEY);
@@ -455,7 +456,9 @@ describe('TronWeb Instance', function () {
             const tronWeb = tronWebBuilder.createInstance();
 
             tronWeb.on('addressChanged', ({hex, base58}) => {
-                done(hex === ADDRESS_HEX && base58 === ADDRESS_BASE58);
+                assert.equal(hex, ADDRESS_HEX);
+                assert.equal(base58, ADDRESS_BASE58);
+                done();
             });
 
             tronWeb.setAddress(ADDRESS_BASE58);

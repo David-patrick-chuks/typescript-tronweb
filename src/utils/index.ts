@@ -1,6 +1,8 @@
 import BigNumber from 'bignumber.js';
 import validator from 'validator';
 
+import {IAbiItem} from '../lib/contract/index';
+import type {IEvent, IEventResponse} from '../lib/event';
 import * as abi from './abi';
 import * as accounts from './accounts';
 import {ADDRESS_PREFIX} from './address';
@@ -21,14 +23,14 @@ const utils = {
         });
     },
 
-    isObject(obj: any): obj is object {
+    isObject<T extends object>(obj: unknown): obj is T {
         return (
             obj === Object(obj) &&
             Object.prototype.toString.call(obj) !== '[object Array]'
         );
     },
 
-    isArray(array: any): array is Array<any> {
+    isArray(array: any): array is unknown[] {
         return Array.isArray(array);
     },
 
@@ -94,8 +96,7 @@ const utils = {
         );
     },
 
-    // FIXME: need a structure
-    mapEvent(event: any): any {
+    mapEvent(event: IEventResponse): IEvent {
         const data = {
             block: event.block_number,
             timestamp: event.block_timestamp,
@@ -112,29 +113,35 @@ const utils = {
         return data;
     },
 
-    // FIXME: need a structure
-    parseEvent(event: any, {inputs: abi}: {inputs: any[]}): any {
+    parseEvent(event: IEvent, {inputs: abi}: {inputs: IAbiItem[]}): IEvent {
         if (!event.result) return event;
 
-        if (this.isObject(event.result))
+        if (this.isArray(event.result))
+            event.result = event.result.reduce(
+                (obj: Record<string, unknown>, result, index) => {
+                    const {name, type} = abi[index];
+
+                    if (type === 'address')
+                        result =
+                            ADDRESS_PREFIX +
+                            (result as string).substr(2).toLowerCase();
+
+                    obj[name] = result;
+
+                    return obj;
+                },
+                {},
+            );
+        else if (this.isObject(event.result))
             for (let i = 0; i < abi.length; i++) {
                 const obj = abi[i];
                 if (obj.type === 'address' && obj.name in event.result)
                     event.result[obj.name] =
                         ADDRESS_PREFIX +
-                        event.result[obj.name].substr(2).toLowerCase();
+                        (event.result[obj.name] as string)
+                            .substr(2)
+                            .toLowerCase();
             }
-        else if (this.isArray(event.result))
-            event.result = event.result.reduce((obj, result, index) => {
-                const {name, type} = abi[index];
-
-                if (type === 'address')
-                    result = ADDRESS_PREFIX + result.substr(2).toLowerCase();
-
-                obj[name] = result;
-
-                return obj;
-            }, {});
 
         return event;
     },

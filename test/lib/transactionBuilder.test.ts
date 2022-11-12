@@ -1260,7 +1260,7 @@ describe('TronWeb.transactionBuilder', function () {
                 );
                 assert.equal(
                     transaction.raw_data.contract[0].Permission_id || 0,
-                    input[2] ? input[2]['permissionId'] : 0,
+                    input[2] ? input[2].permissionId : 0,
                 );
             }
         });
@@ -1338,7 +1338,7 @@ describe('TronWeb.transactionBuilder', function () {
             );
 
             proposals = (await tronWeb.trx.listProposals()).filter(
-                (p) => p.state !== 'CANCELLED',
+                (p) => p.state !== 'CANCELED',
             );
         });
 
@@ -1697,7 +1697,7 @@ describe('TronWeb.transactionBuilder', function () {
         });
     });
 
-    describe('#triggerComfirmedConstantContract', async function () {
+    describe('#triggerConfirmedConstantContract', async function () {
         let transaction;
         before(async function () {
             this.timeout(20000);
@@ -1711,14 +1711,11 @@ describe('TronWeb.transactionBuilder', function () {
             );
             await broadcaster(null, accounts.pks[6], transaction);
             while (true) {
-                const tx = await tronWeb.trx.getTransactionInfo(
-                    transaction.txID,
-                );
-                if (Object.keys(tx).length === 0) {
-                    await wait(3);
-                    continue;
-                } else {
+                try {
+                    await tronWeb.trx.getConfirmedTransaction(transaction.txID);
                     break;
+                } catch {
+                    await wait(3);
                 }
             }
         });

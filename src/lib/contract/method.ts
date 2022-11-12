@@ -416,7 +416,7 @@ export default class Method extends WithTronwebAndInjectpromise {
             return callback('No event server configured');
 
         let listener: NodeJS.Timer | null = null;
-        let lastBlock = false;
+        let lastBlock: number | null = null;
         const since = Date.now() - 1000;
 
         const getEvents = async () => {
