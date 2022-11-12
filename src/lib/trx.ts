@@ -1801,14 +1801,11 @@ export default class Trx extends WithTronwebAndInjectpromise {
                 permissionId,
             );
 
-            // Changed by me
-            if (signWeight.result.code !== 'ENOUGH_PERMISSION')
-                return callback(signWeight.result.message);
-
             let foundKey = false;
-            signWeight.permission!.keys.map((key) => {
-                if (key.address === address) foundKey = true;
-            });
+            signWeight.permission &&
+                signWeight.permission.keys.map((key) => {
+                    if (key.address === address) foundKey = true;
+                });
 
             if (!foundKey)
                 return callback(privateKey + ' has no permission to sign');
@@ -1902,9 +1899,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
             !transaction.raw_data ||
             !transaction.raw_data.contract
         )
-            return callback(
-                'Invalid transacParameters<WalletExtension[typeof walletExtensionMethods[T]]>[0]tion provided',
-            );
+            return callback('Invalid transaction provided');
 
         if (utils.isInteger(permissionId))
             transaction.raw_data.contract[0].Permission_id = parseInt(

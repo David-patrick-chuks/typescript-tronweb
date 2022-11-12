@@ -1039,9 +1039,11 @@ describe('TronWeb.trx', function () {
                         accounts.pks[ownerIdx],
                         1,
                     );
+                    assert.isTrue(false, "Should've raised");
                 } catch (e) {
                     assert.isTrue(
-                        (e as string).indexOf("permission isn't exit") !== -1,
+                        (e as string).indexOf('has no permission to sign') !==
+                            -1,
                     );
                 }
             });
