@@ -1,20 +1,16 @@
 import {Base64} from './base64';
 
-export function byte2hexStr(byte) {
-    if (typeof byte !== 'number') throw new Error('Input must be a number');
+export type SomeBytes = Uint8Array | Buffer | number[];
 
+export function byte2hexStr(byte: number) {
+    if (typeof byte !== 'number') throw new Error('Input must be a number');
     if (byte < 0 || byte > 255) throw new Error('Input must be a byte');
 
     const hexByteMap = '0123456789ABCDEF';
-
-    let str = '';
-    str += hexByteMap.charAt(byte >> 4);
-    str += hexByteMap.charAt(byte & 0x0f);
-
-    return str;
+    return hexByteMap.charAt(byte >> 4) + hexByteMap.charAt(byte & 0x0f);
 }
 
-export function bytesToString(arr) {
+export function bytesToString(arr: SomeBytes | string) {
     if (typeof arr === 'string') return arr;
 
     let str = '';
@@ -40,33 +36,32 @@ export function bytesToString(arr) {
     return str;
 }
 
-export function hextoString(hex) {
+export function hextoString(hex: string) {
     const arr = hex.replace(/^0x/, '').split('');
     let out = '';
 
     for (let i = 0; i < arr.length / 2; i++) {
-        const tmp = `0x${arr[i * 2]}${arr[i * 2 + 1]}`;
-        // FIXME: this should be equal to 16*arr[i*2] + arr[i*2 + 1]
-        // @ts-ignore
+        // const tmp = `0x${arr[i * 2]}${arr[i * 2 + 1]}`;
+        const tmp = 16 * +arr[i * 2] + +arr[i * 2 + 1];
         out += String.fromCharCode(tmp);
     }
 
     return out;
 }
 
-export function byteArray2hexStr(byteArray) {
+export function byteArray2hexStr(byteArray: SomeBytes) {
     let str = '';
 
-    for (let i = 0; i < byteArray.length; i++) str += byte2hexStr(byteArray[i]);
+    for (const b of byteArray) str += byte2hexStr(b);
 
     return str;
 }
 
-export function base64DecodeFromString(string64) {
+export function base64DecodeFromString(string64: string) {
     return new Base64().decodeToByteArray(string64);
 }
 
-export function base64EncodeToString(bytes) {
+export function base64EncodeToString(bytes: SomeBytes) {
     const b = new Base64();
     const string64 = b.encodeIgnoreUtf8(bytes);
 

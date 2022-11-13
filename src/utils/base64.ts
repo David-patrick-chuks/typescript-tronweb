@@ -1,3 +1,5 @@
+import type {SomeBytes} from './bytes';
+
 // FIXME: verify that it works after conversion
 // May need static modifiers
 
@@ -29,8 +31,7 @@ export class Base64 {
             if (isNaN(chr2)) enc3 = enc4 = 64;
             else if (isNaN(chr3)) enc4 = 64;
 
-            output =
-                output +
+            output +=
                 this._keyStr.charAt(enc1) +
                 this._keyStr.charAt(enc2) +
                 this._keyStr.charAt(enc3) +
@@ -40,7 +41,7 @@ export class Base64 {
         return output;
     }
 
-    encodeIgnoreUtf8(inputBytes: Uint8Array | Buffer): string {
+    encodeIgnoreUtf8(inputBytes: SomeBytes): string {
         let output = '';
         let chr1;
         let chr2;
@@ -142,18 +143,11 @@ export class Base64 {
     }
 
     private _out2ByteArray(utftext: string): Uint8Array {
-        const byteArray = new Array(utftext.length);
-
-        let i = 0;
-        let c = 0;
-
-        while (i < utftext.length) {
-            c = utftext.charCodeAt(i);
-            byteArray[i] = c;
-            i++;
+        const byteArray = new Uint8Array(utftext.length);
+        for (let i = 0; i < utftext.length; i++) {
+            byteArray[i] = utftext.charCodeAt(i);
         }
-
-        return new Uint8Array(byteArray);
+        return byteArray;
     }
 
     private _utf8_encode(string: string): string {

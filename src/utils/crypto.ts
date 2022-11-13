@@ -4,6 +4,7 @@ import {ISignedTransaction, ITransaction} from '../lib/transactionBuilder';
 import {ADDRESS_PREFIX, ADDRESS_PREFIX_BYTE, ADDRESS_SIZE} from './address';
 import {decode58, encode58} from './base58';
 import {byte2hexStr, byteArray2hexStr} from './bytes';
+import type {SomeBytes} from './bytes';
 import {
     base64DecodeFromString,
     base64EncodeToString,
@@ -25,7 +26,7 @@ export interface IDomain {
 export type TypedDataTypes = Record<string, {name: string; type: string}[]>;
 
 export function getBase58CheckAddress(
-    addressBytes: Uint8Array | Buffer | number[],
+    addressBytes: SomeBytes | Buffer | number[],
 ) {
     const hash = sha256(sha256(addressBytes));
     let checkSum = hash.slice(0, 4);
@@ -34,14 +35,13 @@ export function getBase58CheckAddress(
     return encode58(checkSum);
 }
 
-export function decodeBase58Address(base58String) {
-    if (typeof base58String != 'string') return false;
-
-    if (base58String.length <= 4) return false;
+export function decodeBase58Address(base58String: string) {
+    if (typeof base58String !== 'string' || base58String.length <= 4)
+        throw new Error('Invalid address provided');
 
     let address = decode58(base58String);
 
-    if (base58String.length <= 4) return false;
+    if (base58String.length <= 4) throw new Error('Invalid address provided');
 
     const checkSum = address.slice(-4);
 
@@ -56,7 +56,7 @@ export function decodeBase58Address(base58String) {
 }
 
 export function signTransaction(
-    priKeyBytes: string | number[] | Uint8Array | Buffer,
+    priKeyBytes: string | SomeBytes,
     transaction: ITransaction,
 ): ISignedTransaction {
     if (typeof priKeyBytes === 'string')
@@ -74,11 +74,11 @@ export function signTransaction(
     return transaction as ISignedTransaction;
 }
 
-export function arrayToBase64String(a) {
+export function arrayToBase64String(a: SomeBytes) {
     return btoa(String.fromCharCode(...a));
 }
 
-export function signBytes(privateKey, contents) {
+export function signBytes(privateKey: string | SomeBytes, contents: SomeBytes) {
     if (typeof privateKey === 'string')
         privateKey = hexStr2byteArray(privateKey);
 
@@ -111,15 +111,15 @@ export function _signTypedData(
     return signatureHex;
 }
 
-export function getRowBytesFromTransactionBase64(base64Data) {
-    const bytesDecode = base64DecodeFromString(base64Data);
-    // FIXME: what the hell is it?
-    const transaction =
-        // @ts-ignore
-        proto.protocol.Transaction.deserializeBinary(bytesDecode);
-    const raw = transaction.getRawData();
+export function getRowBytesFromTransactionBase64(base64Data: string) {
+    throw new Error('Sorry, this function is not supported.');
+    // TODO: what the hell is it? Is it needed? Current impl does not work.
+    // const bytesDecode = base64DecodeFromString(base64Data);
+    // const transaction =
+    //     proto.protocol.Transaction.deserializeBinary(bytesDecode);
+    // const raw = transaction.getRawData();
 
-    return raw.serializeBinary();
+    // return raw.serializeBinary();
 }
 
 export function genPriKey() {
@@ -134,7 +134,7 @@ export function genPriKey() {
     return hexStr2byteArray(priKeyHex);
 }
 
-export function computeAddress(pubBytes) {
+export function computeAddress(pubBytes: SomeBytes) {
     if (pubBytes.length === 65) pubBytes = pubBytes.slice(1);
 
     const hash = keccak256(pubBytes).toString().substring(2);
@@ -143,15 +143,15 @@ export function computeAddress(pubBytes) {
     return hexStr2byteArray(addressHex);
 }
 
-export function getAddressFromPriKey(priKeyBytes) {
+export function getAddressFromPriKey(priKeyBytes: SomeBytes) {
     const pubBytes = getPubKeyFromPriKey(priKeyBytes);
     return computeAddress(pubBytes);
 }
 
-export function decode58Check(addressStr) {
+export function decode58Check(addressStr: string) {
     const decodeCheck = decode58(addressStr);
 
-    if (decodeCheck.length <= 4) return false;
+    if (decodeCheck.length <= 4) return null;
     const checkSum = decodeCheck.slice(-4);
 
     const decodeData = decodeCheck.slice(0, decodeCheck.length - 4);
@@ -159,10 +159,10 @@ export function decode58Check(addressStr) {
 
     if (hash.slice(0, 4).join() === checkSum.join()) return decodeData;
 
-    return false;
+    return null;
 }
 
-export function isAddressValid(base58Str) {
+export function isAddressValid(base58Str: string) {
     if (typeof base58Str !== 'string') return false;
 
     if (base58Str.length !== ADDRESS_SIZE) return false;
@@ -181,7 +181,7 @@ export function isAddressValid(base58Str) {
 }
 
 export function getBase58CheckAddressFromPriKeyBase64String(
-    priKeyBase64String,
+    priKeyBase64String: string,
 ) {
     const priKeyBytes = base64DecodeFromString(priKeyBase64String);
     const pubBytes = getPubKeyFromPriKey(priKeyBytes);
@@ -190,40 +190,35 @@ export function getBase58CheckAddressFromPriKeyBase64String(
     return getBase58CheckAddress(addressBytes);
 }
 
-export function getHexStrAddressFromPriKeyBase64String(priKeyBase64String) {
+export function getHexStrAddressFromPriKeyBase64String(
+    priKeyBase64String: string,
+) {
     const priKeyBytes = base64DecodeFromString(priKeyBase64String);
     const pubBytes = getPubKeyFromPriKey(priKeyBytes);
     const addressBytes = computeAddress(pubBytes);
     return byteArray2hexStr(addressBytes);
 }
 
-export function getAddressFromPriKeyBase64String(priKeyBase64String) {
+export function getAddressFromPriKeyBase64String(priKeyBase64String: string) {
     const priKeyBytes = base64DecodeFromString(priKeyBase64String);
     const pubBytes = getPubKeyFromPriKey(priKeyBytes);
     const addressBytes = computeAddress(pubBytes);
     return base64EncodeToString(addressBytes);
 }
 
-export function getPubKeyFromPriKey(priKeyBytes) {
+export function getPubKeyFromPriKey(priKeyBytes: SomeBytes) {
     const ec = new EC('secp256k1');
     const key = ec.keyFromPrivate(priKeyBytes, 'bytes');
     const pubkey = key.getPublic();
-    const x = pubkey.x;
-    const y = pubkey.y;
 
-    let xHex = x.toString('hex');
-
-    while (xHex.length < 64) xHex = `0${xHex}`;
-
-    let yHex = y.toString('hex');
-
-    while (yHex.length < 64) yHex = `0${yHex}`;
+    const xHex = pubkey.x.toString('hex').padStart(64, '0');
+    const yHex = pubkey.y.toString('hex').padStart(64, '0');
 
     const pubkeyHex = `04${xHex}${yHex}`;
     return hexStr2byteArray(pubkeyHex);
 }
 
-export function getECKeySig(hashBytes, priKeyBytes) {
+export function getECKeySig(hashBytes: SomeBytes, priKeyBytes: SomeBytes) {
     const ec = new EC('secp256k1');
     const key = ec.keyFromPrivate(priKeyBytes, 'bytes');
     const signature = key.sign(hashBytes);
@@ -231,22 +226,14 @@ export function getECKeySig(hashBytes, priKeyBytes) {
     const s = signature.s;
     const id = signature.recoveryParam;
 
-    let rHex = r.toString('hex');
-
-    while (rHex.length < 64) rHex = `0${rHex}`;
-
-    let sHex = s.toString('hex');
-
-    while (sHex.length < 64) sHex = `0${sHex}`;
-
+    const rHex = signature.r.toString('hex').padStart(64, '0');
+    const sHex = signature.s.toString('hex').padStart(64, '0');
     const idHex = byte2hexStr(id);
-    const signHex = rHex + sHex + idHex;
-
-    return signHex;
+    return rHex + sHex + idHex;
 }
 export const ECKeySign = getECKeySig; // backwards-compatible alias
 
-export function sha256(msgBytes) {
+export function sha256(msgBytes: SomeBytes) {
     const msgHex = byteArray2hexStr(msgBytes);
     const hashHex = ethSha256('0x' + msgHex).replace(/^0x/, '');
     return hexStr2byteArray(hashHex);
@@ -254,14 +241,14 @@ export function sha256(msgBytes) {
 
 export const SHA256 = sha256; // backwards-compatible alias
 
-export function passwordToAddress(password) {
+export function passwordToAddress(password: string) {
     const com_priKeyBytes = base64DecodeFromString(password);
     const com_addressBytes = getAddressFromPriKey(com_priKeyBytes);
 
     return getBase58CheckAddress(com_addressBytes);
 }
 
-export function pkToAddress(privateKey, strict = false) {
+export function pkToAddress(privateKey: string, strict = false) {
     const com_priKeyBytes = hexStr2byteArray(privateKey, strict);
     const com_addressBytes = getAddressFromPriKey(com_priKeyBytes);
 

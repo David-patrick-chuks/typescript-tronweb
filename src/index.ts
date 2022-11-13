@@ -477,9 +477,8 @@ export default class TronWeb extends EventEmitter {
     }
 
     static get address() {
-        // FIXME: types are baaad
         return {
-            fromHex(address) {
+            fromHex(address: string): string {
                 if (!utils.isHex(address)) return address;
 
                 return utils.crypto.getBase58CheckAddress(
@@ -488,7 +487,7 @@ export default class TronWeb extends EventEmitter {
                     ),
                 );
             },
-            toHex(address) {
+            toHex(address: string): string {
                 if (utils.isHex(address))
                     return address.toLowerCase().replace(/^0x/, ADDRESS_PREFIX);
 
@@ -496,11 +495,11 @@ export default class TronWeb extends EventEmitter {
                     .byteArray2hexStr(utils.crypto.decodeBase58Address(address))
                     .toLowerCase();
             },
-            fromPrivateKey(privateKey, strict = false) {
+            fromPrivateKey(privateKey: string, strict = false): string {
                 try {
                     return utils.crypto.pkToAddress(privateKey, strict);
                 } catch {
-                    return null;
+                    throw new Error('Invalid private key!');
                 }
             },
         };

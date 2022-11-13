@@ -23,18 +23,15 @@ export function hexStringToUtf8(hex: string): string {
     let out = '';
 
     for (let i = 0; i < arr.length / 2; i++) {
-        const tmp = `0x${arr[i * 2]}${arr[i * 2 + 1]}`;
-        // FIXME: this should be equal to 16*arr[i*2] + arr[i*2 + 1]
-        // @ts-ignore
-        const charValue = String.fromCharCode(tmp);
-        out += charValue;
+        // const tmp = `0x${arr[i * 2]}${arr[i * 2 + 1]}`;
+        const tmp = 16 * +arr[i * 2] + +arr[i * 2 + 1];
+        out += String.fromCharCode(tmp);
     }
 
     return out;
 }
 
 export function stringUtf8tHex(str: string): string {
-    // FIXME: it's a join
     let val = '';
     for (let i = 0; i < str.length; i++) val += str.charCodeAt(i).toString(16);
     return val;

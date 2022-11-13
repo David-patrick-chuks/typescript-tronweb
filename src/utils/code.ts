@@ -79,15 +79,12 @@ export function hexChar2byte(c: string): number {
     else throw new Error('The passed hex char is not a valid hex char');
 }
 
-export function isHexChar(c) {
-    if (
+export function isHexChar(c: string) {
+    return (
         (c >= 'A' && c <= 'F') ||
         (c >= 'a' && c <= 'f') ||
         (c >= '0' && c <= '9')
-    )
-        return true;
-
-    return false;
+    );
 }
 
 // set strict as true: if the length of str is odd,
