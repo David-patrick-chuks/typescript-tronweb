@@ -936,14 +936,22 @@ describe('TronWeb.sidechain [ONLINE]', function () {
                     const balanceBefore = parseInt(dataBefore._hex, 16);
 
                     // Deposit
-                    const [txID] = await tronWeb.sidechain!.withdrawTrc721(
-                        tokenId,
-                        DEPOSIT_FEE,
-                        FEE_LIMIT,
-                        ADDRESS721_MAPPING,
-                        {shouldPollResponse: true, keepTxID: true},
-                    );
-                    assert.equal(txID.length, 64);
+                    try {
+                        const [txID] = await tronWeb.sidechain!.withdrawTrc721(
+                            tokenId,
+                            DEPOSIT_FEE,
+                            FEE_LIMIT,
+                            ADDRESS721_MAPPING,
+                            {shouldPollResponse: true, keepTxID: true},
+                        );
+                        assert.equal(txID.length, 64);
+                    } catch (ex) {
+                        // Retry here, but wait a while first.
+                        // It means corresponding deposit transaction
+                        // was not completely processed yet.
+                        await wait(20);
+                        throw ex;
+                    }
 
                     while (true) {
                         const dataAfter = await contractInstance
