@@ -88,3 +88,12 @@ jobs:
               run: npm i
             - name: build
               run: npm run build
+
+    security:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@main
+            - name: Run Snyk to check for vulnerabilities
+              uses: snyk/actions/node@master
+              env:
+                  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
