@@ -15,3 +15,4 @@ test/lib/dist/
 .nyc_output
 *.sublime-*
 /lib
+/*.tgz
