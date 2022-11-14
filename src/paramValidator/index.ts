@@ -72,7 +72,6 @@ export default class Validator {
     }
 
     notPositive(param: IUnaryOperator): string {
-        const f = '23';
         return `${param.name} must be a positive integer`;
     }
 

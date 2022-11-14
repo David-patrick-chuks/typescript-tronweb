@@ -24,7 +24,7 @@ module.exports = {
         'linebreak-style': [2, 'unix'],
         quotes: [1, 'single', 'avoid-escape'],
         semi: [2, 'always'],
-        'max-len': [1, 88, 2, {ignoreUrls: true}],
+        'max-len': [1, 120, 2, {ignoreUrls: true}],
         'no-trailing-spaces': 2,
         'no-multi-spaces': 2,
         'array-bracket-spacing': 2,

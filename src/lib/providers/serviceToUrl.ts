@@ -198,10 +198,10 @@ export function serviceToUrl(serviceFullName: string): string {
 export default serviceToUrl;
 
 // verify typing
-/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 const _walletMethods: Record<string, keyof Wallet> = walletMethods;
 const _walletSolidityMethods: Record<string, keyof WalletSolidity> =
     walletSolidityMethods;
 const _walletExtensionMethods: Record<string, keyof WalletExtension> =
     walletExtensionMethods;
-/* eslint-enable no-unused-vars */
+/* eslint-enable @typescript-eslint/no-unused-vars */

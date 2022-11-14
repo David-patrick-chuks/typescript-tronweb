@@ -1,9 +1,6 @@
 import TronWeb from '../..';
 import {WithTronwebAndInjectpromise} from '../../../src/utils/_base';
-import {
-    SmartContract_ABI_Entry_StateMutabilityType as IAbiStateMutability,
-    SmartContract_ABI_Entry_EntryType as IAbiType,
-} from '../../proto/core/contract/smart_contract';
+import {SmartContract_ABI_Entry_StateMutabilityType as IAbiStateMutability} from '../../proto/core/contract/smart_contract';
 import utils from '../../utils';
 import _CallbackT from '../../utils/typing';
 import {IEvent} from '../event';

@@ -1,7 +1,6 @@
 import TronWeb from '..';
 import Validator from '../paramValidator';
 import type {Permission as IPermissions, Transaction} from '../proto/core/Tron';
-import type {AssetIssueContract as IToken} from '../proto/core/contract/asset_issue_contract';
 import utils from '../utils';
 import {WithTronwebAndInjectpromise} from '../utils/_base';
 import {encodeParamsV2ByABI} from '../utils/abi';
@@ -13,8 +12,6 @@ import {IAbi} from './contract';
 import {ILog, ResourceT} from './trx';
 
 export type {Transaction, Permission as IPermissions} from '../proto/core/Tron';
-
-export type {AssetIssueContract as IToken} from '../proto/core/contract/asset_issue_contract';
 
 const INVALID_RESOURCE_MESSAGE =
     'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY';

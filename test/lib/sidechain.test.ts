@@ -27,7 +27,6 @@ import {
     RETRY_WITHDRAW_FEE,
     SIDE_CHAIN,
     TOKEN_ID,
-    TRC721_ID,
     WITHDRAW_FEE,
 } from '../helpers/config';
 import tronWebBuilder from '../helpers/tronWebBuilder';

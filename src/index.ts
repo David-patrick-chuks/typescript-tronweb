@@ -215,7 +215,7 @@ export default class TronWeb extends EventEmitter {
     async getFullnodeVersion() {
         try {
             const nodeInfo = await this.trx.getNodeInfo();
-            this.fullnodeVersion = nodeInfo.configNodeInfo?.codeVersion!;
+            this.fullnodeVersion = nodeInfo.configNodeInfo!.codeVersion!;
             if (this.fullnodeVersion.split('.').length === 2)
                 this.fullnodeVersion += '.0';
         } catch (err) {

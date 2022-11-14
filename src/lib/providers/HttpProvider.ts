@@ -2,7 +2,6 @@ import axios from 'axios';
 import {AxiosInstance, Method} from 'axios';
 
 import {Wallet, WalletExtension, WalletSolidity} from '../../proto/api/api';
-import {TransactionExtention as ITransactionExtention} from '../../proto/api/api';
 import {Transaction as ITransaction} from '../../proto/core/Tron';
 import utils from '../../utils';
 import {IEventResponse} from '../event';
