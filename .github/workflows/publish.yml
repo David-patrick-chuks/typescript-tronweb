@@ -6,7 +6,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                node-version: ['14.x', '16.x', '18.x', '19.x']
+                node-version: ['14.x', '18.x', '19.x']
             fail-fast: false
         steps:
             - name: Checkout
@@ -29,9 +29,12 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version: 16
+                  registry-url: 'https://registry.npmjs.org'
             - name: Install
               run: npm i
             - name: Publish
               run: npm publish
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        dependencies:
+            - build
