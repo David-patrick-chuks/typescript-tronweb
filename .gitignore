@@ -14,3 +14,4 @@ test/lib/dist/
 /proto/
 .nyc_output
 *.sublime-*
+/lib

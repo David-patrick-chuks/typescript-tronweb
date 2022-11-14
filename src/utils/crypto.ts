@@ -1,4 +1,4 @@
-import {ec as EC} from 'elliptic';
+import el from 'elliptic';
 
 import type {ISignedTransaction, ITransaction} from '../lib/transactionBuilder';
 import {ADDRESS_PREFIX, ADDRESS_PREFIX_BYTE, ADDRESS_SIZE} from './address';
@@ -13,6 +13,8 @@ import {
 import {SigningKey, sha256 as ethSha256, keccak256} from './ethersUtils';
 import {TypedDataEncoder} from './typedData';
 import type {IDomain} from './typedData';
+
+const {ec: EC} = el;
 
 // import {TransactionExtention as ITransactionExtention} from '../proto/api/api'
 

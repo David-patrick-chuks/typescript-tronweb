@@ -3,10 +3,9 @@ import EventEmitter from 'eventemitter3';
 import injectpromise from 'injectpromise';
 import semver from 'semver';
 
-import * as pack from '../package.json';
+import {version} from '../version.js';
 import Contract from './lib/contract';
-import type {IAbi} from './lib/contract';
-import type {ContractEventOptions} from './lib/contract';
+import type {ContractEventOptions, IAbi} from './lib/contract';
 import Event from './lib/event';
 import type {IEvent, IEventResponse} from './lib/event';
 import Plugin from './lib/plugin';
@@ -48,9 +47,9 @@ export default class TronWeb extends EventEmitter {
     static Contract = Contract;
     static Plugin = Plugin;
     static Event = Event;
-    static version = pack.version;
+    static version = version;
     static utils = utils;
-    version = pack.version;
+    version = version;
 
     providers = providers;
     utils = utils;
