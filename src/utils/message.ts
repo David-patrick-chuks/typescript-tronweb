@@ -45,9 +45,7 @@ export function verifyMessage(
     if (!signature.match(/^0x/)) signature = '0x' + signature;
 
     const recovered = recoverAddress(hashMessage(message), signature);
-    const base58Address = getBase58CheckAddress(
+    return getBase58CheckAddress(
         hexStr2byteArray(recovered.replace(/^0x/, ADDRESS_PREFIX)),
     );
-
-    return base58Address;
 }

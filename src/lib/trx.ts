@@ -93,6 +93,14 @@ function toHex(value: string): string {
     return TronWeb.address.toHex(value);
 }
 
+const INVALID_ADDRESS_MSG = 'Invalid address provided';
+const INVALID_TOKEN_ID_MSG = 'Invalid token ID provided';
+const TOKEN_DOES_NOT_EXIST_MSG = 'Token does not exist';
+const INVALID_TRANSACTION_MSG = 'Invalid transaction provided';
+const INVALID_AMOUNT_MSG = 'Invalid amount provided';
+const NEED_PK_OR_ADDRESS_MSG =
+    'Function requires either a private key or address to be set';
+
 export default class Trx extends WithTronwebAndInjectpromise {
     cache: {contracts: Record<string, ISmartContract>};
     validator: Validator;
@@ -586,7 +594,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
             }
 
         if (!this.tronWeb.isAddress(address))
-            return callback('Invalid address provided');
+            return callback(INVALID_ADDRESS_MSG);
 
         if (!utils.isInteger(limit) || limit < 0 || (offset && limit < 1))
             return callback('Invalid limit provided');
@@ -626,7 +634,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
         if (!callback) return this.injectPromise(this.getAccount, address);
 
         if (!this.tronWeb.isAddress(address))
-            return callback('Invalid address provided');
+            return callback(INVALID_ADDRESS_MSG);
 
         address = this.tronWeb.address.toHex(address);
 
@@ -731,7 +739,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
             return this.injectPromise(this.getUnconfirmedAccount, address);
 
         if (!this.tronWeb.isAddress(address))
-            return callback('Invalid address provided');
+            return callback(INVALID_ADDRESS_MSG);
 
         address = this.tronWeb.address.toHex(address);
 
@@ -785,7 +793,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
         if (!callback) return this.injectPromise(this.getBandwidth, address);
 
         if (!this.tronWeb.isAddress(address))
-            return callback('Invalid address provided');
+            return callback(INVALID_ADDRESS_MSG);
 
         address = this.tronWeb.address.toHex(address);
 
@@ -823,7 +831,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
             return this.injectPromise(this.getTokensIssuedByAddress, address);
 
         if (!this.tronWeb.isAddress(address))
-            return callback('Invalid address provided');
+            return callback(INVALID_ADDRESS_MSG);
 
         address = this.tronWeb.address.toHex(address);
 
@@ -864,7 +872,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
         if (utils.isInteger(tokenID)) tokenID = tokenID.toString();
 
         if (!utils.isString(tokenID) || !tokenID.length)
-            return callback('Invalid token ID provided');
+            return callback(INVALID_TOKEN_ID_MSG);
 
         this.tronWeb.fullNode
             .request(
@@ -873,7 +881,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
                 'post',
             )
             .then((token) => {
-                if (!token.name) return callback('Token does not exist');
+                if (!token.name) return callback(TOKEN_DOES_NOT_EXIST_MSG);
 
                 callback(null, this._parseToken(token));
             })
@@ -1288,7 +1296,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
         }
 
         if (!utils.isObject(transaction))
-            return callback('Invalid transaction provided');
+            return callback(INVALID_TRANSACTION_MSG);
 
         if (!multisig && transaction.signature)
             return callback('Transaction is already signed');
@@ -1507,7 +1515,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
             !transaction.raw_data ||
             !transaction.raw_data.contract
         )
-            return callback('Invalid transaction provided');
+            return callback(INVALID_TRANSACTION_MSG);
 
         // If owner permission or permission id exists in transaction, do sign directly
         // If no permission id inside transaction or user passes permission id,
@@ -1550,7 +1558,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
                     transaction.raw_data.contract[0].Permission_id =
                         permissionId;
             } else {
-                return callback('Invalid transaction provided');
+                return callback(INVALID_TRANSACTION_MSG);
             }
         }
 
@@ -1581,7 +1589,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
             return this.injectPromise(this.getApprovedList, transaction);
 
         if (!utils.isObject(transaction))
-            return callback('Invalid transaction provided');
+            return callback(INVALID_TRANSACTION_MSG);
 
         this.tronWeb.fullNode
             .request('wallet/getapprovedlist', transaction, 'post')
@@ -1618,7 +1626,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
             !transaction.raw_data ||
             !transaction.raw_data.contract
         )
-            return callback('Invalid transaction provided');
+            return callback(INVALID_TRANSACTION_MSG);
 
         if (utils.isInteger(permissionId))
             transaction.raw_data.contract[0].Permission_id = parseInt(
@@ -1630,7 +1638,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
             transaction.raw_data.contract[0].Permission_id = 0;
 
         if (!utils.isObject(transaction))
-            return callback('Invalid transaction provided');
+            return callback(INVALID_TRANSACTION_MSG);
 
         this.tronWeb.fullNode
             .request('wallet/getsignweight', transaction, 'post')
@@ -1663,7 +1671,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
             );
 
         if (!utils.isObject(signedTransaction))
-            return callback('Invalid transaction provided');
+            return callback(INVALID_TRANSACTION_MSG);
 
         if (
             !signedTransaction.signature ||
@@ -1758,7 +1766,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
             return callback('Invalid recipient provided');
 
         if (!utils.isInteger(amount) || amount <= 0)
-            return callback('Invalid amount provided');
+            return callback(INVALID_AMOUNT_MSG);
 
         options = {
             privateKey: this.tronWeb.defaultPrivateKey,
@@ -1767,9 +1775,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
         };
 
         if (!options.privateKey && !options.address)
-            return callback(
-                'Function requires either a private key or address to be set',
-            );
+            return callback(NEED_PK_OR_ADDRESS_MSG);
 
         try {
             const address = (
@@ -1830,12 +1836,11 @@ export default class Trx extends WithTronwebAndInjectpromise {
             return callback('Invalid recipient provided');
 
         if (!utils.isInteger(amount) || amount <= 0)
-            return callback('Invalid amount provided');
+            return callback(INVALID_AMOUNT_MSG);
 
         if (utils.isInteger(tokenID)) tokenID = tokenID.toString();
 
-        if (!utils.isString(tokenID))
-            return callback('Invalid token ID provided');
+        if (!utils.isString(tokenID)) return callback(INVALID_TOKEN_ID_MSG);
 
         options = {
             privateKey: this.tronWeb.defaultPrivateKey,
@@ -1844,9 +1849,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
         };
 
         if (!options.privateKey && !options.address)
-            return callback(
-                'Function requires either a private key or address to be set',
-            );
+            return callback(NEED_PK_OR_ADDRESS_MSG);
 
         try {
             const address = (
@@ -1925,7 +1928,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
             );
 
         if (!utils.isInteger(amount) || amount <= 0)
-            return callback('Invalid amount provided');
+            return callback(INVALID_AMOUNT_MSG);
 
         if (!utils.isInteger(duration) || duration < 3)
             return callback('Invalid duration provided, minimum of 3 days');
@@ -1937,9 +1940,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
         };
 
         if (!options.privateKey && !options.address)
-            return callback(
-                'Function requires either a private key or address to be set',
-            );
+            return callback(NEED_PK_OR_ADDRESS_MSG);
 
         try {
             const address = (
@@ -2015,9 +2016,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
         };
 
         if (!options.privateKey && !options.address)
-            return callback(
-                'Function requires either a private key or address to be set',
-            );
+            return callback(NEED_PK_OR_ADDRESS_MSG);
 
         try {
             const address = (
@@ -2083,9 +2082,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
         };
 
         if (!options.privateKey && !options.address)
-            return callback(
-                'Function requires either a private key or address to be set',
-            );
+            return callback(NEED_PK_OR_ADDRESS_MSG);
 
         try {
             const address = (
@@ -2202,7 +2199,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
             return this.injectPromise(this.getAccountResources, address);
 
         if (!this.tronWeb.isAddress(address))
-            return callback('Invalid address provided');
+            return callback(INVALID_ADDRESS_MSG);
 
         this.tronWeb.fullNode
             .request(
@@ -2327,7 +2324,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
         if (utils.isInteger(tokenID)) tokenID = tokenID.toString();
 
         if (!utils.isString(tokenID) || !tokenID.length)
-            return callback('Invalid token ID provided');
+            return callback(INVALID_TOKEN_ID_MSG);
 
         this.tronWeb.fullNode
             .request(
@@ -2342,7 +2339,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
                         token.assetIssue.map((t) => this._parseToken(t)),
                     );
                 else if (!('name' in token) || !(token as any).name)
-                    return callback('Token does not exist');
+                    return callback(TOKEN_DOES_NOT_EXIST_MSG);
                 // TODO: borrowed from old impl. This should never happen
                 else return callback(null, [this._parseToken(token as any)]);
             })
@@ -2363,12 +2360,12 @@ export default class Trx extends WithTronwebAndInjectpromise {
         if (utils.isInteger(tokenID)) tokenID = tokenID.toString();
 
         if (!utils.isString(tokenID) || !tokenID.length)
-            return callback('Invalid token ID provided');
+            return callback(INVALID_TOKEN_ID_MSG);
 
         this.tronWeb.fullNode
             .request('wallet/getassetissuebyid', {value: tokenID}, 'post')
             .then((token) => {
-                if (!token.name) return callback('Token does not exist');
+                if (!token.name) return callback(TOKEN_DOES_NOT_EXIST_MSG);
 
                 callback(null, this._parseToken(token));
             })

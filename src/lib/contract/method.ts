@@ -19,6 +19,8 @@ export interface IMethodSendOptions {
     keepTxID?: boolean;
 }
 
+const MISSING_ADDRESS_MSG = 'Smart contract is missing address';
+
 const getFunctionSelector = (abi) => {
     abi.stateMutability = abi.stateMutability
         ? abi.stateMutability.toLowerCase()
@@ -101,9 +103,7 @@ export default class Method extends WithTronwebAndInjectpromise {
                 return this._call([], [], options, callback);
             },
             send: (
-                options: {
-                    [k in keyof ContractOptions]?: ContractOptions[k];
-                } & IMethodSendOptions = {},
+                options: Partial<ContractOptions> & IMethodSendOptions = {},
                 privateKey: string = this.tronWeb.defaultPrivateKey,
                 callback?: _CallbackT<any>,
             ) => {
@@ -130,8 +130,7 @@ export default class Method extends WithTronwebAndInjectpromise {
         if (types.length !== args.length)
             return callback('Invalid argument count provided');
 
-        if (!this.contract.address)
-            return callback('Smart contract is missing address');
+        if (!this.contract.address) return callback(MISSING_ADDRESS_MSG);
 
         if (!this.contract.deployed)
             return callback(
@@ -222,9 +221,7 @@ export default class Method extends WithTronwebAndInjectpromise {
     async _send(
         types: string[],
         args: unknown[],
-        options: {
-            [k in keyof ContractOptions]?: ContractOptions[k];
-        } & IMethodSendOptions = {},
+        options: Partial<ContractOptions> & IMethodSendOptions = {},
         privateKey: string = this.tronWeb.defaultPrivateKey,
         callback?: _CallbackT<any>,
     ) {
@@ -240,8 +237,7 @@ export default class Method extends WithTronwebAndInjectpromise {
         if (types.length !== args.length)
             throw new Error('Invalid argument count provided');
 
-        if (!this.contract.address)
-            return callback('Smart contract is missing address');
+        if (!this.contract.address) return callback(MISSING_ADDRESS_MSG);
 
         if (!this.contract.deployed)
             return callback(
@@ -377,16 +373,13 @@ export default class Method extends WithTronwebAndInjectpromise {
     }
 
     async _watch(
-        options: {
-            [k in keyof ContractOptions]?: ContractOptions[k];
-        } = {},
+        options: Partial<ContractOptions> = {},
         callback: _CallbackT<any>,
     ) {
         if (!utils.isFunction(callback))
             throw new Error('Expected callback to be provided');
 
-        if (!this.contract.address)
-            return callback('Smart contract is missing address');
+        if (!this.contract.address) return callback(MISSING_ADDRESS_MSG);
 
         if (!this.abi.type || !/event/i.test(this.abi.type))
             return callback('Invalid method type for event watching');
@@ -399,8 +392,7 @@ export default class Method extends WithTronwebAndInjectpromise {
         const since = Date.now() - 1000;
 
         const getEvents = async () => {
-            if (!this.contract.address)
-                throw new Error('Smart contract is missing address');
+            if (!this.contract.address) throw new Error(MISSING_ADDRESS_MSG);
 
             try {
                 const params = {

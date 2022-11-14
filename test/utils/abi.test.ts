@@ -5,6 +5,9 @@ import tronWebBuilder from '../helpers/tronWebBuilder';
 import {loadTests} from '../testcases/src/disk-utils';
 
 describe('TronWeb.utils.abi', function () {
+    const TOKEN_NAME = 'Pi Day N00b Token';
+    const TOKEN_ABBR = 'PIE';
+
     describe('#decodeParams()', function () {
         it('should decode abi coded params passing types and output', function () {
             const tronWeb = tronWebBuilder.createInstance();
@@ -13,8 +16,8 @@ describe('TronWeb.utils.abi', function () {
                 '0x00000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000e00000000000000000000000000000000000000000000000000000000000000012dc03b7993bad736ad595eb9e3ba51877ac17ecc31d2355f8f270125b9427ece700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011506920446179204e30306220546f6b656e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000035049450000000000000000000000000000000000000000000000000000000000';
 
             const expected = [
-                'Pi Day N00b Token',
-                'PIE',
+                TOKEN_NAME,
+                TOKEN_ABBR,
                 18,
                 '0xdc03b7993bad736ad595eb9e3ba51877ac17ecc31d2355f8f270125b9427ece7',
                 0,
@@ -34,8 +37,8 @@ describe('TronWeb.utils.abi', function () {
                 '0x00000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000e00000000000000000000000000000000000000000000000000000000000000012dc03b7993bad736ad595eb9e3ba51877ac17ecc31d2355f8f270125b9427ece700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011506920446179204e30306220546f6b656e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000035049450000000000000000000000000000000000000000000000000000000000';
 
             const expected = {
-                Token: 'Pi Day N00b Token',
-                Graph: 'PIE',
+                Token: TOKEN_NAME,
+                Graph: TOKEN_ABBR,
                 Qty: 18,
                 Bytes: '0xdc03b7993bad736ad595eb9e3ba51877ac17ecc31d2355f8f270125b9427ece7',
                 Total: 0,
@@ -93,8 +96,8 @@ describe('TronWeb.utils.abi', function () {
             const tronWeb = tronWebBuilder.createInstance();
             const types = ['string', 'string', 'uint8', 'bytes32', 'uint256'];
             const values = [
-                'Pi Day N00b Token',
-                'PIE',
+                TOKEN_NAME,
+                TOKEN_ABBR,
                 18,
                 '0xdc03b7993bad736ad595eb9e3ba51877ac17ecc31d2355f8f270125b9427ece7',
                 0,

@@ -36,10 +36,29 @@ import wait from '../helpers/wait';
 import waitChainData from '../helpers/waitChainData';
 
 describe('TronWeb.transactionBuilder', function () {
+    const INVALID_AMOUNT_MSG = 'Invalid amount provided';
+    const INVALID_ORIGIN_MSG = 'Invalid origin address provided';
+    const ASSET_ISSUE_PROTO_TYPE =
+        'type.googleapis.com/protocol.AssetIssueContract';
+    const INVALID_TOKEN_DESCRIPTION_MSG = 'Invalid token description provided';
+    const INVALID_TOKEN_URL_MSG = 'Invalid token url provided';
+    const INVALID_ISSUER_ADDRESS_MSG = 'Invalid issuer address provided';
+    const TRIGGER_SMART_CONTRACT_PROTO_TYPE =
+        'type.googleapis.com/protocol.TriggerSmartContract';
+
     let accounts: IAccts;
     let tronWeb: TronWeb;
     let emptyAccount: IAccount;
     let isAllowSameTokenNameApproved: boolean;
+
+    const SOME_CONTRACT = {
+        issuerAddress: undefined as any as string,
+        functionSelector: 'testPure(uint256,uint256)',
+        parameter: [
+            {type: 'uint256', value: 1},
+            {type: 'uint256', value: 2},
+        ],
+    };
 
     before(async function () {
         tronWeb = tronWebBuilder.createInstance();
@@ -50,6 +69,8 @@ describe('TronWeb.transactionBuilder', function () {
             tronWeb,
             'getAllowSameTokenName',
         );
+
+        SOME_CONTRACT.issuerAddress = accounts.hex[6];
     });
 
     describe('#constructor()', function () {
@@ -134,7 +155,7 @@ describe('TronWeb.transactionBuilder', function () {
         it('should throw if an invalid amount is passed', async function () {
             await assertThrow(
                 tronWeb.transactionBuilder.sendTrx(accounts.hex[2], -10),
-                'Invalid amount provided',
+                INVALID_AMOUNT_MSG,
             );
         });
 
@@ -145,7 +166,7 @@ describe('TronWeb.transactionBuilder', function () {
                     10,
                     '40f0b27e3d16060a5b0e8e995120e00',
                 ),
-                'Invalid origin address provided',
+                INVALID_ORIGIN_MSG,
             );
         });
 
@@ -193,10 +214,7 @@ describe('TronWeb.transactionBuilder', function () {
                     options.abbreviation,
                 );
                 assert.equal(parameter.value.owner_address, accounts.hex[2]);
-                assert.equal(
-                    parameter.type_url,
-                    'type.googleapis.com/protocol.AssetIssueContract',
-                );
+                assert.equal(parameter.type_url, ASSET_ISSUE_PROTO_TYPE);
                 assert.equal(
                     transaction.raw_data.contract[0].Permission_id || 0,
                     options.permissionId || 0,
@@ -234,10 +252,7 @@ describe('TronWeb.transactionBuilder', function () {
                         parameter.value.owner_address,
                         accounts.hex[8 + i],
                     );
-                    assert.equal(
-                        parameter.type_url,
-                        'type.googleapis.com/protocol.AssetIssueContract',
-                    );
+                    assert.equal(parameter.type_url, ASSET_ISSUE_PROTO_TYPE);
                     assert.equal(
                         transaction.raw_data.contract[0].Permission_id || 0,
                         options.permissionId || 0,
@@ -430,14 +445,14 @@ describe('TronWeb.transactionBuilder', function () {
 
             await assertThrow(
                 tronWeb.transactionBuilder.createToken(options),
-                'Invalid token description provided',
+                INVALID_TOKEN_DESCRIPTION_MSG,
             );
 
             options.description = '';
 
             await assertThrow(
                 tronWeb.transactionBuilder.createToken(options),
-                'Invalid token description provided',
+                INVALID_TOKEN_DESCRIPTION_MSG,
             );
         });
 
@@ -449,21 +464,21 @@ describe('TronWeb.transactionBuilder', function () {
 
             await assertThrow(
                 tronWeb.transactionBuilder.createToken(options),
-                'Invalid token url provided',
+                INVALID_TOKEN_URL_MSG,
             );
 
             options.url = '';
 
             await assertThrow(
                 tronWeb.transactionBuilder.createToken(options),
-                'Invalid token url provided',
+                INVALID_TOKEN_URL_MSG,
             );
 
             options.url = '//www.example.com';
 
             await assertThrow(
                 tronWeb.transactionBuilder.createToken(options),
-                'Invalid token url provided',
+                INVALID_TOKEN_URL_MSG,
             );
         });
 
@@ -531,12 +546,12 @@ describe('TronWeb.transactionBuilder', function () {
             );
         });
 
-        it('should throw if the issuer address is invalid', async function () {
+        it('createToken() should throw if the issuer address is invalid', async function () {
             const options = getTokenOptions();
 
             await assertThrow(
                 tronWeb.transactionBuilder.createToken(options, '0xzzzww'),
-                'Invalid issuer address provided',
+                INVALID_ISSUER_ADDRESS_MSG,
             );
         });
 
@@ -558,10 +573,7 @@ describe('TronWeb.transactionBuilder', function () {
                     options.abbreviation,
                 );
                 assert.equal(parameter.value.owner_address, accounts.hex[2]);
-                assert.equal(
-                    parameter.type_url,
-                    'type.googleapis.com/protocol.AssetIssueContract',
-                );
+                assert.equal(parameter.type_url, ASSET_ISSUE_PROTO_TYPE);
             });
         });
     });
@@ -602,10 +614,10 @@ describe('TronWeb.transactionBuilder', function () {
             );
         });
 
-        it('should throw if the issuer address is invalid', async function () {
+        it('should throw if the account address is invalid', async function () {
             await assertThrow(
                 tronWeb.transactionBuilder.updateAccount('New name', '0xzzzww'),
-                'Invalid origin address provided',
+                INVALID_ORIGIN_MSG,
             );
         });
     });
@@ -655,7 +667,7 @@ describe('TronWeb.transactionBuilder', function () {
                     TronWeb.toHex('testtest001'),
                     '0xzzzww',
                 ),
-                'Invalid origin address provided',
+                INVALID_ORIGIN_MSG,
             );
         });
     });
@@ -725,7 +737,7 @@ describe('TronWeb.transactionBuilder', function () {
                     options,
                     accounts.hex[2],
                 ),
-                'Invalid token description provided',
+                INVALID_TOKEN_DESCRIPTION_MSG,
             );
 
             options.description = '';
@@ -735,7 +747,7 @@ describe('TronWeb.transactionBuilder', function () {
                     options,
                     accounts.hex[2],
                 ),
-                'Invalid token description provided',
+                INVALID_TOKEN_DESCRIPTION_MSG,
             );
         });
 
@@ -748,7 +760,7 @@ describe('TronWeb.transactionBuilder', function () {
                     options,
                     accounts.hex[2],
                 ),
-                'Invalid token url provided',
+                INVALID_TOKEN_URL_MSG,
             );
 
             options.url = '';
@@ -758,7 +770,7 @@ describe('TronWeb.transactionBuilder', function () {
                     options,
                     accounts.hex[2],
                 ),
-                'Invalid token url provided',
+                INVALID_TOKEN_URL_MSG,
             );
 
             options.url = '//www.example.com';
@@ -768,7 +780,7 @@ describe('TronWeb.transactionBuilder', function () {
                     options,
                     accounts.hex[2],
                 ),
-                'Invalid token url provided',
+                INVALID_TOKEN_URL_MSG,
             );
         });
 
@@ -826,7 +838,7 @@ describe('TronWeb.transactionBuilder', function () {
                     UPDATED_TEST_TOKEN_OPTIONS,
                     '0xzzzww',
                 ),
-                'Invalid issuer address provided',
+                INVALID_ISSUER_ADDRESS_MSG,
             );
         });
 
@@ -949,7 +961,7 @@ describe('TronWeb.transactionBuilder', function () {
                     20,
                     accounts.b58[2],
                 ),
-                'Invalid issuer address provided',
+                INVALID_ISSUER_ADDRESS_MSG,
             );
         });
 
@@ -1013,7 +1025,7 @@ describe('TronWeb.transactionBuilder', function () {
                     -3,
                     accounts.b58[2],
                 ),
-                'Invalid amount provided',
+                INVALID_AMOUNT_MSG,
             );
 
             await assertThrow(
@@ -1025,7 +1037,7 @@ describe('TronWeb.transactionBuilder', function () {
                     'some-amount',
                     accounts.b58[2],
                 ),
-                'Invalid amount provided',
+                INVALID_AMOUNT_MSG,
             );
         });
     });
@@ -1191,7 +1203,7 @@ describe('TronWeb.transactionBuilder', function () {
                     // @ts-ignore
                     213253453453,
                 ),
-                'Invalid origin address provided',
+                INVALID_ORIGIN_MSG,
             );
         });
 
@@ -1203,7 +1215,7 @@ describe('TronWeb.transactionBuilder', function () {
                     tokenID,
                     accounts.b58[7],
                 ),
-                'Invalid amount provided',
+                INVALID_AMOUNT_MSG,
             );
 
             await assertThrow(
@@ -1213,7 +1225,7 @@ describe('TronWeb.transactionBuilder', function () {
                     tokenID,
                     accounts.b58[7],
                 ),
-                'Invalid amount provided',
+                INVALID_AMOUNT_MSG,
             );
         });
     });
@@ -1303,7 +1315,7 @@ describe('TronWeb.transactionBuilder', function () {
                     parameters,
                     'sadasdsffdgdf',
                 ),
-                'Invalid issuer address provided',
+                INVALID_ISSUER_ADDRESS_MSG,
             );
         });
 
@@ -1572,12 +1584,8 @@ describe('TronWeb.transactionBuilder', function () {
                 const tx = await tronWeb.trx.getTransactionInfo(
                     transaction.txID,
                 );
-                if (Object.keys(tx).length === 0) {
-                    await wait(3);
-                    continue;
-                } else {
-                    break;
-                }
+                if (Object.keys(tx).length === 0) await wait(3);
+                else break;
             }
             const deployed = await tronWeb
                 .contract()
@@ -1639,12 +1647,8 @@ describe('TronWeb.transactionBuilder', function () {
                 const tx = await tronWeb.trx.getTransactionInfo(
                     transaction.txID,
                 );
-                if (Object.keys(tx).length === 0) {
-                    await wait(3);
-                    continue;
-                } else {
-                    break;
-                }
+                if (Object.keys(tx).length === 0) await wait(3);
+                else break;
             }
         });
 
@@ -1652,12 +1656,6 @@ describe('TronWeb.transactionBuilder', function () {
             this.timeout(20000);
 
             const contractAddress = transaction.contract_address;
-            const issuerAddress = accounts.hex[6];
-            const functionSelector = 'testPure(uint256,uint256)';
-            const parameter = [
-                {type: 'uint256', value: 1},
-                {type: 'uint256', value: 2},
-            ];
             const options = {
                 permissionId: undefined as undefined | number,
             };
@@ -1667,16 +1665,15 @@ describe('TronWeb.transactionBuilder', function () {
                 transaction =
                     await tronWeb.transactionBuilder.triggerConstantContract(
                         contractAddress,
-                        functionSelector,
+                        SOME_CONTRACT.functionSelector,
                         options,
-                        parameter,
-                        issuerAddress,
+                        SOME_CONTRACT.parameter,
+                        SOME_CONTRACT.issuerAddress,
                     );
                 assert.isTrue(
                     transaction.result.result &&
                         transaction.transaction.raw_data.contract[0].parameter
-                            .type_url ===
-                            'type.googleapis.com/protocol.TriggerSmartContract',
+                            .type_url === TRIGGER_SMART_CONTRACT_PROTO_TYPE,
                 );
                 assert.equal(
                     transaction.constant_result,
@@ -1723,12 +1720,6 @@ describe('TronWeb.transactionBuilder', function () {
             this.timeout(20000);
 
             const contractAddress = transaction.contract_address;
-            const issuerAddress = accounts.hex[6];
-            const functionSelector = 'testPure(uint256,uint256)';
-            const parameter = [
-                {type: 'uint256', value: 1},
-                {type: 'uint256', value: 2},
-            ];
             const options = {
                 permissionId: undefined as undefined | number,
             };
@@ -1738,16 +1729,15 @@ describe('TronWeb.transactionBuilder', function () {
                 transaction =
                     await tronWeb.transactionBuilder.triggerConfirmedConstantContract(
                         contractAddress,
-                        functionSelector,
+                        SOME_CONTRACT.functionSelector,
                         options,
-                        parameter,
-                        issuerAddress,
+                        SOME_CONTRACT.parameter,
+                        SOME_CONTRACT.issuerAddress,
                     );
                 assert.isTrue(
                     transaction.result.result &&
                         transaction.transaction.raw_data.contract[0].parameter
-                            .type_url ===
-                            'type.googleapis.com/protocol.TriggerSmartContract',
+                            .type_url === TRIGGER_SMART_CONTRACT_PROTO_TYPE,
                 );
                 assert.equal(
                     transaction.constant_result,
@@ -1786,12 +1776,8 @@ describe('TronWeb.transactionBuilder', function () {
                 const tx = await tronWeb.trx.getTransactionInfo(
                     transaction.txID,
                 );
-                if (Object.keys(tx).length === 0) {
-                    await wait(3);
-                    continue;
-                } else {
-                    break;
-                }
+                if (Object.keys(tx).length === 0) await wait(3);
+                else break;
             }
         });
 
@@ -1821,12 +1807,8 @@ describe('TronWeb.transactionBuilder', function () {
             // verify contract abi after
             while (true) {
                 contract = await tronWeb.trx.getContract(contractAddress);
-                if (Object.keys(contract.abi).length > 0) {
-                    await wait(3);
-                    continue;
-                } else {
-                    break;
-                }
+                if (Object.keys(contract.abi).length > 0) await wait(3);
+                else break;
             }
             assert.isTrue(Object.keys(contract.abi).length === 0);
         });
@@ -1888,12 +1870,8 @@ describe('TronWeb.transactionBuilder', function () {
                 const tx = await tronWeb.trx.getTransactionInfo(
                     transaction.txID,
                 );
-                if (Object.keys(tx).length === 0) {
-                    await wait(3);
-                    continue;
-                } else {
-                    break;
-                }
+                if (Object.keys(tx).length === 0) await wait(3);
+                else break;
             }
         });
 
@@ -1901,12 +1879,6 @@ describe('TronWeb.transactionBuilder', function () {
             this.timeout(20000);
 
             const contractAddress = transaction.contract_address;
-            const issuerAddress = accounts.hex[6];
-            const functionSelector = 'testPure(uint256,uint256)';
-            const parameter = [
-                {type: 'uint256', value: 1},
-                {type: 'uint256', value: 2},
-            ];
             const options = {
                 permissionId: undefined as undefined | number,
             };
@@ -1916,16 +1888,15 @@ describe('TronWeb.transactionBuilder', function () {
                 transaction =
                     await tronWeb.transactionBuilder.triggerSmartContract(
                         contractAddress,
-                        functionSelector,
+                        SOME_CONTRACT.functionSelector,
                         options,
-                        parameter,
-                        issuerAddress,
+                        SOME_CONTRACT.parameter,
+                        SOME_CONTRACT.issuerAddress,
                     );
                 assert.isTrue(
                     transaction.result.result &&
                         transaction.transaction.raw_data.contract[0].parameter
-                            .type_url ===
-                            'type.googleapis.com/protocol.TriggerSmartContract',
+                            .type_url === TRIGGER_SMART_CONTRACT_PROTO_TYPE,
                 );
                 assert.equal(
                     transaction.constant_result,
@@ -2176,12 +2147,8 @@ describe('TronWeb.transactionBuilder', function () {
                 const tx = await tronWeb.trx.getTransactionInfo(
                     transaction.txID,
                 );
-                if (Object.keys(tx).length === 0) {
-                    await wait(3);
-                    continue;
-                } else {
-                    break;
-                }
+                if (Object.keys(tx).length === 0) await wait(3);
+                else break;
             }
 
             const deployed = await tronWeb
@@ -2228,12 +2195,8 @@ describe('TronWeb.transactionBuilder', function () {
                 const tx = await tronWeb.trx.getTransactionInfo(
                     transaction.txID,
                 );
-                if (Object.keys(tx).length === 0) {
-                    await wait(3);
-                    continue;
-                } else {
-                    break;
-                }
+                if (Object.keys(tx).length === 0) await wait(3);
+                else break;
             }
 
             const deployed = await tronWeb
@@ -2246,12 +2209,8 @@ describe('TronWeb.transactionBuilder', function () {
             const sendTxId = await deployed.setCheck(8).send({}, issuerPk);
             while (true) {
                 const tx = await tronWeb.trx.getTransactionInfo(sendTxId);
-                if (Object.keys(tx).length === 0) {
-                    await wait(3);
-                    continue;
-                } else {
-                    break;
-                }
+                if (Object.keys(tx).length === 0) await wait(3);
+                else break;
             }
             const check1 = await deployed.check().call();
             assert.ok(check1.eq(8));
@@ -2295,12 +2254,8 @@ describe('TronWeb.transactionBuilder', function () {
                 const tx = await tronWeb.trx.getTransactionInfo(
                     transaction.txID,
                 );
-                if (Object.keys(tx).length === 0) {
-                    await wait(3);
-                    continue;
-                } else {
-                    break;
-                }
+                if (Object.keys(tx).length === 0) await wait(3);
+                else break;
             }
 
             const deployed = await tronWeb.contract(
@@ -2329,12 +2284,8 @@ describe('TronWeb.transactionBuilder', function () {
                 const tx = await tronWeb.trx.getTransactionInfo(
                     transaction.txID,
                 );
-                if (Object.keys(tx).length === 0) {
-                    await wait(3);
-                    continue;
-                } else {
-                    break;
-                }
+                if (Object.keys(tx).length === 0) await wait(3);
+                else break;
             }
 
             const deployed = await tronWeb.contract(
@@ -2350,12 +2301,8 @@ describe('TronWeb.transactionBuilder', function () {
                 .send();
             while (true) {
                 const tx = await tronWeb.trx.getTransactionInfo(txID);
-                if (Object.keys(tx).length === 0) {
-                    await wait(3);
-                    continue;
-                } else {
-                    break;
-                }
+                if (Object.keys(tx).length === 0) await wait(3);
+                else break;
             }
 
             const check = await deployed.s(0).call();
@@ -2385,12 +2332,8 @@ describe('TronWeb.transactionBuilder', function () {
                 const tx = await tronWeb.trx.getTransactionInfo(
                     transaction.txID,
                 );
-                if (Object.keys(tx).length === 0) {
-                    await wait(3);
-                    continue;
-                } else {
-                    break;
-                }
+                if (Object.keys(tx).length === 0) await wait(3);
+                else break;
             }
 
             const deployed = await tronWeb.contract(
@@ -2406,12 +2349,8 @@ describe('TronWeb.transactionBuilder', function () {
                 .send();
             while (true) {
                 const tx = await tronWeb.trx.getTransactionInfo(txID);
-                if (Object.keys(tx).length === 0) {
-                    await wait(3);
-                    continue;
-                } else {
-                    break;
-                }
+                if (Object.keys(tx).length === 0) await wait(3);
+                else break;
             }
 
             const check = await deployed.s(0).call();

@@ -87,46 +87,41 @@ export function isHexChar(c: string) {
     );
 }
 
-// set strict as true: if the length of str is odd,
-// add 0 before the str to make its length as even
+/**
+ * Convert a hex string to a byte array.
+ * @param strict: if strict and the length of str is odd, pad it left with one zero
+ */
 export function hexStr2byteArray(str: string, strict = false) {
     if (typeof str !== 'string')
         throw new Error('The passed string is not a string');
 
-    let len = str.length;
+    if (strict && str.length % 2) str = `0${str}`;
 
-    if (strict)
-        if (len % 2) {
-            str = `0${str}`;
-            len++;
-        }
-
-    const byteArray: number[] = [];
+    const byteArray = new Uint8Array(str.length / 2);
     let d = 0;
     let j = 0;
     let k = 0;
 
-    for (let i = 0; i < len; i++) {
-        const c = str.charAt(i);
-
+    for (const c of str)
         if (isHexChar(c)) {
             d <<= 4;
             d += hexChar2byte(c);
             j++;
 
-            if (0 === j % 2) {
+            if (j % 2 === 0) {
                 byteArray[k++] = d;
                 d = 0;
             }
         } else {
             throw new Error('The passed hex char is not a valid hex string');
         }
-    }
 
-    return new Uint8Array(byteArray);
+    return byteArray;
 }
 
-//yyyy-MM-DD HH-mm-ss
+/**
+ * Convert string of form `yyyy-MM-DD HH-mm-ss` to `Date`
+ */
 export function strToDate(str: string) {
     if (!/^\d{4}-\d{2}-\d{2}( \d{2}-\d{2}-\d{2}|)/.test(str))
         throw new Error('The passed date string is not valid');

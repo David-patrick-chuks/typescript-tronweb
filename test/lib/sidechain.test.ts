@@ -35,6 +35,8 @@ import wait from '../helpers/wait';
 describe('TronWeb.sidechain [ONLINE]', function () {
     this.retries(1); // Let it retry once (SERVER_BUSY, etc)
 
+    const INVALID_FEELIMIT_MSG = 'Invalid feeLimit provided';
+
     const _tronWeb = tronWebBuilder.createInstanceSide();
     const address = _tronWeb.address.fromPrivateKey(PRIVATE_KEY);
     let tokenId: number;
@@ -143,7 +145,7 @@ describe('TronWeb.sidechain [ONLINE]', function () {
             it('should throw if an invalid fee limit is passed', async function () {
                 await assertThrow(
                     tronWeb.sidechain!.depositTrx(10000, DEPOSIT_FEE, 0),
-                    'Invalid feeLimit provided',
+                    INVALID_FEELIMIT_MSG,
                 );
             });
         });
@@ -268,7 +270,7 @@ describe('TronWeb.sidechain [ONLINE]', function () {
                         DEPOSIT_FEE,
                         feeLimit,
                     ),
-                    'Invalid feeLimit provided',
+                    INVALID_FEELIMIT_MSG,
                 );
             });
         });
@@ -407,7 +409,7 @@ describe('TronWeb.sidechain [ONLINE]', function () {
                         feeLimit,
                         CONTRACT_ADDRESS20,
                     ),
-                    'Invalid feeLimit provided',
+                    INVALID_FEELIMIT_MSG,
                 );
             });
 
@@ -540,7 +542,7 @@ describe('TronWeb.sidechain [ONLINE]', function () {
             const feeLimit = -1;
             await assertThrow(
                 tronWeb.sidechain!.mappingTrc20(HASH20, MAPPING_FEE, feeLimit),
-                'Invalid feeLimit provided',
+                INVALID_FEELIMIT_MSG,
             );
         });
 
@@ -674,7 +676,7 @@ describe('TronWeb.sidechain [ONLINE]', function () {
             it('should throw if an invalid fee limit is passed', async function () {
                 await assertThrow(
                     tronWeb.sidechain!.withdrawTrx(10000, WITHDRAW_FEE, 0),
-                    'Invalid feeLimit provided',
+                    INVALID_FEELIMIT_MSG,
                 );
             });
         });
@@ -794,7 +796,7 @@ describe('TronWeb.sidechain [ONLINE]', function () {
                         WITHDRAW_FEE,
                         feeLimit,
                     ),
-                    'Invalid feeLimit provided',
+                    INVALID_FEELIMIT_MSG,
                 );
             });
         });
@@ -904,7 +906,7 @@ describe('TronWeb.sidechain [ONLINE]', function () {
                             FEE_LIMIT * 10,
                             ADDRESS20_MAPPING,
                         ),
-                        'Invalid feeLimit provided',
+                        INVALID_FEELIMIT_MSG,
                     );
                 });
 

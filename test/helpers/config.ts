@@ -82,14 +82,16 @@ export const isProposalApproved = async (tronWeb, proposal) => {
     return false;
 };
 export const SUN_NETWORK = process.env.SUN_NETWORK;
+const SIDE_CHAIN_ADDR_MAIN = 'https://testhttpapi.tronex.io';
+const SIDE_CHAIN_ADDR_SIDE = 'https://suntest.tronex.io';
 export const SIDE_CHAIN = {
-    fullNode: 'https://testhttpapi.tronex.io',
-    solidityNode: 'https://testhttpapi.tronex.io',
-    eventServer: 'https://testhttpapi.tronex.io',
+    fullNode: SIDE_CHAIN_ADDR_MAIN,
+    solidityNode: SIDE_CHAIN_ADDR_MAIN,
+    eventServer: SIDE_CHAIN_ADDR_MAIN,
     sideOptions: {
-        fullNode: 'https://suntest.tronex.io',
-        solidityNode: 'https://suntest.tronex.io',
-        eventServer: 'https://suntest.tronex.io',
+        fullNode: SIDE_CHAIN_ADDR_SIDE,
+        solidityNode: SIDE_CHAIN_ADDR_SIDE,
+        eventServer: SIDE_CHAIN_ADDR_SIDE,
         mainGatewayAddress: 'TFLtPoEtVJBMcj6kZPrQrwEdM3W3shxsBU',
         sideGatewayAddress: 'TRDepx5KoQ8oNbFVZ5sogwUxtdYmATDRgX',
         sideChainId: '413AF23F37DA0D48234FDD43D89931E98E1144481B',

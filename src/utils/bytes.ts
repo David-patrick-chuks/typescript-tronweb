@@ -62,7 +62,5 @@ export function base64DecodeFromString(string64: string) {
 
 export function base64EncodeToString(bytes: SomeBytes) {
     const b = new Base64();
-    const string64 = b.encodeIgnoreUtf8(bytes);
-
-    return string64;
+    return b.encodeIgnoreUtf8(bytes);
 }

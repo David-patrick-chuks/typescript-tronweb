@@ -23,10 +23,16 @@ import {
 import wait from '../helpers/wait';
 import waitChainData from '../helpers/waitChainData';
 
-export {};
-
 describe('TronWeb.trx', function () {
     this.retries(2); // We'll fail sometimes anyway - even with docker node
+
+    const INVALID_ADDRESS_MSG = 'Invalid address provided';
+    const NO_PERM_MSG = 'has no permission to sign';
+    const BLOCK_NOT_FOUND_MSG = 'Block not found';
+    const INVALID_TOKEN_ID_MSG = 'Invalid token ID provided';
+    const INVALID_RECIPIENT_MSG = 'Invalid recipient provided';
+    const INVALID_AMOUNT_MSG = 'Invalid amount provided';
+    const TX_NOT_FOUND_MSG = 'Transaction not found';
 
     let accounts: IAccts;
     let tronWeb: TronWeb;
@@ -59,10 +65,10 @@ describe('TronWeb.trx', function () {
                 }
             });
 
-            it('should throw address is not valid error', async function () {
+            it('getAccount() should throw address is not valid error', async function () {
                 await assertThrow(
                     tronWeb.trx.getAccount('notAnAddress'),
-                    'Invalid address provided',
+                    INVALID_ADDRESS_MSG,
                 );
             });
         });
@@ -90,7 +96,6 @@ describe('TronWeb.trx', function () {
                     const account = await tronWeb.trx.getAccountById(accountId);
                     if (Object.keys(account).length === 0) {
                         await wait(3);
-                        continue;
                     } else {
                         assert.equal(account.account_id, accountId.slice(2));
                         break;
@@ -130,7 +135,7 @@ describe('TronWeb.trx', function () {
             it('should throw address is not valid error', async function () {
                 await assertThrow(
                     tronWeb.trx.getAccountResources('notAnAddress'),
-                    'Invalid address provided',
+                    INVALID_ADDRESS_MSG,
                 );
             });
         });
@@ -187,7 +192,7 @@ describe('TronWeb.trx', function () {
             it('should throw address is not valid error', async function () {
                 await assertThrow(
                     tronWeb.trx.getUnconfirmedAccount('notAnAddress'),
-                    'Invalid address provided',
+                    INVALID_ADDRESS_MSG,
                 );
             });
         });
@@ -783,10 +788,7 @@ describe('TronWeb.trx', function () {
                     );
                 } catch (e) {
                     assert.isArray(e);
-                    assert.isTrue(
-                        (e as string).indexOf('has no permission to sign') !==
-                            -1,
-                    );
+                    assert.isTrue((e as string).indexOf(NO_PERM_MSG) !== -1);
                 }
             });
 
@@ -965,10 +967,7 @@ describe('TronWeb.trx', function () {
                         2,
                     );
                 } catch (e) {
-                    assert.isTrue(
-                        (e as string).indexOf('has no permission to sign') !==
-                            -1,
-                    );
+                    assert.isTrue((e as string).indexOf(NO_PERM_MSG) !== -1);
                 }
             });
 
@@ -1042,17 +1041,14 @@ describe('TronWeb.trx', function () {
                     );
                     assert.isTrue(false, "Should've raised");
                 } catch (e) {
-                    assert.isTrue(
-                        (e as string).indexOf('has no permission to sign') !==
-                            -1,
-                    );
+                    assert.isTrue((e as string).indexOf(NO_PERM_MSG) !== -1);
                 }
             });
         });
     });
 
     // Block Test
-    describe('#Block Test', function () {
+    describe.only('#Block Test', function () {
         describe('#getBlock', async function () {
             it('should get earliest or latest block', async function () {
                 const earliestParentHash =
@@ -1082,7 +1078,7 @@ describe('TronWeb.trx', function () {
             it('should throw block not found error', async function () {
                 await assertThrow(
                     tronWeb.trx.getBlock(10e10),
-                    'Block not found',
+                    BLOCK_NOT_FOUND_MSG,
                 );
             });
 
@@ -1159,7 +1155,7 @@ describe('TronWeb.trx', function () {
             const fromIdx = 19;
             const toIdx = 20;
 
-            it('should send trx', async function () {
+            it('should send', async function () {
                 this.timeout(10000);
 
                 const balanceBefore = await tronWeb.trx.getUnconfirmedBalance(
@@ -1180,21 +1176,21 @@ describe('TronWeb.trx', function () {
                 assert.equal(balanceAfter - balanceBefore, 10e5);
             });
 
-            it('should throw invalid recipient provided error', async function () {
+            it('send hould throw invalid recipient provided error', async function () {
                 await assertThrow(
                     tronWeb.trx.send('notValidAddress', 10e5, {
                         privateKey: accounts.pks[fromIdx],
                     }),
-                    'Invalid recipient provided',
+                    INVALID_RECIPIENT_MSG,
                 );
             });
 
-            it('should throw invalid amount provided error', async function () {
+            it('send should throw invalid amount provided error', async function () {
                 await assertThrow(
                     tronWeb.trx.send(accounts.hex[toIdx], -1, {
                         privateKey: accounts.pks[fromIdx],
                     }),
-                    'Invalid amount provided',
+                    INVALID_AMOUNT_MSG,
                 );
             });
         });
@@ -1203,7 +1199,7 @@ describe('TronWeb.trx', function () {
             const fromIdx = 21;
             const toIdx = 22;
 
-            it('should send trx', async function () {
+            it('should send transaction', async function () {
                 this.timeout(10000);
 
                 const balanceBefore = await tronWeb.trx.getUnconfirmedBalance(
@@ -1223,21 +1219,21 @@ describe('TronWeb.trx', function () {
                 assert.equal(balanceAfter - balanceBefore, 10e5);
             });
 
-            it('should throw invalid recipient provided error', async function () {
+            it('sendTransaction should throw invalid recipient provided error', async function () {
                 await assertThrow(
                     tronWeb.trx.sendTransaction('notValidAddress', 10e5, {
                         privateKey: accounts.pks[fromIdx],
                     }),
-                    'Invalid recipient provided',
+                    INVALID_RECIPIENT_MSG,
                 );
             });
 
-            it('should throw invalid amount provided error', async function () {
+            it('sendTransaction should throw invalid amount provided error', async function () {
                 await assertThrow(
                     tronWeb.trx.sendTransaction(accounts.hex[toIdx], -1, {
                         privateKey: accounts.pks[fromIdx],
                     }),
-                    'Invalid amount provided',
+                    INVALID_AMOUNT_MSG,
                 );
             });
         });
@@ -1267,21 +1263,21 @@ describe('TronWeb.trx', function () {
                 assert.equal(balanceAfter - balanceBefore, 10e5);
             });
 
-            it('should throw invalid recipient provided error', async function () {
+            it('ssendTrx hould throw invalid recipient provided error', async function () {
                 await assertThrow(
                     tronWeb.trx.sendTrx('notValidAddress', 10e5, {
                         privateKey: accounts.pks[fromIdx],
                     }),
-                    'Invalid recipient provided',
+                    INVALID_RECIPIENT_MSG,
                 );
             });
 
-            it('should throw invalid amount provided error', async function () {
+            it('sendTrx should throw invalid amount provided error', async function () {
                 await assertThrow(
                     tronWeb.trx.sendTrx(accounts.hex[18], -1, {
                         privateKey: accounts.pks[fromIdx],
                     }),
-                    'Invalid amount provided',
+                    INVALID_AMOUNT_MSG,
                 );
             });
         });
@@ -1331,7 +1327,7 @@ describe('TronWeb.trx', function () {
                 );
             });
 
-            it('should throw invalid resource provided: expected "BANDWIDTH" or "ENERGY" error', async function () {
+            it('should throw invalid resource provided error', async function () {
                 await assertThrow(
                     // Intentionally invalid
                     // @ts-ignore
@@ -1343,13 +1339,13 @@ describe('TronWeb.trx', function () {
                 );
             });
 
-            it('should throw invalid amount provided error', async function () {
+            it('freezeBalance should throw invalid amount provided error', async function () {
                 await assertThrow(
                     tronWeb.trx.freezeBalance(-10, 3, 'BANDWIDTH', {
                         privateKey: accounts.pks[idx],
                         address: accounts.hex[idx],
                     }),
-                    'Invalid amount provided',
+                    INVALID_AMOUNT_MSG,
                 );
             });
 
@@ -1528,7 +1524,7 @@ describe('TronWeb.trx', function () {
                     tronWeb.trx.getTransaction(
                         'a8813981b1737d9caf7d51b200760a16c9cdbc826fa8de102386af898048cbe5',
                     ),
-                    'Transaction not found',
+                    TX_NOT_FOUND_MSG,
                 );
             });
         });
@@ -1568,7 +1564,7 @@ describe('TronWeb.trx', function () {
                         if (e === 'Transaction not found in block') {
                             i++;
                             continue;
-                        } else if (e === 'Block not found') {
+                        } else if (e === BLOCK_NOT_FOUND_MSG) {
                             await wait(3);
                             continue;
                         } else {
@@ -1588,7 +1584,7 @@ describe('TronWeb.trx', function () {
             it('should throw block not found error by transaction from block', async function () {
                 await assertThrow(
                     tronWeb.trx.getTransactionFromBlock(currBlockNum + 50, 0),
-                    'Block not found',
+                    BLOCK_NOT_FOUND_MSG,
                 );
             });
 
@@ -1623,7 +1619,6 @@ describe('TronWeb.trx', function () {
                     );
                     if (Object.keys(tx).length === 0) {
                         await wait(3);
-                        continue;
                     } else {
                         assert.equal(tx.id, transaction.txID);
                         break;
@@ -1665,7 +1660,7 @@ describe('TronWeb.trx', function () {
                     tronWeb.trx.getUnconfirmedTransactionInfo(
                         'a8813981b1737d9caf7d51b200760a16c9cdbc826fa8de102386af898048cbe5',
                     ),
-                    'Transaction not found',
+                    TX_NOT_FOUND_MSG,
                 );
             });
         });
@@ -1693,7 +1688,7 @@ describe('TronWeb.trx', function () {
                         assert.equal(tx.txID, transaction.transaction.txID);
                         break;
                     } catch (e) {
-                        if (e === 'Transaction not found') {
+                        if (e === TX_NOT_FOUND_MSG) {
                             await wait(3);
                             continue;
                         } else {
@@ -1773,7 +1768,7 @@ describe('TronWeb.trx', function () {
                             address: accounts.hex[fromIdx],
                         },
                     ),
-                    'Invalid recipient provided',
+                    INVALID_RECIPIENT_MSG,
                 );
             });
 
@@ -1788,7 +1783,7 @@ describe('TronWeb.trx', function () {
                             address: accounts.hex[fromIdx],
                         },
                     ),
-                    'Invalid amount provided',
+                    INVALID_AMOUNT_MSG,
                 );
             });
 
@@ -1805,7 +1800,7 @@ describe('TronWeb.trx', function () {
                             address: accounts.hex[fromIdx],
                         },
                     ),
-                    'Invalid token ID provided',
+                    INVALID_TOKEN_ID_MSG,
                 );
             });
 
@@ -1888,7 +1883,7 @@ describe('TronWeb.trx', function () {
                             address: accounts.hex[fromIdx],
                         },
                     ),
-                    'Invalid recipient provided',
+                    INVALID_RECIPIENT_MSG,
                 );
             });
 
@@ -1903,7 +1898,7 @@ describe('TronWeb.trx', function () {
                             address: accounts.hex[fromIdx],
                         },
                     ),
-                    'Invalid amount provided',
+                    INVALID_AMOUNT_MSG,
                 );
             });
 
@@ -1920,7 +1915,7 @@ describe('TronWeb.trx', function () {
                             address: accounts.hex[fromIdx],
                         },
                     ),
-                    'Invalid token ID provided',
+                    INVALID_TOKEN_ID_MSG,
                 );
             });
 
@@ -1969,7 +1964,7 @@ describe('TronWeb.trx', function () {
                     // Intentionally invalid
                     // @ts-ignore
                     tronWeb.trx.getTokenFromID({}),
-                    'Invalid token ID provided',
+                    INVALID_TOKEN_ID_MSG,
                 );
             });
 
@@ -2010,7 +2005,7 @@ describe('TronWeb.trx', function () {
             it('should throw invalid address provided error', async function () {
                 await assertThrow(
                     tronWeb.trx.getTokensIssuedByAddress('abcdefghijklmn'),
-                    'Invalid address provided',
+                    INVALID_ADDRESS_MSG,
                 );
             });
         });

@@ -3,6 +3,8 @@ import {assert} from 'chai';
 import {createInstance} from '../helpers/tronWebBuilder';
 
 describe('TronWeb.utils.code', function () {
+    const NOT_A_STRING_MSG = 'The passed string is not a string';
+
     describe('#bin2String()', function () {
         it('should convert a byte to a hex string', async function () {
             const tronWeb = createInstance();
@@ -63,13 +65,13 @@ describe('TronWeb.utils.code', function () {
                 tronWeb.utils.code.stringToBytes([
                     210, 154, 224, 161, 128, 208, 191, 207, 137,
                 ]);
-            }, 'The passed string is not a string');
+            }, NOT_A_STRING_MSG);
 
             assert.throws(() => {
                 // Intentionally invalid
                 // @ts-ignore
                 tronWeb.utils.code.stringToBytes(356253);
-            }, 'The passed string is not a string');
+            }, NOT_A_STRING_MSG);
         });
     });
 
@@ -114,7 +116,7 @@ describe('TronWeb.utils.code', function () {
     });
 
     describe('#hexStr2byteArray()', function () {
-        it('should verify that an hex char is a valid hex char', async function () {
+        it('should convert hex string to ByteArray', async function () {
             const tronWeb = createInstance();
 
             assert.isTrue(
@@ -141,12 +143,12 @@ describe('TronWeb.utils.code', function () {
                 // Intentionally invalid
                 // @ts-ignore
                 tronWeb.utils.code.hexStr2byteArray(123);
-            }, 'The passed string is not a string');
+            }, NOT_A_STRING_MSG);
         });
     });
 
     describe('#strToDate()', function () {
-        it('should verify that an hex char is a valid hex char', async function () {
+        it('should parse a string to Date', async function () {
             const tronWeb = createInstance();
 
             let input = '2018-09-23 13-45-03';
@@ -162,7 +164,7 @@ describe('TronWeb.utils.code', function () {
             );
         });
 
-        it('should throw if we pass an invalid hex string', async function () {
+        it('should throw if we pass an invalid date string', async function () {
             const tronWeb = createInstance();
 
             assert.throws(() => {
@@ -186,7 +188,7 @@ describe('TronWeb.utils.code', function () {
     });
 
     describe('#isNumber()', function () {
-        it('should verify that an numeric char is a number', async function () {
+        it('should verify that a numeric char is a number', async function () {
             const tronWeb = createInstance();
 
             assert.isTrue(tronWeb.utils.code.isNumber('0'));

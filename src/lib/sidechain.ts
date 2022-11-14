@@ -29,6 +29,8 @@ export type IChainOptions = {
 export type IDepositTrc = any;
 export type IMappingTrc = any;
 
+const INVALID_TX_MESSAGE = 'Invalid transaction provided';
+
 export default class SideChain<T extends TronWeb> {
     mainchain: T;
     sidechain: TronWeb;
@@ -164,7 +166,7 @@ export default class SideChain<T extends TronWeb> {
             !transaction.raw_data ||
             !transaction.raw_data.contract
         )
-            return callback('Invalid transaction provided');
+            return callback(INVALID_TX_MESSAGE);
 
         if (
             !transaction.raw_data.contract[0].Permission_id &&
@@ -206,7 +208,7 @@ export default class SideChain<T extends TronWeb> {
                 transaction = signWeight.transaction.transaction;
                 transaction.raw_data.contract[0].Permission_id = permissionId;
             } else {
-                return callback('Invalid transaction provided');
+                return callback(INVALID_TX_MESSAGE);
             }
         }
         // sign
@@ -269,7 +271,7 @@ export default class SideChain<T extends TronWeb> {
         }
 
         if (!this.utils.isObject(transaction))
-            return callback('Invalid transaction provided');
+            return callback(INVALID_TX_MESSAGE);
 
         if (!multisig && (transaction as ITransaction).signature)
             return callback('Transaction is already signed');

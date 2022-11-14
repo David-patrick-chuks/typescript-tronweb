@@ -5,6 +5,9 @@ import {FULL_NODE_API} from '../helpers/config';
 import {TronWeb, default as tronWebBuilder} from '../helpers/tronWebBuilder';
 
 describe('TronWeb.lib.providers', async function () {
+    const INVALID_URL_MSG = 'Invalid URL provided to HttpProvider';
+    const HEALTH_ENDPOINT = '/wallet/getnowblock';
+
     describe('#constructor()', function () {
         it('should create a full instance', function () {
             let provider = new TronWeb.providers.HttpProvider(FULL_NODE_API);
@@ -18,19 +21,19 @@ describe('TronWeb.lib.providers', async function () {
             tronWebBuilder.createInstance();
             assert.throws(
                 () => new TronWeb.providers.HttpProvider('$' + FULL_NODE_API),
-                'Invalid URL provided to HttpProvider',
+                INVALID_URL_MSG,
             );
 
             assert.throws(
                 () => new TronWeb.providers.HttpProvider('_localhost'),
-                'Invalid URL provided to HttpProvider',
+                INVALID_URL_MSG,
             );
 
             assert.throws(
                 // Intentionally invalid
                 // @ts-ignore
                 () => new TronWeb.providers.HttpProvider([FULL_NODE_API]),
-                'Invalid URL provided to HttpProvider',
+                INVALID_URL_MSG,
             );
         });
     });
@@ -47,21 +50,21 @@ describe('TronWeb.lib.providers', async function () {
     describe('#isConnected()', function () {
         it('should verify if the provider is connected', async function () {
             const provider = new TronWeb.providers.HttpProvider(FULL_NODE_API);
-            assert.isTrue(await provider.isConnected('/wallet/getnowblock'));
+            assert.isTrue(await provider.isConnected(HEALTH_ENDPOINT));
         });
 
         it('should return false if the url is not one of the expected provider', async function () {
             const provider = new TronWeb.providers.HttpProvider(
                 'https://google.com',
             );
-            assert.isFalse(await provider.isConnected('/wallet/getnowblock'));
+            assert.isFalse(await provider.isConnected(HEALTH_ENDPOINT));
         });
     });
 
     describe('#request()', function () {
         it('should request a route', async function () {
             const provider = new TronWeb.providers.HttpProvider(FULL_NODE_API);
-            const result = await provider.request('/wallet/getnowblock');
+            const result = await provider.request(HEALTH_ENDPOINT);
             assert.equal(result.blockID.length, 64);
         });
 

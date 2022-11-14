@@ -15,7 +15,7 @@ export default async function pollAccountFor(
     while (true) {
         if (Date.now() > now + timeout) throw new Error('Timeout...');
 
-        wait(interval);
+        await wait(interval);
         const result = await tronWeb.trx.getAccount(address);
         if (typeof property === 'string') {
             const data = _.get(result, property);
@@ -27,8 +27,8 @@ export default async function pollAccountFor(
                 } else {
                     return Promise.resolve(result);
                 }
-        } else if (typeof property === 'function') {
-            if (property(result)) return Promise.resolve(result);
+        } else if (typeof property === 'function' && property(result)) {
+            return Promise.resolve(result);
         }
     }
 }

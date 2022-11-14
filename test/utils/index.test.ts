@@ -47,7 +47,7 @@ describe('TronWeb.utils', function () {
     });
 
     describe('#isBoolean()', function () {
-        it('should verify that a value is a JSON string', function () {
+        it('should verify that a value is a boolean', function () {
             const tronWeb = createInstance();
 
             assert.isTrue(tronWeb.utils.isBoolean(true));
@@ -60,7 +60,7 @@ describe('TronWeb.utils', function () {
     });
 
     describe('#isBigNumber()', function () {
-        it('should verify that a value is a JSON string', function () {
+        it('should verify that a value is a BigNumber instance', function () {
             const tronWeb = createInstance();
 
             const bigNumber = new BigNumber('1234565432123456778765434456777');
@@ -78,7 +78,7 @@ describe('TronWeb.utils', function () {
     });
 
     describe('#isString()', function () {
-        it('should verify that a valyue is a string', function () {
+        it('should verify that a value is a string', function () {
             const tronWeb = createInstance();
 
             assert.isTrue(tronWeb.utils.isString('str'));

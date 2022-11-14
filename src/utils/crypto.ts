@@ -31,12 +31,14 @@ export function getBase58CheckAddress(
 }
 
 export function decodeBase58Address(base58String: string) {
+    const error_msg = 'Invalid address provided';
+
     if (typeof base58String !== 'string' || base58String.length <= 4)
-        throw new Error('Invalid address provided');
+        throw new Error(error_msg);
 
     let address = decode58(base58String);
 
-    if (base58String.length <= 4) throw new Error('Invalid address provided');
+    if (base58String.length <= 4) throw new Error(error_msg);
 
     const checkSum = address.slice(-4);
 
@@ -47,7 +49,7 @@ export function decodeBase58Address(base58String: string) {
 
     if (checkSum.join() === checkSum1.join()) return address;
 
-    throw new Error('Invalid address provided');
+    throw new Error(error_msg);
 }
 
 export function signTransaction(
@@ -97,13 +99,12 @@ export function _signTypedData(
 
     const messageDigest = TypedDataEncoder.hash(domain, types, value);
     const signature = signingKey.signDigest(messageDigest);
-    const signatureHex = [
+    return [
         '0x',
         signature.r.substring(2),
         signature.s.substring(2),
         Number(signature.v).toString(16),
     ].join('');
-    return signatureHex;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

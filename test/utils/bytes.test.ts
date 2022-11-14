@@ -3,6 +3,8 @@ import {assert} from 'chai';
 import {createInstance} from '../helpers/tronWebBuilder';
 
 describe('TronWeb.utils.bytes', function () {
+    const MUST_BE_A_BYTE_MSG = 'Input must be a byte';
+
     describe('#byte2hexStr()', function () {
         it('should convert a byte to a hex string', async function () {
             const tronWeb = createInstance();
@@ -25,11 +27,11 @@ describe('TronWeb.utils.bytes', function () {
 
             assert.throws(() => {
                 tronWeb.utils.bytes.byte2hexStr(-15);
-            }, 'Input must be a byte');
+            }, MUST_BE_A_BYTE_MSG);
 
             assert.throws(() => {
                 tronWeb.utils.bytes.byte2hexStr(1455);
-            }, 'Input must be a byte');
+            }, MUST_BE_A_BYTE_MSG);
         });
     });
 
@@ -93,7 +95,7 @@ describe('TronWeb.utils.bytes', function () {
 
             assert.throws(() => {
                 tronWeb.utils.bytes.byteArray2hexStr([73, -32, 108]);
-            }, 'Input must be a byte');
+            }, MUST_BE_A_BYTE_MSG);
         });
     });
 

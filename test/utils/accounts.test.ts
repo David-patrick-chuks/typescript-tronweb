@@ -4,6 +4,7 @@ import assertThrow from '../helpers/assertThrow';
 import {createInstance} from '../helpers/tronWebBuilder';
 
 describe('TronWeb.utils.accounts', function () {
+    const INVALID_PATH_MSG = 'Invalid tron path provided';
     describe('#generateAccount()', function () {
         it('should generate a new account', async function () {
             const tronWeb = createInstance();
@@ -151,7 +152,7 @@ describe('TronWeb.utils.accounts', function () {
 
                 await assertThrow(
                     () => tronWeb.utils.accounts.generateRandom(options),
-                    'Invalid tron path provided',
+                    INVALID_PATH_MSG,
                 );
             });
 
@@ -163,7 +164,7 @@ describe('TronWeb.utils.accounts', function () {
                     // Intentionally invalid
                     // @ts-ignore
                     () => tronWeb.utils.accounts.generateRandom(options),
-                    'Invalid tron path provided',
+                    INVALID_PATH_MSG,
                 );
             });
         });
@@ -234,7 +235,7 @@ describe('TronWeb.utils.accounts', function () {
                             // @ts-ignore
                             path,
                         ),
-                    'Invalid tron path provided',
+                    INVALID_PATH_MSG,
                 );
             });
 
@@ -252,7 +253,7 @@ describe('TronWeb.utils.accounts', function () {
                             accountCreated.mnemonic.phrase,
                             path,
                         ),
-                    'Invalid tron path provided',
+                    INVALID_PATH_MSG,
                 );
             });
         });

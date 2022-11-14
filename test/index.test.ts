@@ -25,6 +25,8 @@ import wait from './helpers/wait';
 const HttpProvider = TronWeb.providers.HttpProvider;
 
 describe('TronWeb Instance', function () {
+    const BAD_URL_MESSAGE = 'Invalid URL provided to HttpProvider';
+
     describe('#constructor()', function () {
         it('should create a full instance', function () {
             const tronWeb = tronWebBuilder.createInstance();
@@ -88,7 +90,7 @@ describe('TronWeb Instance', function () {
 
             assert.throws(
                 () => new TronWeb('$' + FULL_NODE_API, solidityNode),
-                'Invalid URL provided to HttpProvider',
+                BAD_URL_MESSAGE,
             );
         });
 
@@ -97,7 +99,7 @@ describe('TronWeb Instance', function () {
 
             assert.throws(
                 () => new TronWeb(fullNode, '$' + SOLIDITY_NODE_API),
-                'Invalid URL provided to HttpProvider',
+                BAD_URL_MESSAGE,
             );
         });
 
@@ -107,7 +109,7 @@ describe('TronWeb Instance', function () {
 
             assert.throws(
                 () => new TronWeb(fullNode, solidityNode, '$' + EVENT_API),
-                'Invalid URL provided to HttpProvider',
+                BAD_URL_MESSAGE,
             );
         });
 
@@ -221,7 +223,7 @@ describe('TronWeb Instance', function () {
                             SIDE_CHAIN.sideOptions.sideGatewayAddress,
                         sideChainId: SIDE_CHAIN.sideOptions.sideChainId,
                     }),
-                'Invalid URL provided to HttpProvider',
+                BAD_URL_MESSAGE,
             );
         });
 
@@ -240,7 +242,7 @@ describe('TronWeb Instance', function () {
                             SIDE_CHAIN.sideOptions.sideGatewayAddress,
                         sideChainId: SIDE_CHAIN.sideOptions.sideChainId,
                     }),
-                'Invalid URL provided to HttpProvider',
+                BAD_URL_MESSAGE,
             );
         });
 
@@ -260,7 +262,7 @@ describe('TronWeb Instance', function () {
                             SIDE_CHAIN.sideOptions.sideGatewayAddress,
                         sideChainId: SIDE_CHAIN.sideOptions.sideChainId,
                     }),
-                'Invalid URL provided to HttpProvider',
+                BAD_URL_MESSAGE,
             );
         });
     });
@@ -481,7 +483,7 @@ describe('TronWeb Instance', function () {
     });
 
     describe('#setFullNode()', function () {
-        it('should accept a HttpProvider instance', function () {
+        it('Full node should accept a HttpProvider instance', function () {
             const tronWeb = tronWebBuilder.createInstance();
             const provider = new HttpProvider(FULL_NODE_API);
 
@@ -490,7 +492,7 @@ describe('TronWeb Instance', function () {
             assert.equal(tronWeb.fullNode, provider);
         });
 
-        it('should accept a valid URL string', function () {
+        it('Full node should accept a valid URL string', function () {
             const tronWeb = tronWebBuilder.createInstance();
             const provider = FULL_NODE_API;
 
@@ -499,7 +501,7 @@ describe('TronWeb Instance', function () {
             assert.equal(tronWeb.fullNode.host, provider);
         });
 
-        it('should reject a non-string', function () {
+        it('Full node should reject a non-string', function () {
             assert.throws(() => {
                 // Intentionally invalid
                 // @ts-ignore
@@ -507,10 +509,10 @@ describe('TronWeb Instance', function () {
             }, 'Invalid full node provided');
         });
 
-        it('should reject an invalid URL string', function () {
+        it('Full node should reject an invalid URL string', function () {
             assert.throws(() => {
                 tronWebBuilder.createInstance().setFullNode('example.');
-            }, 'Invalid URL provided to HttpProvider');
+            }, BAD_URL_MESSAGE);
         });
     });
 
@@ -524,7 +526,7 @@ describe('TronWeb Instance', function () {
             assert.equal(tronWeb.solidityNode, provider);
         });
 
-        it('should accept a valid URL string', function () {
+        it('Solidity node should accept a valid URL string', function () {
             const tronWeb = tronWebBuilder.createInstance();
             const provider = SOLIDITY_NODE_API;
 
@@ -533,7 +535,7 @@ describe('TronWeb Instance', function () {
             assert.equal(tronWeb.solidityNode.host, provider);
         });
 
-        it('should reject a non-string', function () {
+        it('Solidity node should reject a non-string', function () {
             assert.throws(() => {
                 // Intentionally invalid
                 // @ts-ignore
@@ -541,10 +543,10 @@ describe('TronWeb Instance', function () {
             }, 'Invalid solidity node provided');
         });
 
-        it('should reject an invalid URL string', function () {
+        it('Solidity node should reject an invalid URL string', function () {
             assert.throws(() => {
                 tronWebBuilder.createInstance().setSolidityNode('_localhost');
-            }, 'Invalid URL provided to HttpProvider');
+            }, BAD_URL_MESSAGE);
         });
     });
 
@@ -566,15 +568,15 @@ describe('TronWeb Instance', function () {
             assert.isUndefined(tronWeb.eventServer);
         });
 
-        it('should reject an invalid URL string', function () {
+        it('Event server should reject an invalid URL string', function () {
             const tronWeb = tronWebBuilder.createInstance();
 
             assert.throws(() => {
                 tronWeb.setEventServer('test%20');
-            }, 'Invalid URL provided to HttpProvider');
+            }, BAD_URL_MESSAGE);
         });
 
-        it('should reject an invalid URL parameter', function () {
+        it('Event server should reject an invalid URL parameter', function () {
             const tronWeb = tronWebBuilder.createInstance();
 
             assert.throws(() => {
@@ -1191,23 +1193,23 @@ describe('TronWeb Instance', function () {
     });
 });
 
-describe('#testTronGrid', function () {
-    // Temporary stop testing api key because test server is closed
-    return;
+// Temporary stop testing api key because test server is closed
+describe.skip('#testTronGrid', function () {
+    const API_KEY_HEADER_NAME = 'TRON-PRO-API-KEY';
 
     describe('#testTronGridApiKey', function () {
         it('should add the parameter TRON-PRO-API-KEY=Key to the header of the request', async function () {
             const tronWeb = tronWebBuilder.createInstance({
                 fullHost: TEST_TRON_GRID_API,
-                headers: {'TRON-PRO-API-KEY': TEST_TRON_HEADER_API_KEY},
+                headers: {[API_KEY_HEADER_NAME]: TEST_TRON_HEADER_API_KEY},
             });
 
             assert.equal(
-                tronWeb.fullNode.headers['TRON-PRO-API-KEY'],
+                tronWeb.fullNode.headers[API_KEY_HEADER_NAME],
                 TEST_TRON_HEADER_API_KEY,
             );
             assert.equal(
-                tronWeb.eventServer.headers['TRON-PRO-API-KEY'],
+                tronWeb.eventServer.headers[API_KEY_HEADER_NAME],
                 TEST_TRON_HEADER_API_KEY,
             );
 
@@ -1223,16 +1225,16 @@ describe('#testTronGrid', function () {
         it('should add the parameter TRON-PRO-API-KEY=Key to the header of the event request', async function () {
             const tronWeb = tronWebBuilder.createInstance({
                 fullHost: TEST_TRON_GRID_API,
-                headers: {'TRON-PRO-API-KEY': TEST_TRON_HEADER_API_KEY},
-                eventHeaders: {'TRON-PRO-API-KEY': TEST_TRON_HEADER_API_KEY},
+                headers: {[API_KEY_HEADER_NAME]: TEST_TRON_HEADER_API_KEY},
+                eventHeaders: {[API_KEY_HEADER_NAME]: TEST_TRON_HEADER_API_KEY},
             });
 
             assert.equal(
-                tronWeb.fullNode.headers['TRON-PRO-API-KEY'],
+                tronWeb.fullNode.headers[API_KEY_HEADER_NAME],
                 TEST_TRON_HEADER_API_KEY,
             );
             assert.equal(
-                tronWeb.eventServer.headers['TRON-PRO-API-KEY'],
+                tronWeb.eventServer.headers[API_KEY_HEADER_NAME],
                 TEST_TRON_HEADER_API_KEY,
             );
 
@@ -1249,14 +1251,16 @@ describe('#testTronGrid', function () {
             const tronWeb = tronWebBuilder.createInstance({
                 fullHost: TEST_TRON_GRID_API,
             });
-            tronWeb.setHeader({'TRON-PRO-API-KEY': TEST_TRON_HEADER_API_KEY});
+            tronWeb.setHeader({
+                [API_KEY_HEADER_NAME]: TEST_TRON_HEADER_API_KEY,
+            });
 
             assert.equal(
-                tronWeb.fullNode.headers['TRON-PRO-API-KEY'],
+                tronWeb.fullNode.headers[API_KEY_HEADER_NAME],
                 TEST_TRON_HEADER_API_KEY,
             );
             assert.equal(
-                tronWeb.eventServer.headers['TRON-PRO-API-KEY'],
+                tronWeb.eventServer.headers[API_KEY_HEADER_NAME],
                 TEST_TRON_HEADER_API_KEY,
             );
 
@@ -1278,11 +1282,11 @@ describe('#testTronGrid', function () {
             });
 
             assert.equal(
-                tronWeb.fullNode.headers['TRON-PRO-API-KEY'],
+                tronWeb.fullNode.headers[API_KEY_HEADER_NAME],
                 TEST_TRON_HEADER_API_KEY,
             );
             assert.equal(
-                tronWeb.eventServer.headers['TRON-PRO-API-KEY'],
+                tronWeb.eventServer.headers[API_KEY_HEADER_NAME],
                 undefined,
             );
 
@@ -1307,11 +1311,11 @@ describe('#testTronGrid', function () {
             });
 
             assert.equal(
-                tronWeb.fullNode.headers['TRON-PRO-API-KEY'],
+                tronWeb.fullNode.headers[API_KEY_HEADER_NAME],
                 undefined,
             );
             assert.equal(
-                tronWeb.eventServer.headers['TRON-PRO-API-KEY'],
+                tronWeb.eventServer.headers[API_KEY_HEADER_NAME],
                 TEST_TRON_HEADER_API_KEY,
             );
 
@@ -1331,15 +1335,15 @@ describe('#testTronGrid', function () {
             const FAKE_KEY = 'ABCEDF';
             const tronWeb = tronWebBuilder.createInstance({
                 fullHost: TEST_TRON_GRID_API,
-                headers: {'TRON-PRO-API-KEY': FAKE_KEY},
+                headers: {[API_KEY_HEADER_NAME]: FAKE_KEY},
             });
 
             assert.equal(
-                tronWeb.fullNode.headers['TRON-PRO-API-KEY'],
+                tronWeb.fullNode.headers[API_KEY_HEADER_NAME],
                 FAKE_KEY,
             );
             assert.equal(
-                tronWeb.eventServer.headers['TRON-PRO-API-KEY'],
+                tronWeb.eventServer.headers[API_KEY_HEADER_NAME],
                 FAKE_KEY,
             );
 
@@ -1362,16 +1366,16 @@ describe('#testTronGrid', function () {
             const FAKE_KEY = 'ABCEDF';
             const tronWeb = tronWebBuilder.createInstance({
                 fullHost: TEST_TRON_GRID_API,
-                headers: {'TRON-PRO-API-KEY': FAKE_KEY},
-                eventHeaders: {'TRON-PRO-API-KEY': TEST_TRON_HEADER_API_KEY},
+                headers: {[API_KEY_HEADER_NAME]: FAKE_KEY},
+                eventHeaders: {[API_KEY_HEADER_NAME]: TEST_TRON_HEADER_API_KEY},
             });
 
             assert.equal(
-                tronWeb.fullNode.headers['TRON-PRO-API-KEY'],
+                tronWeb.fullNode.headers[API_KEY_HEADER_NAME],
                 FAKE_KEY,
             );
             assert.equal(
-                tronWeb.eventServer.headers['TRON-PRO-API-KEY'],
+                tronWeb.eventServer.headers[API_KEY_HEADER_NAME],
                 TEST_TRON_HEADER_API_KEY,
             );
 
@@ -1391,16 +1395,16 @@ describe('#testTronGrid', function () {
             const FAKE_KEY = 'ABCEDF';
             const tronWeb = tronWebBuilder.createInstance({
                 fullHost: TEST_TRON_GRID_API,
-                headers: {'TRON-PRO-API-KEY': TEST_TRON_HEADER_API_KEY},
-                eventHeaders: {'TRON-PRO-API-KEY': FAKE_KEY},
+                headers: {[API_KEY_HEADER_NAME]: TEST_TRON_HEADER_API_KEY},
+                eventHeaders: {[API_KEY_HEADER_NAME]: FAKE_KEY},
             });
 
             assert.equal(
-                tronWeb.fullNode.headers['TRON-PRO-API-KEY'],
+                tronWeb.fullNode.headers[API_KEY_HEADER_NAME],
                 TEST_TRON_HEADER_API_KEY,
             );
             assert.equal(
-                tronWeb.eventServer.headers['TRON-PRO-API-KEY'],
+                tronWeb.eventServer.headers[API_KEY_HEADER_NAME],
                 FAKE_KEY,
             );
 

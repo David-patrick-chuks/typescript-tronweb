@@ -69,9 +69,7 @@ export const equals = (actual: any, expected: any): boolean => {
             expected = bnify(expected);
             if (neg) expected = expected.mul(-1);
         }
-        if (!actual.eq(expected)) return false;
-
-        return true;
+        return actual.eq(expected);
     }
 
     // Uint8Array

@@ -13,13 +13,14 @@ module.exports = {
         'eslint:recommended',
         'plugin:@typescript-eslint/recommended',
         'eslint-config-prettier',
+        'plugin:sonarjs/recommended',
     ],
     root: true,
     parserOptions: {
         ecmaVersion: 13,
     },
     parser: '@typescript-eslint/parser',
-    plugins: ['@typescript-eslint'],
+    plugins: ['@typescript-eslint', 'sonarjs'],
     rules: {
         'linebreak-style': [2, 'unix'],
         quotes: [1, 'single', 'avoid-escape'],
@@ -44,6 +45,8 @@ module.exports = {
         curly: [2, 'multi', 'consistent'],
         'no-constant-condition': ['error', {checkLoops: false}],
         'no-unused-vars': 0,
+        // sonarjs
+        'sonarjs/no-duplicate-string': 0, // to dumb to figure out literal types
         // ts
         '@typescript-eslint/no-unused-vars': 2,
         '@typescript-eslint/ban-ts-comment': 0,
@@ -52,6 +55,7 @@ module.exports = {
         '@typescript-eslint/no-empty-function': 0,
         // FIXME: only temporary
         '@typescript-eslint/no-this-alias': 0,
+        'sonarjs/cognitive-complexity': 0,
     },
     overrides: [
         {
@@ -59,6 +63,7 @@ module.exports = {
             env: {node: true, mocha: true},
             rules: {
                 'max-len': 0,
+                'sonarjs/cognitive-complexity': 0,
             },
         },
         {
