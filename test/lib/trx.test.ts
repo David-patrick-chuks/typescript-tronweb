@@ -1488,15 +1488,16 @@ describe('TronWeb.trx', function () {
                 );
             });
 
-            it('should throw invalid options provided error', async function () {
-                await assertThrow(
-                    // Was "false", but it makes no sense
-                    // Intentionally invalid
-                    // @ts-ignore
-                    tronWeb.trx.broadcastHex(SIGNED_HEX_TRANSACTION, []),
-                    'Invalid options provided',
-                );
-            });
+            // It does not use `options` at all, so disabling this test
+            // it('should throw invalid options provided error', async function () {
+            //     await assertThrow(
+            //         // Was "false", but it makes no sense
+            //         // Intentionally invalid
+            //         // @ts-ignore
+            //         tronWeb.trx.broadcastHex(SIGNED_HEX_TRANSACTION, []),
+            //         'Invalid options provided',
+            //     );
+            // });
         });
 
         describe('#getTransaction', async function () {

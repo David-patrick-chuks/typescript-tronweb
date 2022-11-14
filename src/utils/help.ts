@@ -23,9 +23,8 @@ export function hexStringToUtf8(hex: string): string {
     let out = '';
 
     for (let i = 0; i < arr.length / 2; i++) {
-        // const tmp = `0x${arr[i * 2]}${arr[i * 2 + 1]}`;
-        const tmp = 16 * +arr[i * 2] + +arr[i * 2 + 1];
-        out += String.fromCharCode(tmp);
+        const tmp = `0x${arr[i * 2]}${arr[i * 2 + 1]}`;
+        out += String.fromCharCode(parseInt(tmp, 16));
     }
 
     return out;
