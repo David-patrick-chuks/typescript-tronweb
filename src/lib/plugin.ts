@@ -10,7 +10,7 @@ export interface IPluginRegisterResult {
     error?: string;
 }
 export interface IPluginDefn {
-    // FIXME: it can be better
+    // TODO: it can be better
     requires?: string;
     // eslint-disable-next-line @typescript-eslint/ban-types
     components?: Record<string, Record<string, Function>>;

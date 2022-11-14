@@ -27,7 +27,7 @@ export interface IPermissionsMinimal extends IPermissions {
     parent_id?: number;
     operations?: string;
 }
-export interface ITransaction extends Transaction {}
+export type ITransaction = Transaction;
 
 export interface ISignedTransaction extends ITransaction {
     signature: string[];
@@ -1122,26 +1122,18 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         contractAddress: string,
         functionSelector: string,
         options: ITriggerContractOptions,
-        parameters: {type: string; value: any}[],
-        issuerAddress: string | undefined,
+        parameters?: {type: string; value: any}[] | undefined,
+        issuerAddress?: string | undefined,
         callback?: undefined,
     ): Promise<ITriggerSmartContract>;
     triggerSmartContract(
         contractAddress: string,
         functionSelector: string,
         options: ITriggerContractOptions,
-        parameters: {type: string; value: any}[],
+        parameters: {type: string; value: any}[] | undefined,
         issuerAddress: string | undefined,
         callback: _CallbackT<ITriggerSmartContract>,
     ): void;
-    triggerSmartContract(
-        contractAddress: string,
-        functionSelector: string,
-        options: ITriggerContractOptions,
-        parameters: {type: string; value: any}[],
-        issuerAddress: string | undefined,
-        callback?: _CallbackT<ITriggerSmartContract>,
-    ): void | Promise<ITriggerSmartContract>;
     triggerSmartContract(
         contractAddress: string,
         functionSelector: string,
@@ -1150,10 +1142,7 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         issuerAddress: string | undefined = this.tronWeb.defaultAddress.hex,
         callback?: _CallbackT<ITriggerSmartContract>,
     ): void | Promise<ITriggerSmartContract> {
-        // triggerSmartContract(...params) {
-        // FIXME: it's some weird params shifting, fix it later
         if (typeof options !== 'object')
-            // @ts-ignore
             return this.triggerSmartContract(
                 contractAddress,
                 functionSelector,
@@ -1162,7 +1151,6 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
                     callValue: parameters,
                 },
             );
-        // params.splice(3, 1);
 
         return this._triggerSmartContract(
             contractAddress,

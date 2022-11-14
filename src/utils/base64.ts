@@ -144,9 +144,9 @@ export class Base64 {
 
     private _out2ByteArray(utftext: string): Uint8Array {
         const byteArray = new Uint8Array(utftext.length);
-        for (let i = 0; i < utftext.length; i++) {
+        for (let i = 0; i < utftext.length; i++)
             byteArray[i] = utftext.charCodeAt(i);
-        }
+
         return byteArray;
     }
 

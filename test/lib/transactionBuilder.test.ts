@@ -1710,14 +1710,13 @@ describe('TronWeb.transactionBuilder', function () {
                 accounts.hex[6],
             );
             await broadcaster(null, accounts.pks[6], transaction);
-            while (true) {
+            while (true)
                 try {
                     await tronWeb.trx.getConfirmedTransaction(transaction.txID);
                     break;
                 } catch {
                     await wait(3);
                 }
-            }
         });
 
         it('should trigger confirmed constant contract successfully', async function () {

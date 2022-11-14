@@ -1,4 +1,5 @@
 import {ADDRESS_PREFIX} from './address';
+import type {SomeBytes} from './bytes';
 import {hexStr2byteArray} from './code';
 import {getBase58CheckAddress} from './crypto';
 import {
@@ -12,7 +13,7 @@ import {
 
 export const TRON_MESSAGE_PREFIX = '\x19TRON Signed Message:\n';
 
-export function hashMessage(message: string | Uint8Array): string {
+export function hashMessage(message: string | SomeBytes): string {
     if (typeof message === 'string') message = toUtf8Bytes(message);
 
     return keccak256(
@@ -25,7 +26,7 @@ export function hashMessage(message: string | Uint8Array): string {
 }
 
 export function signMessage(
-    message: string | Uint8Array,
+    message: string | SomeBytes,
     privateKey: string,
 ): string {
     if (!privateKey.match(/^0x/)) privateKey = '0x' + privateKey;
@@ -38,7 +39,7 @@ export function signMessage(
 }
 
 export function verifyMessage(
-    message: string | Uint8Array,
+    message: string | SomeBytes,
     signature: string,
 ): string {
     if (!signature.match(/^0x/)) signature = '0x' + signature;

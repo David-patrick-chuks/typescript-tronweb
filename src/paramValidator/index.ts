@@ -38,6 +38,19 @@ export type IBinaryOperator = IOperatorBase & {
 };
 export type IOperator = IUnaryOperator | IBinaryOperator;
 
+function compare(
+    value: number,
+    opts: {gt?: number; gte?: number; lt?: number; lte?: number},
+) {
+    const {gt, lt, gte, lte} = opts;
+    return (
+        (typeof gt === 'number' && value <= gt) ||
+        (typeof lt === 'number' && value >= lt) ||
+        (typeof gte === 'number' && value < gte) ||
+        (typeof lte === 'number' && value > lte)
+    );
+}
+
 export default class Validator {
     tronWeb: TronWeb;
 
@@ -59,6 +72,7 @@ export default class Validator {
     }
 
     notPositive(param: IUnaryOperator): string {
+        const f = '23';
         return `${param.name} must be a positive integer`;
     }
 
@@ -69,8 +83,6 @@ export default class Validator {
         );
     }
 
-    // FIXME: complexity
-    // eslint-disable-next-line complexity
     notValid(params: IOperator[] = [], callback = new Function()) {
         const normalized: {[key: string]: any} = {};
         let no = false;
@@ -95,15 +107,7 @@ export default class Validator {
                     break;
 
                 case 'integer': {
-                    // FIXME: this has to be a method with 4 bounds check
-                    const {gt, lt, gte, lte} = param;
-                    if (
-                        !utils.isInteger(value) ||
-                        (typeof gt === 'number' && value <= gt) ||
-                        (typeof lt === 'number' && value >= lt) ||
-                        (typeof gte === 'number' && value < gte) ||
-                        (typeof lte === 'number' && value > lte)
-                    )
+                    if (!utils.isInteger(value) || !compare(value, param))
                         no = true;
                     break;
                 }
@@ -159,14 +163,7 @@ export default class Validator {
                     if (!utils.isBoolean(value)) no = true;
                     break;
                 case 'string': {
-                    const {gt, lt, gte, lte} = param;
-                    if (
-                        !utils.isString(value) ||
-                        (typeof gt === 'number' && value.length <= gt) ||
-                        (typeof lt === 'number' && value.length >= lt) ||
-                        (typeof gte === 'number' && value.length < gte) ||
-                        (typeof lte === 'number' && value.length > lte)
-                    )
+                    if (!utils.isString(value) || !compare(value.length, param))
                         no = true;
                     break;
                 }

@@ -181,9 +181,8 @@ class _Contract extends WithTronwebAndInjectpromise {
     hasProperty(property: string): boolean {
         return (
             Object.prototype.hasOwnProperty.call(this, property) ||
-            // FIXME: just remove this, it's very old stuff
-            // @ts-ignore
-            this.__proto__.hasOwnProperty(property) // eslint-disable-line
+            // TODO: just remove this, it's very old stuff
+            (this as any).__proto__.hasOwnProperty(property) // eslint-disable-line
         );
     }
 

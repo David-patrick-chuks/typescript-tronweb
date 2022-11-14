@@ -1552,7 +1552,7 @@ describe('TronWeb.trx', function () {
 
             it('should get transaction from block', async function () {
                 this.timeout(10000);
-                for (let i = currBlockNum; i < currBlockNum + 3; ) {
+                for (let i = currBlockNum; i < currBlockNum + 3; )
                     try {
                         const tx = await tronWeb.trx.getTransactionFromBlock(
                             i,
@@ -1574,7 +1574,6 @@ describe('TronWeb.trx', function () {
                             break;
                         }
                     }
-                }
             });
 
             it('should throw transaction not found error by transaction from block', async function () {

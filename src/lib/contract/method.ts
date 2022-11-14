@@ -47,7 +47,12 @@ export default class Method extends WithTronwebAndInjectpromise {
     outputs: IAbiItem[];
     functionSelector: string;
     signature: string;
-    defaultOptions: Record<string, unknown>;
+    defaultOptions: {
+        feeLimit: number;
+        callValue: number;
+        userFeePercentage: number;
+        shouldPollResponse: boolean;
+    };
 
     constructor(contract: Contract, abi: IFuncAbi) {
         super(contract.tronWeb);
@@ -69,7 +74,7 @@ export default class Method extends WithTronwebAndInjectpromise {
             feeLimit: this.tronWeb.feeLimit,
             callValue: 0,
             userFeePercentage: 100,
-            shouldPollResponse: false, // Only used for sign()
+            shouldPollResponse: false,
         };
     }
 
@@ -83,7 +88,10 @@ export default class Method extends WithTronwebAndInjectpromise {
             rawParameter = encodeParamsV2ByABI(this.abi, args);
 
         return {
-            call: (options = {}, callback?: _CallbackT<any>) => {
+            call: (
+                options: ITriggerContractOptions = {},
+                callback?: _CallbackT<any>,
+            ) => {
                 // if (utils.isFunction(options)) {
                 //     callback = options;
                 //     options = {};
@@ -96,7 +104,9 @@ export default class Method extends WithTronwebAndInjectpromise {
                 return this._call([], [], options, callback);
             },
             send: (
-                options = {},
+                options: {
+                    [k in keyof ContractOptions]?: ContractOptions[k];
+                } & IMethodSendOptions = {},
                 privateKey: string = this.tronWeb.defaultPrivateKey,
                 callback?: _CallbackT<any>,
             ) => {

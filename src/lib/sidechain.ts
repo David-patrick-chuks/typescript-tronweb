@@ -92,7 +92,7 @@ export default class SideChain<T extends TronWeb> {
         };
     }
 
-    // FIXME: this and two next must be setters
+    // TODO: this and two next must be setters
     setMainGatewayAddress(mainGatewayAddress) {
         if (!this.isAddress(mainGatewayAddress))
             throw new Error('Invalid main gateway address provided');
@@ -292,14 +292,12 @@ export default class SideChain<T extends TronWeb> {
                 return callback('Expected hex message input');
 
             try {
-                // FIXME: it's weird, .trx is an instance and signString is static
-                // @ts-ignore
                 const signatureHex = this.sidechain.trx.signString(
                     transaction,
                     privateKey,
                     useTronHeader,
                 );
-                return callback(null, signatureHex);
+                return callback(null, signatureHex as MakeSigned<T>);
             } catch (ex) {
                 callback(ex);
             }
@@ -320,7 +318,6 @@ export default class SideChain<T extends TronWeb> {
                 if (
                     address !==
                     this.sidechain.address.toHex(
-                        // @ts-ignore
                         transaction.raw_data.contract[0].parameter.value
                             .owner_address,
                     )
@@ -635,26 +632,14 @@ export default class SideChain<T extends TronWeb> {
                     .contract()
                     .at(this.mainGatewayAddress);
                 switch (functionSelector) {
-                    // FIXME: it's actually 1 case
                     case 'depositTRC20':
-                        result = await contractInstance
-                            .depositTRC20(contractAddress, num)
-                            .send(options, privateKey);
-                        break;
                     case 'depositTRC721':
-                        result = await contractInstance
-                            .depositTRC721(contractAddress, num)
-                            .send(options, privateKey);
-                        break;
                     case 'retryDeposit':
-                        result = await contractInstance
-                            .retryDeposit(num)
-                            .send(options, privateKey);
-                        break;
                     case 'retryMapping':
-                        result = await contractInstance
-                            .retryMapping(num)
-                            .send(options, privateKey);
+                        result = await contractInstance[functionSelector](
+                            contractAddress,
+                            num,
+                        ).send(options, privateKey);
                         break;
                     default:
                         break;

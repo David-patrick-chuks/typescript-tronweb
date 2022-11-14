@@ -8,23 +8,10 @@ import type {
     TransactionApprovedList as ITransactionApprovedList,
     TransactionExtention as ITransactionExtention,
 } from '../proto/api/api';
-// FIXME: All interfaces here should be generated from protobuf instead.
-// export interface IBlock {
-//     number: number;
-//     transactions: ITransaction[];
-//     blockID: string;
-//     block_header: {
-//         raw_data: {
-//             number: number;
-//         };
-//     };
-// }
 import type {
     Account as IAccount,
-    Block as IBlock,
     ChainParameters_ChainParameter as IChainParameter,
     Exchange as IExchange,
-    TransactionInfo_Log as ILog,
     NodeInfo as INodeInfo,
     Proposal as IProposal,
     TransactionInfo as ITransactionInfo,
@@ -35,6 +22,7 @@ import {ResourceCode as ResourceT} from '../proto/core/contract/common';
 import type {SmartContract as ISmartContract} from '../proto/core/contract/smart_contract';
 import utils from '../utils';
 import {ADDRESS_PREFIX} from '../utils/address';
+import type {SomeBytes} from '../utils/bytes';
 import {IDomain, TypedDataTypes} from '../utils/crypto';
 import {
     SigningKey,
@@ -55,7 +43,6 @@ const TRX_MESSAGE_HEADER = '\x19TRON Signed Message:\n32';
 const ETH_MESSAGE_HEADER = '\x19Ethereum Signed Message:\n32';
 
 export type BlockT = number | 'latest' | 'earliest' | string;
-// export type ResourceT = 'BANDWIDTH' | 'ENERGY';
 
 export type {
     Block as IBlock,
@@ -103,7 +90,7 @@ function toHex(value: string): string {
 }
 
 export default class Trx extends WithTronwebAndInjectpromise {
-    cache: {contracts: {[key: string]: ISmartContract}};
+    cache: {contracts: Record<string, ISmartContract>};
     validator: Validator;
 
     constructor(tronWeb: TronWeb) {
@@ -464,7 +451,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
         if (options.confirmed)
             this.tronWeb.solidityNode
                 .request(
-                    `wallet/gettransactioninfobyid`,
+                    'wallet/gettransactioninfobyid',
                     {value: transactionID},
                     'post',
                 )
@@ -475,7 +462,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
         else
             this.tronWeb.fullNode
                 .request(
-                    `walletsolidity/gettransactioninfobyid`,
+                    'walletsolidity/gettransactioninfobyid',
                     {value: transactionID},
                     'post',
                 )
@@ -503,8 +490,8 @@ export default class Trx extends WithTronwebAndInjectpromise {
     ): Promise<void>;
     async getTransactionsToAddress(
         address: string = this.tronWeb.defaultAddress.hex,
-        limit: number = 30,
-        offset: number = 0,
+        limit = 30,
+        offset = 0,
         callback?: _CallbackT<ITransactionExtention[]>,
     ): Promise<void | ITransactionExtention[]> {
         return this.getTransactionsRelated(
@@ -534,8 +521,8 @@ export default class Trx extends WithTronwebAndInjectpromise {
     ): Promise<void>;
     async getTransactionsFromAddress(
         address: string = this.tronWeb.defaultAddress.hex,
-        limit: number = 30,
-        offset: number = 0,
+        limit = 30,
+        offset = 0,
         callback?: _CallbackT<ITransactionExtention[]>,
     ): Promise<void | ITransactionExtention[]> {
         return this.getTransactionsRelated(
@@ -584,8 +571,8 @@ export default class Trx extends WithTronwebAndInjectpromise {
     async getTransactionsRelated(
         address: string = this.tronWeb.defaultAddress.hex,
         direction: 'all' | 'to' | 'from' = 'all',
-        limit: number = 30,
-        offset: number = 0,
+        limit = 30,
+        offset = 0,
         callback?:
             | _CallbackT<(ITransactionExtention & {direction: 'to' | 'from'})[]>
             | _CallbackT<ITransactionExtention[]>,
@@ -736,7 +723,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
         else
             this.tronWeb.fullNode
                 .request(
-                    `wallet/getaccountbyid`,
+                    'wallet/getaccountbyid',
                     {account_id: id} as IAccount,
                     'post',
                 )
@@ -915,17 +902,14 @@ export default class Trx extends WithTronwebAndInjectpromise {
                 {address} as IAccount,
                 'post',
             )
-            // FIXME: should be separate interface
             .then(({assetIssue}) => {
                 if (!assetIssue) return callback(null, {});
 
                 const tokens = assetIssue
-                    .map((token) => {
-                        return this._parseToken(token);
-                    })
+                    .map((token) => this._parseToken(token))
                     .reduce((tokens, token) => {
                         return (tokens[token.name] = token), tokens;
-                    }, {});
+                    }, {} as Record<string, IToken>);
 
                 callback(null, tokens);
             })
@@ -1578,44 +1562,50 @@ export default class Trx extends WithTronwebAndInjectpromise {
         ];
         const messageDigest = keccak256(messageBytes);
         const signature = signingKey.signDigest(messageDigest);
-        const signatureHex = [
+        return [
             '0x',
             signature.r.substring(2),
             signature.s.substring(2),
             Number(signature.v).toString(16),
         ].join('');
-        return signatureHex;
+    }
+
+    signString(
+        message: string,
+        privateKey: string,
+        useTronHeader: boolean | null | undefined = true,
+    ): string {
+        return Trx.signString(message, privateKey, useTronHeader);
     }
 
     /**
-     * sign message v2 for verified header length
+     * Sign message v2 for verified header length.
      *
      * @param {message to be signed, should be Bytes or string} message
      * @param {privateKey for signature} privateKey
      * @param {reserved} options
      * @param {callback function} callback
      */
-    // FIXME: Bytes?
     signMessageV2(message: string, privateKey: string): Promise<string>;
     signMessageV2(message: string, privateKey: _CallbackT<string>): void;
     signMessageV2(
-        message: string,
+        message: SomeBytes | string,
         privateKey: string,
         options: _PureObject,
     ): Promise<string>;
     signMessageV2(
-        message: string,
+        message: SomeBytes | string,
         privateKey: string,
         options: _CallbackT<string>,
     ): void;
     signMessageV2(
-        message: string,
+        message: SomeBytes | string,
         privateKey: string,
         options: _PureObject | undefined,
         callback: _CallbackT<string>,
     ): void;
     signMessageV2(
-        message: string,
+        message: SomeBytes | string,
         privateKey: string | _CallbackT<string> = this.tronWeb
             .defaultPrivateKey,
         options: _PureObject | _CallbackT<string> = {},
@@ -1646,7 +1636,10 @@ export default class Trx extends WithTronwebAndInjectpromise {
         }
     }
 
-    static signMessageV2(message: string, privateKey: string): string {
+    static signMessageV2(
+        message: SomeBytes | string,
+        privateKey: string,
+    ): string {
         return utils.message.signMessage(message, privateKey);
     }
 
@@ -2787,7 +2780,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
     }
 
     /**
-     * Get info about thre node
+     * Get info about the node
      */
     getNodeInfo(callback?: undefined): Promise<INodeInfo>;
     getNodeInfo(callback: _CallbackT<INodeInfo>): void;
@@ -2828,18 +2821,16 @@ export default class Trx extends WithTronwebAndInjectpromise {
                 {value: this.tronWeb.fromUtf8(tokenID)},
                 'post',
             )
-            .then((token: {assetIssue: IToken[]}) => {
-                // FIXME: this is super weird and probably wrong
+            .then((token) => {
                 if (Array.isArray(token.assetIssue))
-                    callback(
+                    return callback(
                         null,
                         token.assetIssue.map((t) => this._parseToken(t)),
                     );
-                // @ts-ignore
-                else if (!token.name) return callback('Token does not exist');
-
-                // @ts-ignore
-                callback(null, this._parseToken(token));
+                else if (!('name' in token) || !(token as any).name)
+                    return callback('Token does not exist');
+                // TODO: borrowed from old impl. This should never happen
+                else return callback(null, [this._parseToken(token as any)]);
             })
             .catch((err) => callback(err));
     }
@@ -2862,7 +2853,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
 
         this.tronWeb.fullNode
             .request('wallet/getassetissuebyid', {value: tokenID}, 'post')
-            .then((token: IToken) => {
+            .then((token) => {
                 if (!token.name) return callback('Token does not exist');
 
                 callback(null, this._parseToken(token));

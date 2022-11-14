@@ -111,6 +111,7 @@ export function _signTypedData(
     return signatureHex;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function getRowBytesFromTransactionBase64(base64Data: string) {
     throw new Error('Sorry, this function is not supported.');
     // TODO: what the hell is it? Is it needed? Current impl does not work.
@@ -222,13 +223,10 @@ export function getECKeySig(hashBytes: SomeBytes, priKeyBytes: SomeBytes) {
     const ec = new EC('secp256k1');
     const key = ec.keyFromPrivate(priKeyBytes, 'bytes');
     const signature = key.sign(hashBytes);
-    const r = signature.r;
-    const s = signature.s;
-    const id = signature.recoveryParam;
 
     const rHex = signature.r.toString('hex').padStart(64, '0');
     const sHex = signature.s.toString('hex').padStart(64, '0');
-    const idHex = byte2hexStr(id);
+    const idHex = byte2hexStr(signature.recoveryParam);
     return rHex + sHex + idHex;
 }
 export const ECKeySign = getECKeySig; // backwards-compatible alias
