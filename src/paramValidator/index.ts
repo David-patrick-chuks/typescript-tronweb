@@ -43,7 +43,7 @@ function compare(
     opts: {gt?: number; gte?: number; lt?: number; lte?: number},
 ) {
     const {gt, lt, gte, lte} = opts;
-    return (
+    return !(
         (typeof gt === 'number' && value <= gt) ||
         (typeof lt === 'number' && value >= lt) ||
         (typeof gte === 'number' && value < gte) ||
