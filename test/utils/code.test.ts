@@ -107,6 +107,8 @@ describe('TronWeb.utils.code', function () {
             assert.isTrue(tronWeb.utils.code.isHexChar('D'));
 
             assert.isFalse(tronWeb.utils.code.isHexChar('Z'));
+            // Intentionally invalid
+            // @ts-ignore
             assert.isFalse(tronWeb.utils.code.isHexChar(66));
         });
     });

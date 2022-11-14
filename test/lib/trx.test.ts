@@ -365,7 +365,7 @@ describe('TronWeb.trx', function () {
                 signedMsg = await tronWeb.trx.sign(
                     hexMsg,
                     accounts.pks[idx],
-                    null,
+                    false,
                     false,
                 );
             });
@@ -375,7 +375,7 @@ describe('TronWeb.trx', function () {
                     hexMsg,
                     signedMsg,
                     accounts.hex[idx],
-                    null,
+                    false,
                 );
                 assert.isTrue(result);
             });
@@ -386,7 +386,7 @@ describe('TronWeb.trx', function () {
                         'e66f4c8f323229131006ad3e4a2ca65dfdf339f0',
                         signedMsg,
                         accounts.hex[idx],
-                        null,
+                        false,
                     ),
                     'Expected hex message input',
                 );
@@ -401,7 +401,7 @@ describe('TronWeb.trx', function () {
                         hexMsg,
                         fakeSig,
                         accounts.hex[idx],
-                        null,
+                        false,
                     ),
                     'Signature does not match',
                 );
@@ -490,6 +490,7 @@ describe('TronWeb.trx', function () {
                             types,
                             value,
                             signature!,
+                            undefined,
                             (err, result) => {
                                 assert.isTrue(result);
                             },
@@ -614,7 +615,7 @@ describe('TronWeb.trx', function () {
                     await tronWeb.transactionBuilder.updateAccountPermissions(
                         ownerAddress,
                         ownerPermission,
-                        null,
+                        undefined,
                         [activePermission],
                     );
                 assert.isTrue(
@@ -626,7 +627,7 @@ describe('TronWeb.trx', function () {
                 const signedUpdateTransaction = await tronWeb.trx.sign(
                     updateTransaction,
                     ownerPk,
-                    null,
+                    false,
                     false,
                 );
                 await tronWeb.trx.broadcast(signedUpdateTransaction);
@@ -1073,7 +1074,7 @@ describe('TronWeb.trx', function () {
 
             it('should throw no block identifier provided error', async function () {
                 await assertThrow(
-                    tronWeb.trx.getBlock(false),
+                    tronWeb.trx.getBlock(null),
                     'No block identifier provided',
                 );
             });

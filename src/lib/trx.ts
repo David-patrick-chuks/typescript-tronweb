@@ -23,13 +23,14 @@ import type {SmartContract as ISmartContract} from '../proto/core/contract/smart
 import utils from '../utils';
 import {ADDRESS_PREFIX} from '../utils/address';
 import type {SomeBytes} from '../utils/bytes';
-import {IDomain, TypedDataTypes} from '../utils/crypto';
+import {TypedDataTypes} from '../utils/crypto';
 import {
     SigningKey,
     keccak256,
     recoverAddress,
     toUtf8Bytes,
 } from '../utils/ethersUtils';
+import {IDomain} from '../utils/typedData';
 import _CallbackT from '../utils/typing';
 import {
     ISignedTransaction,
@@ -83,7 +84,10 @@ export type IBroadcastHexResult = {
     | {result: false}
 );
 
-type _PureObject = {[k: string]: unknown} & ({bind?: never} | {call?: never});
+export interface IAddressOrPk {
+    privateKey?: string;
+    address?: string;
+}
 
 function toHex(value: string): string {
     return TronWeb.address.toHex(value);
@@ -112,7 +116,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
         };
     }
 
-    getCurrentBlock(): Promise<IBlockExtention>;
+    getCurrentBlock(callback?: undefined): Promise<IBlockExtention>;
     getCurrentBlock(callback: _CallbackT<IBlockExtention>): void;
     getCurrentBlock(
         callback?: _CallbackT<IBlockExtention>,
@@ -126,7 +130,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
             .catch((err) => callback(err));
     }
 
-    getConfirmedCurrentBlock(): Promise<IBlockExtention>;
+    getConfirmedCurrentBlock(callback?: undefined): Promise<IBlockExtention>;
     getConfirmedCurrentBlock(callback: _CallbackT<IBlockExtention>): void;
     getConfirmedCurrentBlock(
         callback?: _CallbackT<IBlockExtention>,
@@ -140,23 +144,21 @@ export default class Trx extends WithTronwebAndInjectpromise {
             .catch((err) => callback(err));
     }
 
-    getBlock(block: BlockT | false): Promise<IBlockExtention>;
-    getBlock(block: _CallbackT<IBlockExtention>): void;
     getBlock(
-        block: BlockT | false,
+        block?: BlockT | null,
+        callback?: undefined,
+    ): Promise<IBlockExtention>;
+    getBlock(
+        block: BlockT | null | undefined,
         callback: _CallbackT<IBlockExtention>,
     ): void;
     getBlock(
-        block: BlockT | _CallbackT<IBlockExtention> | false = this.tronWeb
-            .defaultBlock,
+        block: BlockT | null = this.tronWeb.defaultBlock,
         callback?: _CallbackT<IBlockExtention>,
     ): void | Promise<IBlockExtention> {
-        if (typeof block === 'function')
-            return this.getBlock(this.tronWeb.defaultBlock, block);
-
         if (!callback) return this.injectPromise(this.getBlock, block);
 
-        if (block === false) return callback('No block identifier provided');
+        if (block === null) return callback('No block identifier provided');
 
         if (block === 'earliest') block = 0;
         if (block === 'latest') return this.getCurrentBlock(callback);
@@ -233,22 +235,17 @@ export default class Trx extends WithTronwebAndInjectpromise {
             .catch((err) => callback(err));
     }
 
-    getBlockTransactionCount(block: BlockT | false): Promise<number>;
-    getBlockTransactionCount(block: _CallbackT<number>): void;
     getBlockTransactionCount(
-        block: BlockT | false,
+        block?: BlockT | null | undefined,
+    ): Promise<number>;
+    getBlockTransactionCount(
+        block: BlockT | null | undefined,
         callback: _CallbackT<number>,
     ): void;
     getBlockTransactionCount(
-        block: BlockT | _CallbackT<number> | false = this.tronWeb.defaultBlock,
+        block: BlockT | null = this.tronWeb.defaultBlock,
         callback?: _CallbackT<number>,
     ): void | Promise<number> {
-        if (typeof block === 'function')
-            return this.getBlockTransactionCount(
-                this.tronWeb.defaultBlock,
-                block,
-            );
-
         if (!callback)
             return this.injectPromise(this.getBlockTransactionCount, block);
 
@@ -259,39 +256,26 @@ export default class Trx extends WithTronwebAndInjectpromise {
             .catch((err) => callback(err));
     }
 
-    getTransactionFromBlock(block: BlockT | false): Promise<ITransaction[]>;
-    getTransactionFromBlock(block: _CallbackT<any>): void;
+    getTransactionFromBlock(block?: BlockT | null): Promise<ITransaction[]>;
     getTransactionFromBlock(
-        block: BlockT | false,
+        block: BlockT | null | undefined,
         index: number,
     ): Promise<ITransaction>;
     getTransactionFromBlock(
-        block: BlockT | false,
-        index: _CallbackT<any>,
+        block: BlockT | null | undefined,
+        index: null | undefined,
+        callback: _CallbackT<ITransaction[]>,
     ): void;
     getTransactionFromBlock(
-        block: BlockT | false,
-        index: number | null | undefined,
-        callback: _CallbackT<any>,
+        block: BlockT | null | undefined,
+        index: number,
+        callback: _CallbackT<ITransaction>,
     ): void;
     getTransactionFromBlock(
-        block: BlockT | _CallbackT<any> | false = this.tronWeb.defaultBlock,
-        index?: number | null | _CallbackT<any>,
-        callback?: _CallbackT<any>,
+        block: BlockT | null = this.tronWeb.defaultBlock,
+        index?: number | null,
+        callback?: _CallbackT<ITransaction> | _CallbackT<ITransaction[]>,
     ): void | Promise<ITransaction> | Promise<ITransaction[]> {
-        if (utils.isFunction(index)) {
-            if (utils.isFunction(block))
-                throw new TypeError('Two callbacks passed.');
-            return this.getTransactionFromBlock(block, 0, index);
-        }
-
-        if (utils.isFunction(block))
-            return this.getTransactionFromBlock(
-                this.tronWeb.defaultBlock,
-                index,
-                block,
-            );
-
         if (!callback)
             return this.injectPromise(
                 this.getTransactionFromBlock,
@@ -304,9 +288,9 @@ export default class Trx extends WithTronwebAndInjectpromise {
                 if (!transactions) callback('Transaction not found in block');
                 else if (typeof index === 'number')
                     if (index >= 0 && index < transactions.length)
-                        callback(null, transactions[index]);
+                        callback(null, transactions[index] as any);
                     else callback('Invalid transaction index provided');
-                else callback(null, transactions);
+                else callback(null, transactions as any);
             })
             .catch((err) => callback(err));
     }
@@ -386,17 +370,10 @@ export default class Trx extends WithTronwebAndInjectpromise {
         transactionID: string,
         callback?: _CallbackT<ITransactionInfo>,
     ): void | Promise<ITransactionInfo> {
-        if (!callback)
-            return this._getTransactionInfoById(
-                transactionID,
-                {confirmed: false},
-                callback,
-            );
-
         return this._getTransactionInfoById(
             transactionID,
             {confirmed: false},
-            callback,
+            callback as any,
         );
     }
 
@@ -412,17 +389,10 @@ export default class Trx extends WithTronwebAndInjectpromise {
         transactionID: string,
         callback?: _CallbackT<ITransactionInfo>,
     ): void | Promise<ITransactionInfo> {
-        if (!callback)
-            return this._getTransactionInfoById(
-                transactionID,
-                {confirmed: true},
-                callback,
-            );
-
         return this._getTransactionInfoById(
             transactionID,
             {confirmed: true},
-            callback,
+            callback as any,
         );
     }
 
@@ -644,18 +614,15 @@ export default class Trx extends WithTronwebAndInjectpromise {
             .catch((err) => callback(err));
     }
 
-    getAccount(): Promise<IAccount>;
-    getAccount(address: _CallbackT<IAccount>): void;
-    getAccount(address: string, callback?: undefined): Promise<IAccount>;
-    getAccount(address: string, callback: _CallbackT<IAccount>): void;
+    getAccount(address?: string, callback?: undefined): Promise<IAccount>;
     getAccount(
-        address: string | _CallbackT<IAccount> = this.tronWeb.defaultAddress
-            .hex,
+        address: string | undefined,
+        callback: _CallbackT<IAccount>,
+    ): void;
+    getAccount(
+        address: string = this.tronWeb.defaultAddress.hex,
         callback?: _CallbackT<IAccount>,
     ): void | Promise<IAccount> {
-        if (utils.isFunction(address))
-            return this.getAccount(this.tronWeb.defaultAddress.hex, address);
-
         if (!callback) return this.injectPromise(this.getAccount, address);
 
         if (!this.tronWeb.isAddress(address))
@@ -733,17 +700,12 @@ export default class Trx extends WithTronwebAndInjectpromise {
                 .catch((err) => callback(err));
     }
 
-    getBalance(): Promise<number>;
-    getBalance(address: _CallbackT<number>): void;
-    getBalance(address: string, callback?: undefined): Promise<number>;
+    getBalance(address?: string, callback?: undefined): Promise<number>;
     getBalance(address: string, callback: _CallbackT<number>): void;
     getBalance(
-        address: string | _CallbackT<number> = this.tronWeb.defaultAddress.hex,
+        address: string = this.tronWeb.defaultAddress.hex,
         callback?: _CallbackT<number>,
     ): void | Promise<number> {
-        if (utils.isFunction(address))
-            return this.getBalance(this.tronWeb.defaultAddress.hex, address);
-
         if (!callback) return this.injectPromise(this.getBalance, address);
 
         this.getAccount(address)
@@ -753,10 +715,8 @@ export default class Trx extends WithTronwebAndInjectpromise {
             .catch((err) => callback(err));
     }
 
-    getUnconfirmedAccount(): Promise<IAccount>;
-    getUnconfirmedAccount(address: _CallbackT<IAccount>): void;
     getUnconfirmedAccount(
-        address: string,
+        address?: string,
         callback?: undefined,
     ): Promise<IAccount>;
     getUnconfirmedAccount(
@@ -764,16 +724,9 @@ export default class Trx extends WithTronwebAndInjectpromise {
         callback: _CallbackT<IAccount>,
     ): void;
     getUnconfirmedAccount(
-        address: string | _CallbackT<IAccount> = this.tronWeb.defaultAddress
-            .hex,
+        address: string = this.tronWeb.defaultAddress.hex,
         callback?: _CallbackT<IAccount>,
     ): void | Promise<IAccount> {
-        if (utils.isFunction(address))
-            return this.getUnconfirmedAccount(
-                this.tronWeb.defaultAddress.hex,
-                address,
-            );
-
         if (!callback)
             return this.injectPromise(this.getUnconfirmedAccount, address);
 
@@ -804,23 +757,15 @@ export default class Trx extends WithTronwebAndInjectpromise {
         this.getAccountInfoById(id, {confirmed: false}, callback);
     }
 
-    getUnconfirmedBalance(): Promise<number>;
-    getUnconfirmedBalance(address: _CallbackT<number>): void;
     getUnconfirmedBalance(
-        address: string,
+        address?: string,
         callback?: undefined,
     ): Promise<number>;
     getUnconfirmedBalance(address: string, callback: _CallbackT<number>): void;
     getUnconfirmedBalance(
-        address: string | _CallbackT<number> = this.tronWeb.defaultAddress.hex,
+        address: string = this.tronWeb.defaultAddress.hex,
         callback?: _CallbackT<number>,
     ): void | Promise<number> {
-        if (utils.isFunction(address))
-            return this.getUnconfirmedBalance(
-                this.tronWeb.defaultAddress.hex,
-                address,
-            );
-
         if (!callback)
             return this.injectPromise(this.getUnconfirmedBalance, address);
 
@@ -831,17 +776,12 @@ export default class Trx extends WithTronwebAndInjectpromise {
             .catch((err) => callback(err));
     }
 
-    getBandwidth(): Promise<number>;
-    getBandwidth(address: _CallbackT<number>): void;
-    getBandwidth(address: string, callback?: undefined): Promise<number>;
+    getBandwidth(address?: string, callback?: undefined): Promise<number>;
     getBandwidth(address: string, callback: _CallbackT<number>): void;
     getBandwidth(
-        address: string | _CallbackT<number> = this.tronWeb.defaultAddress.hex,
+        address: string = this.tronWeb.defaultAddress.hex,
         callback?: _CallbackT<number>,
     ): void | Promise<number> {
-        if (utils.isFunction(address))
-            return this.getBandwidth(this.tronWeb.defaultAddress.hex, address);
-
         if (!callback) return this.injectPromise(this.getBandwidth, address);
 
         if (!this.tronWeb.isAddress(address))
@@ -867,10 +807,8 @@ export default class Trx extends WithTronwebAndInjectpromise {
             .catch((err) => callback(err));
     }
 
-    getTokensIssuedByAddress(): Promise<Record<string, IToken>>;
-    getTokensIssuedByAddress(address: _CallbackT<Record<string, IToken>>): void;
     getTokensIssuedByAddress(
-        address: string,
+        address?: string,
         callback?: undefined,
     ): Promise<Record<string, IToken>>;
     getTokensIssuedByAddress(
@@ -878,16 +816,9 @@ export default class Trx extends WithTronwebAndInjectpromise {
         callback: _CallbackT<Record<string, IToken>>,
     ): void;
     getTokensIssuedByAddress(
-        address: string | _CallbackT<Record<string, IToken>> = this.tronWeb
-            .defaultAddress.hex,
+        address: string = this.tronWeb.defaultAddress.hex,
         callback?: _CallbackT<Record<string, IToken>>,
     ): void | Promise<Record<string, IToken>> {
-        if (utils.isFunction(address))
-            return this.getTokensIssuedByAddress(
-                this.tronWeb.defaultAddress.hex,
-                address,
-            );
-
         if (!callback)
             return this.injectPromise(this.getTokensIssuedByAddress, address);
 
@@ -968,28 +899,21 @@ export default class Trx extends WithTronwebAndInjectpromise {
             .catch((err) => callback(err));
     }
 
-    getBlockRange(start: number): Promise<IBlockExtention[]>;
-    getBlockRange(start: _CallbackT<IBlockExtention[]>): void;
-    getBlockRange(start: number, end: number): Promise<IBlockExtention[]>;
-    getBlockRange(start: number, end: _CallbackT<IBlockExtention[]>): void;
     getBlockRange(
-        start: number,
-        end: number | null | undefined,
+        start?: number,
+        end?: number,
+        callback?: undefined,
+    ): Promise<IBlockExtention[]>;
+    getBlockRange(
+        start: number | undefined,
+        end: number | undefined,
         callback: _CallbackT<IBlockExtention[]>,
     ): void;
     getBlockRange(
-        start: number | _CallbackT<IBlockExtention[]> = 0,
-        end: number | null | _CallbackT<IBlockExtention[]> = 30,
+        start = 0,
+        end = 30,
         callback?: _CallbackT<IBlockExtention[]>,
     ): void | Promise<IBlockExtention[]> {
-        if (utils.isFunction(end)) {
-            if (utils.isFunction(start))
-                throw new TypeError('Two callbacks passed');
-            return this.getBlockRange(start, 30, end);
-        }
-
-        if (utils.isFunction(start)) return this.getBlockRange(0, end, start);
-
         if (!callback)
             return this.injectPromise(this.getBlockRange, start, end);
 
@@ -1029,28 +953,21 @@ export default class Trx extends WithTronwebAndInjectpromise {
             .catch((err) => callback(err));
     }
 
-    listTokens(limit: number): Promise<IToken[]>;
-    listTokens(limit: _CallbackT<IToken[]>): void;
-    listTokens(limit: number, offset: number): Promise<IToken[]>;
-    listTokens(limit: number, offset: _CallbackT<IToken[]>): void;
     listTokens(
-        limit: number,
-        offset: number | null | undefined,
+        limit?: number,
+        offset?: number,
+        callback?: undefined,
+    ): Promise<IToken[]>;
+    listTokens(
+        limit: number | undefined,
+        offset: number | undefined,
         callback: _CallbackT<IToken[]>,
     ): void;
     listTokens(
-        limit: number | _CallbackT<IToken[]> = 0,
-        offset: number | null | _CallbackT<IToken[]> = 0,
+        limit = 0,
+        offset = 0,
         callback?: _CallbackT<IToken[]>,
     ): void | Promise<IToken[]> {
-        if (utils.isFunction(offset)) {
-            if (utils.isFunction(limit))
-                throw new TypeError('Two callbacks passed');
-            return this.listTokens(limit, 30, offset);
-        }
-
-        if (utils.isFunction(limit)) return this.listTokens(0, offset, limit);
-
         if (!callback)
             return this.injectPromise(this.listTokens, limit, offset);
 
@@ -1146,68 +1063,24 @@ export default class Trx extends WithTronwebAndInjectpromise {
     async verifyMessage(
         message: string,
         signature: string,
-        address: string,
-    ): Promise<boolean>;
-    async verifyMessage(
-        message: string,
-        signature: string,
-        address: _CallbackT<boolean>,
-    ): Promise<void>;
-    async verifyMessage(
-        message: string,
-        signature: string,
-        address: string,
-        useTronHeader: boolean | null | undefined,
-    ): Promise<boolean>;
-    async verifyMessage(
-        message: string,
-        signature: string,
-        address: string,
-        useTronHeader: _CallbackT<boolean>,
-    ): Promise<void>;
-    async verifyMessage(
-        message: string,
-        signature: string,
-        address: string,
-        useTronHeader: boolean | undefined | null,
+        address?: string,
+        useTronHeader?: boolean,
         callback?: undefined,
     ): Promise<boolean>;
     async verifyMessage(
         message: string,
         signature: string,
-        address: string,
-        useTronHeader: boolean | undefined | null,
+        address: string | undefined,
+        useTronHeader: boolean | undefined,
         callback: _CallbackT<boolean>,
     ): Promise<void>;
     async verifyMessage(
         message: string,
         signature: string,
-        address: string | _CallbackT<boolean> = this.tronWeb.defaultAddress
-            .base58,
-        useTronHeader: boolean | undefined | null | _CallbackT<boolean> = true,
+        address: string = this.tronWeb.defaultAddress.base58,
+        useTronHeader: boolean | undefined = true,
         callback?: _CallbackT<boolean>,
     ): Promise<void | boolean> {
-        if (utils.isFunction(address)) {
-            if (utils.isFunction(useTronHeader))
-                throw new TypeError('Two callbacks passed');
-            return this.verifyMessage(
-                message,
-                signature,
-                this.tronWeb.defaultAddress.hex,
-                true,
-                address,
-            );
-        }
-
-        if (utils.isFunction(useTronHeader))
-            return this.verifyMessage(
-                message,
-                signature,
-                address,
-                true,
-                useTronHeader,
-            );
-
         if (!callback)
             return this.injectPromise(
                 this.verifyMessage,
@@ -1230,7 +1103,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
         message: string,
         address: string,
         signature: string,
-        useTronHeader: boolean | null | undefined = true,
+        useTronHeader: boolean | undefined = true,
     ): boolean {
         message = message.replace(/^0x/, '');
         signature = signature.replace(/^0x/, '');
@@ -1263,23 +1136,23 @@ export default class Trx extends WithTronwebAndInjectpromise {
     verifyMessageV2(
         message: string,
         signature: string,
-        options: _PureObject,
+        options: undefined,
         callback?: undefined,
     ): Promise<string>;
     verifyMessageV2(
         message: string,
         signature: string,
-        options: _PureObject | _CallbackT<string>,
+        options: undefined,
         callback: _CallbackT<string>,
     ): void;
     verifyMessageV2(
         message: string,
         signature: string,
-        options: _PureObject | _CallbackT<string> = {},
+        options?: undefined | _CallbackT<string>,
         callback?: _CallbackT<string>,
     ): void | Promise<string> {
         if (utils.isFunction(options))
-            return this.verifyMessageV2(message, signature, {}, options);
+            return this.verifyMessageV2(message, signature, undefined, options);
 
         if (!callback)
             return this.injectPromise(
@@ -1306,20 +1179,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
         types: TypedDataTypes,
         value: Record<string, unknown>,
         signature: string,
-    ): Promise<boolean>;
-    verifyTypedData(
-        domain: IDomain,
-        types: TypedDataTypes,
-        value: Record<string, unknown>,
-        signature: string,
-        address: _CallbackT<boolean>,
-    ): void;
-    verifyTypedData(
-        domain: IDomain,
-        types: TypedDataTypes,
-        value: Record<string, unknown>,
-        signature: string,
-        address: string,
+        address?: string,
         callback?: undefined,
     ): Promise<boolean>;
     verifyTypedData(
@@ -1327,7 +1187,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
         types: TypedDataTypes,
         value: Record<string, unknown>,
         signature: string,
-        address: string,
+        address: string | undefined,
         callback: _CallbackT<boolean>,
     ): void;
     verifyTypedData(
@@ -1335,20 +1195,9 @@ export default class Trx extends WithTronwebAndInjectpromise {
         types: TypedDataTypes,
         value: Record<string, unknown>,
         signature: string,
-        address: string | _CallbackT<boolean> = this.tronWeb.defaultAddress
-            .base58,
+        address: string = this.tronWeb.defaultAddress.base58,
         callback?: _CallbackT<boolean>,
     ): void | Promise<boolean> {
-        if (utils.isFunction(address))
-            return this.verifyTypedData(
-                domain,
-                types,
-                value,
-                signature,
-                this.tronWeb.defaultAddress.base58,
-                address,
-            );
-
         if (!callback)
             return this.injectPromise(
                 this.verifyTypedData,
@@ -1394,92 +1243,24 @@ export default class Trx extends WithTronwebAndInjectpromise {
     async sign<T extends string | ITransaction>(
         transaction: T,
         privateKey?: string,
-    ): Promise<MakeSigned<T>>;
-    async sign<T extends string | ITransaction>(
-        transaction: T,
-        privateKey: _CallbackT<MakeSigned<T>>,
-    ): Promise<void>;
-    async sign<T extends string | ITransaction>(
-        transaction: T,
-        privateKey: string,
-        useTronHeader: boolean | null | undefined,
-    ): Promise<MakeSigned<T>>;
-    async sign<T extends string | ITransaction>(
-        transaction: T,
-        privateKey: string,
-        useTronHeader: _CallbackT<MakeSigned<T>>,
-    ): Promise<void>;
-    async sign<T extends string | ITransaction>(
-        transaction: T,
-        privateKey: string,
-        useTronHeader: boolean | null | undefined,
-        multisig: boolean,
-    ): Promise<MakeSigned<T>>;
-    async sign<T extends string | ITransaction>(
-        transaction: T,
-        privateKey: string,
-        useTronHeader: boolean | null | undefined,
-        multisig: _CallbackT<MakeSigned<T>>,
-    ): Promise<void>;
-    async sign<T extends string | ITransaction>(
-        transaction: T,
-        privateKey: string,
-        useTronHeader: boolean | null | undefined,
-        multisig: boolean,
+        useTronHeader?: boolean,
+        multisig?: boolean,
         callback?: undefined,
     ): Promise<MakeSigned<T>>;
     async sign<T extends string | ITransaction>(
         transaction: T,
-        privateKey: string,
-        useTronHeader: boolean | null | undefined,
-        multisig: boolean,
+        privateKey: string | undefined,
+        useTronHeader: boolean | undefined,
+        multisig: boolean | undefined,
         callback: _CallbackT<MakeSigned<T>>,
     ): Promise<void>;
     async sign<T extends string | ITransaction>(
         transaction: T,
-        privateKey: string | _CallbackT<MakeSigned<T>> = this.tronWeb
-            .defaultAddress.hex,
-        useTronHeader:
-            | boolean
-            | null
-            | undefined
-            | _CallbackT<MakeSigned<T>> = false,
-        multisig: boolean | _CallbackT<MakeSigned<T>> = false,
+        privateKey: string = this.tronWeb.defaultAddress.hex,
+        useTronHeader: boolean | undefined = false,
+        multisig = false,
         callback?: _CallbackT<MakeSigned<T>>,
     ): Promise<void | MakeSigned<T>> {
-        if (utils.isFunction(multisig)) {
-            if (utils.isFunction(useTronHeader) || utils.isFunction(privateKey))
-                throw new TypeError('Two or more callbacks passed');
-            return this.sign(
-                transaction,
-                privateKey,
-                useTronHeader,
-                false,
-                multisig,
-            );
-        }
-
-        if (utils.isFunction(useTronHeader)) {
-            if (utils.isFunction(privateKey))
-                throw new TypeError('Two callbacks passed');
-            return this.sign(
-                transaction,
-                privateKey,
-                true,
-                false,
-                useTronHeader,
-            );
-        }
-
-        if (utils.isFunction(privateKey))
-            return this.sign(
-                transaction,
-                this.tronWeb.defaultPrivateKey,
-                true,
-                false,
-                privateKey,
-            );
-
         if (!callback)
             return this.injectPromise(
                 this.sign,
@@ -1544,7 +1325,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
     static signString(
         message: string,
         privateKey: string,
-        useTronHeader: boolean | null | undefined = true,
+        useTronHeader: boolean | undefined = true,
     ): string {
         message = message.replace(/^0x/, '');
         const value = {
@@ -1573,7 +1354,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
     signString(
         message: string,
         privateKey: string,
-        useTronHeader: boolean | null | undefined = true,
+        useTronHeader: boolean | undefined = true,
     ): string {
         return Trx.signString(message, privateKey, useTronHeader);
     }
@@ -1586,45 +1367,24 @@ export default class Trx extends WithTronwebAndInjectpromise {
      * @param {reserved} options
      * @param {callback function} callback
      */
-    signMessageV2(message: string, privateKey: string): Promise<string>;
-    signMessageV2(message: string, privateKey: _CallbackT<string>): void;
     signMessageV2(
         message: SomeBytes | string,
-        privateKey: string,
-        options: _PureObject,
+        privateKey?: string,
+        options?: undefined,
+        callback?: undefined,
     ): Promise<string>;
     signMessageV2(
         message: SomeBytes | string,
-        privateKey: string,
-        options: _CallbackT<string>,
-    ): void;
-    signMessageV2(
-        message: SomeBytes | string,
-        privateKey: string,
-        options: _PureObject | undefined,
+        privateKey: string | undefined,
+        options: undefined,
         callback: _CallbackT<string>,
     ): void;
     signMessageV2(
         message: SomeBytes | string,
-        privateKey: string | _CallbackT<string> = this.tronWeb
-            .defaultPrivateKey,
-        options: _PureObject | _CallbackT<string> = {},
+        privateKey: string = this.tronWeb.defaultPrivateKey,
+        options?: undefined | _CallbackT<string>,
         callback?: _CallbackT<string>,
     ): void | Promise<string> {
-        if (utils.isFunction(options)) {
-            if (utils.isFunction(privateKey))
-                throw new TypeError('Two callbacks passed');
-            return this.signMessageV2(message, privateKey, {}, options);
-        }
-
-        if (utils.isFunction(privateKey))
-            return this.signMessageV2(
-                message,
-                this.tronWeb.defaultPrivateKey,
-                options,
-                privateKey,
-            );
-
         if (!callback)
             return this.injectPromise(this.signMessageV2, message, privateKey);
 
@@ -1718,48 +1478,22 @@ export default class Trx extends WithTronwebAndInjectpromise {
 
     async multiSign(
         transaction: ITransaction,
-        privateKey: string,
+        privateKey?: string,
+        permissionId?: number,
+        callback?: undefined,
     ): Promise<ISignedTransaction>;
     async multiSign(
         transaction: ITransaction,
-        privateKey: _CallbackT<ISignedTransaction>,
-    ): Promise<void>;
-    async multiSign(
-        transaction: ITransaction,
-        privateKey: string,
-        permissionId: number,
-    ): Promise<ISignedTransaction>;
-    async multiSign(
-        transaction: ITransaction,
-        privateKey: string,
-        permissionId: _CallbackT<ISignedTransaction>,
-    ): Promise<void>;
-    async multiSign(
-        transaction: ITransaction,
-        privateKey: string,
+        privateKey: string | undefined,
         permissionId: number | undefined,
         callback: _CallbackT<ISignedTransaction>,
     ): Promise<void>;
     async multiSign(
         transaction: ITransaction,
-        privateKey: string | _CallbackT<ISignedTransaction> = this.tronWeb
-            .defaultPrivateKey,
-        permissionId: number | _CallbackT<ISignedTransaction> = 0,
+        privateKey: string = this.tronWeb.defaultPrivateKey,
+        permissionId = 0,
         callback?: _CallbackT<ISignedTransaction>,
     ): Promise<void | ISignedTransaction> {
-        if (utils.isFunction(permissionId)) {
-            if (utils.isFunction(privateKey))
-                throw new TypeError('Two callbacks passed');
-            return this.multiSign(transaction, privateKey, 0, permissionId);
-        }
-        if (utils.isFunction(privateKey))
-            return this.multiSign(
-                transaction,
-                this.tronWeb.defaultPrivateKey,
-                0,
-                privateKey,
-            );
-
         if (!callback)
             return this.injectPromise(
                 this.multiSign,
@@ -1869,17 +1603,9 @@ export default class Trx extends WithTronwebAndInjectpromise {
     ): Promise<void>;
     async getSignWeight(
         transaction: ITransaction,
-        permissionId: _CallbackT<ISignWeight>,
-        callback?: undefined,
-    ): Promise<void>;
-    async getSignWeight(
-        transaction: ITransaction,
-        permissionId?: number | _CallbackT<ISignWeight>,
+        permissionId?: number,
         callback?: _CallbackT<ISignWeight>,
     ): Promise<void | ISignWeight> {
-        if (utils.isFunction(permissionId))
-            return this.getSignWeight(transaction, undefined, permissionId);
-
         if (!callback)
             return this.injectPromise(
                 this.getSignWeight,
@@ -1916,32 +1642,19 @@ export default class Trx extends WithTronwebAndInjectpromise {
 
     sendRawTransaction(
         signedTransaction: ITransaction,
-        options?: _PureObject | null | string,
+        options?: undefined,
         callback?: undefined,
     ): Promise<IBroadcastResult>;
     sendRawTransaction(
         signedTransaction: ITransaction,
-        options?: _CallbackT<IBroadcastResult>,
-        callback?: undefined,
-    ): void;
-    sendRawTransaction(
-        signedTransaction: ITransaction,
-        options: _PureObject | undefined | null | string,
+        options: undefined,
         callback: _CallbackT<IBroadcastResult>,
     ): void;
     sendRawTransaction(
         signedTransaction: ITransaction,
-        options:
-            | _PureObject
-            | _CallbackT<IBroadcastResult>
-            | undefined
-            | null
-            | string = 'UNUSED LEGACY?',
+        options?: undefined,
         callback?: _CallbackT<IBroadcastResult>,
     ): void | Promise<IBroadcastResult> {
-        if (utils.isFunction(options))
-            return this.sendRawTransaction(signedTransaction, {}, options);
-
         if (!callback)
             return this.injectPromise(
                 this.sendRawTransaction,
@@ -1951,9 +1664,6 @@ export default class Trx extends WithTronwebAndInjectpromise {
 
         if (!utils.isObject(signedTransaction))
             return callback('Invalid transaction provided');
-
-        // if (!utils.isObject(options || {}))
-        //     return callback('Invalid options provided');
 
         if (
             !signedTransaction.signature ||
@@ -1971,39 +1681,25 @@ export default class Trx extends WithTronwebAndInjectpromise {
             .catch((err) => callback(err));
     }
 
-    /** Broadcast a transaction in hex form
+    /**
+     * Broadcast a transaction in hex form
      *  Warning: This method is missing in .proto and absent in docker test node
      */
     sendHexTransaction(
         signedHexTransaction: string,
-    ): Promise<IBroadcastHexResult>;
-    sendHexTransaction(
-        signedHexTransaction: string,
-        options?: _CallbackT<IBroadcastHexResult>,
-        callback?: undefined,
-    ): void;
-    sendHexTransaction(
-        signedHexTransaction: string,
-        options?: _PureObject | null,
+        options?: undefined,
         callback?: undefined,
     ): Promise<IBroadcastHexResult>;
     sendHexTransaction(
         signedHexTransaction: string,
-        options: _PureObject | undefined | null,
-        callback?: _CallbackT<IBroadcastHexResult>,
+        options: undefined,
+        callback: _CallbackT<IBroadcastHexResult>,
     ): void;
     sendHexTransaction(
         signedHexTransaction: string,
-        options:
-            | _PureObject
-            | _CallbackT<IBroadcastHexResult>
-            | null
-            | undefined = {},
+        options?: undefined,
         callback?: _CallbackT<IBroadcastHexResult>,
     ): void | Promise<IBroadcastHexResult> {
-        if (utils.isFunction(options))
-            return this.sendHexTransaction(signedHexTransaction, {}, options);
-
         if (!callback)
             return this.injectPromise(
                 this.sendHexTransaction,
@@ -2013,9 +1709,6 @@ export default class Trx extends WithTronwebAndInjectpromise {
 
         if (!utils.isHex(signedHexTransaction))
             return callback('Invalid hex transaction provided');
-
-        if (!utils.isObject(options || {}))
-            return callback('Invalid options provided');
 
         const params = {
             transaction: signedHexTransaction,
@@ -2036,30 +1729,21 @@ export default class Trx extends WithTronwebAndInjectpromise {
     async sendTransaction(
         to: string,
         amount: number,
-        options?: _CallbackT<IBroadcastResult>,
-        callback?: undefined,
-    ): Promise<void>;
-    async sendTransaction(
-        to: string,
-        amount: number,
-        options?: string | _PureObject,
+        options?: string | IAddressOrPk,
         callback?: undefined,
     ): Promise<IBroadcastResult>;
     async sendTransaction(
         to: string,
         amount: number,
-        options: string | _PureObject | undefined,
+        options: string | IAddressOrPk | undefined,
         callback?: _CallbackT<IBroadcastResult>,
     ): Promise<void>;
     async sendTransaction(
         to: string,
         amount: number,
-        options?: string | _PureObject | _CallbackT<IBroadcastResult>,
+        options?: string | IAddressOrPk,
         callback?: _CallbackT<IBroadcastResult>,
     ): Promise<void | IBroadcastResult> {
-        if (utils.isFunction(options))
-            return this.sendTransaction(to, amount, {}, options);
-
         if (typeof options === 'string') options = {privateKey: options};
 
         if (!callback)
@@ -2076,24 +1760,22 @@ export default class Trx extends WithTronwebAndInjectpromise {
         if (!utils.isInteger(amount) || amount <= 0)
             return callback('Invalid amount provided');
 
-        const options2:
-            | {privateKey: string; address: string | undefined}
-            | {privateKey: string | undefined; address: string} = {
+        options = {
             privateKey: this.tronWeb.defaultPrivateKey,
             address: this.tronWeb.defaultAddress.hex,
             ...options,
         };
 
-        if (!options2.privateKey && !options2.address)
+        if (!options.privateKey && !options.address)
             return callback(
                 'Function requires either a private key or address to be set',
             );
 
         try {
             const address = (
-                options2.privateKey
-                    ? this.tronWeb.address.fromPrivateKey(options2.privateKey)
-                    : options2.address
+                options.privateKey
+                    ? this.tronWeb.address.fromPrivateKey(options.privateKey)
+                    : options.address
             ) as string;
             const transaction = await this.tronWeb.transactionBuilder.sendTrx(
                 to,
@@ -2102,7 +1784,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
             );
             const signedTransaction = await this.sign(
                 transaction,
-                options2.privateKey || undefined,
+                options.privateKey || undefined,
             );
             const result = await this.sendRawTransaction(signedTransaction);
 
@@ -2116,33 +1798,23 @@ export default class Trx extends WithTronwebAndInjectpromise {
         to: string,
         amount: number,
         tokenID: string | number,
-        options?: _CallbackT<IBroadcastResult>,
-        callback?: undefined,
-    ): Promise<void>;
-    async sendToken(
-        to: string,
-        amount: number,
-        tokenID: string | number,
-        options?: string | _PureObject,
+        options?: string | IAddressOrPk,
         callback?: undefined,
     ): Promise<IBroadcastResult>;
     async sendToken(
         to: string,
         amount: number,
         tokenID: string | number,
-        options: string | _PureObject | undefined,
+        options: string | IAddressOrPk | undefined,
         callback?: _CallbackT<IBroadcastResult>,
     ): Promise<void>;
     async sendToken(
         to: string,
         amount: number,
         tokenID: string | number,
-        options?: string | _PureObject | _CallbackT<IBroadcastResult>,
+        options?: string | IAddressOrPk | _CallbackT<IBroadcastResult>,
         callback?: _CallbackT<IBroadcastResult>,
     ): Promise<void | IBroadcastResult> {
-        if (utils.isFunction(options))
-            return this.sendToken(to, amount, tokenID, {}, options);
-
         if (typeof options === 'string') options = {privateKey: options};
 
         if (!callback)
@@ -2165,24 +1837,22 @@ export default class Trx extends WithTronwebAndInjectpromise {
         if (!utils.isString(tokenID))
             return callback('Invalid token ID provided');
 
-        const options2:
-            | {privateKey: string; address: string | undefined}
-            | {privateKey: string | undefined; address: string} = {
+        options = {
             privateKey: this.tronWeb.defaultPrivateKey,
             address: this.tronWeb.defaultAddress.hex,
             ...options,
         };
 
-        if (!options2.privateKey && !options2.address)
+        if (!options.privateKey && !options.address)
             return callback(
                 'Function requires either a private key or address to be set',
             );
 
         try {
             const address = (
-                options2.privateKey
-                    ? this.tronWeb.address.fromPrivateKey(options2.privateKey)
-                    : options2.address
+                options.privateKey
+                    ? this.tronWeb.address.fromPrivateKey(options.privateKey)
+                    : options.address
             ) as string;
             const transaction = await this.tronWeb.transactionBuilder.sendToken(
                 to,
@@ -2192,7 +1862,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
             );
             const signedTransaction = await this.sign(
                 transaction,
-                options2.privateKey || undefined,
+                options.privateKey || undefined,
             );
             const result = await this.sendRawTransaction(signedTransaction);
 
@@ -2213,117 +1883,30 @@ export default class Trx extends WithTronwebAndInjectpromise {
      * @param options
      * @param callback
      */
-    // async freezeBalance(amount: number): Promise<any[]>;
     async freezeBalance(
         amount: number,
         duration?: number,
-    ): Promise<IBroadcastResult>;
-    async freezeBalance(
-        amount: number,
-        duration: _CallbackT<IBroadcastResult>,
-    ): Promise<void>;
-    async freezeBalance(
-        amount: number,
-        duration: number,
         resource?: ResourceT,
-    ): Promise<IBroadcastResult>;
-    async freezeBalance(
-        amount: number,
-        duration: number,
-        resource: _CallbackT<IBroadcastResult>,
-    ): Promise<void>;
-    // async freezeBalance(
-    //     amount: number,
-    //     duration: number,
-    //     resource: ResourceT,
-    //     options: _PureObject
-    // ): Promise<IBroadcastResult>;
-    async freezeBalance(
-        amount: number,
-        duration: number,
-        resource: ResourceT,
-        options: _CallbackT<IBroadcastResult>,
-    ): Promise<void>;
-    async freezeBalance(
-        amount: number,
-        duration: number,
-        resource: ResourceT,
-        options: _PureObject,
+        options?: IAddressOrPk | string,
         receiverAddress?: string,
+        callback?: undefined,
     ): Promise<IBroadcastResult>;
     async freezeBalance(
         amount: number,
-        duration: number,
-        resource: ResourceT,
-        options: _PureObject,
-        receiverAddress: _CallbackT<IBroadcastResult>,
-    ): Promise<void>;
-    async freezeBalance(
-        amount: number,
-        duration: number,
-        resource: ResourceT,
-        options: _PureObject,
+        duration: number | undefined,
+        resource: ResourceT | undefined,
+        options: IAddressOrPk | string | undefined,
         receiverAddress: string | undefined,
         callback: _CallbackT<IBroadcastResult>,
     ): Promise<void>;
     async freezeBalance(
         amount: number,
-        duration: number | _CallbackT<IBroadcastResult> = 3,
-        resource: ResourceT | _CallbackT<IBroadcastResult> = 'BANDWIDTH',
-        options: _PureObject | _CallbackT<IBroadcastResult> = {},
-        receiverAddress?: string | undefined | _CallbackT<IBroadcastResult>,
+        duration = 3,
+        resource: ResourceT = 'BANDWIDTH',
+        options: IAddressOrPk | string = {},
+        receiverAddress?: string | undefined,
         callback?: _CallbackT<IBroadcastResult>,
     ): Promise<void | IBroadcastResult> {
-        if (utils.isFunction(receiverAddress)) {
-            if (
-                utils.isFunction(options) ||
-                utils.isFunction(duration) ||
-                utils.isFunction(resource)
-            )
-                throw new TypeError('Two or more callbacks passed.');
-            return this.freezeBalance(
-                amount,
-                duration,
-                resource,
-                options,
-                undefined,
-                receiverAddress,
-            );
-        }
-        if (utils.isFunction(options)) {
-            if (utils.isFunction(duration) || utils.isFunction(resource))
-                throw new TypeError('Two or more callbacks passed.');
-            return this.freezeBalance(
-                amount,
-                duration,
-                resource,
-                {},
-                receiverAddress,
-                options,
-            );
-        }
-        if (utils.isFunction(resource)) {
-            if (utils.isFunction(duration))
-                throw new TypeError('Two or more callbacks passed.');
-            return this.freezeBalance(
-                amount,
-                duration,
-                'BANDWIDTH',
-                options,
-                receiverAddress,
-                resource,
-            );
-        }
-        if (utils.isFunction(duration))
-            return this.freezeBalance(
-                amount,
-                3,
-                resource,
-                options,
-                receiverAddress,
-                duration,
-            );
-
         if (typeof options === 'string') options = {privateKey: options};
 
         if (!callback)
@@ -2347,24 +1930,22 @@ export default class Trx extends WithTronwebAndInjectpromise {
         if (!utils.isInteger(duration) || duration < 3)
             return callback('Invalid duration provided, minimum of 3 days');
 
-        const options2:
-            | {privateKey: string; address: string | undefined}
-            | {privateKey: string | undefined; address: string} = {
+        options = {
             privateKey: this.tronWeb.defaultPrivateKey,
             address: this.tronWeb.defaultAddress.hex,
             ...options,
         };
 
-        if (!options2.privateKey && !options2.address)
+        if (!options.privateKey && !options.address)
             return callback(
                 'Function requires either a private key or address to be set',
             );
 
         try {
             const address = (
-                options2.privateKey
-                    ? this.tronWeb.address.fromPrivateKey(options2.privateKey)
-                    : options2.address
+                options.privateKey
+                    ? this.tronWeb.address.fromPrivateKey(options.privateKey)
+                    : options.address
             ) as string;
             const freezeBalance =
                 await this.tronWeb.transactionBuilder.freezeBalance(
@@ -2376,7 +1957,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
                 );
             const signedTransaction = await this.sign(
                 freezeBalance,
-                options2.privateKey || undefined,
+                options.privateKey || undefined,
             );
             const result = await this.sendRawTransaction(signedTransaction);
 
@@ -2394,69 +1975,24 @@ export default class Trx extends WithTronwebAndInjectpromise {
      * @param options
      * @param callback
      */
-    // async unfreezeBalance(amount: number): Promise<any[]>;
-    // async unfreezeBalance(amount: number, duration?: number): Promise<any[]>;
-    // async unfreezeBalance(amount: number, duration: _CallbackT<any>): Promise<void>;
-    async unfreezeBalance(resource?: ResourceT): Promise<IBroadcastResult>;
     async unfreezeBalance(
-        resource: _CallbackT<IBroadcastResult>,
-    ): Promise<void>;
-    async unfreezeBalance(
-        resource: ResourceT,
-        options: _PureObject,
-    ): Promise<IBroadcastResult>;
-    async unfreezeBalance(
-        resource: ResourceT,
-        options: _CallbackT<IBroadcastResult>,
-    ): Promise<void>;
-    async unfreezeBalance(
-        resource: ResourceT,
-        options: _PureObject,
+        resource?: ResourceT,
+        options?: IAddressOrPk,
         receiverAddress?: string,
+        callback?: undefined,
     ): Promise<IBroadcastResult>;
     async unfreezeBalance(
-        resource: ResourceT,
-        options: _PureObject,
-        receiverAddress: _CallbackT<IBroadcastResult>,
-    ): Promise<void>;
-    async unfreezeBalance(
-        resource: ResourceT,
-        options: _PureObject,
+        resource: ResourceT | undefined,
+        options: IAddressOrPk | undefined,
         receiverAddress: string | undefined,
         callback: _CallbackT<IBroadcastResult>,
     ): Promise<void>;
     async unfreezeBalance(
-        resource: ResourceT | _CallbackT<IBroadcastResult> = 'BANDWIDTH',
-        options: _PureObject | _CallbackT<IBroadcastResult> = {},
-        receiverAddress:
-            | string
-            | undefined
-            | _CallbackT<IBroadcastResult> = undefined,
+        resource: ResourceT = 'BANDWIDTH',
+        options: IAddressOrPk = {},
+        receiverAddress?: string | undefined,
         callback?: _CallbackT<IBroadcastResult>,
     ): Promise<void | IBroadcastResult> {
-        if (utils.isFunction(receiverAddress)) {
-            if (utils.isFunction(options) || utils.isFunction(resource))
-                throw new TypeError('Two or more callbacks passed.');
-            return this.unfreezeBalance(
-                resource,
-                options,
-                undefined,
-                receiverAddress,
-            );
-        }
-        if (utils.isFunction(options)) {
-            if (utils.isFunction(resource))
-                throw new TypeError('Two or more callbacks passed.');
-            return this.unfreezeBalance(resource, {}, receiverAddress, options);
-        }
-        if (utils.isFunction(resource))
-            return this.unfreezeBalance(
-                'BANDWIDTH',
-                options,
-                receiverAddress,
-                resource,
-            );
-
         if (typeof options === 'string') options = {privateKey: options};
 
         if (!callback)
@@ -2472,24 +2008,22 @@ export default class Trx extends WithTronwebAndInjectpromise {
                 'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"',
             );
 
-        const options2:
-            | {privateKey: string; address: string | undefined}
-            | {privateKey: string | undefined; address: string} = {
+        options = {
             privateKey: this.tronWeb.defaultPrivateKey,
             address: this.tronWeb.defaultAddress.hex,
             ...options,
         };
 
-        if (!options2.privateKey && !options2.address)
+        if (!options.privateKey && !options.address)
             return callback(
                 'Function requires either a private key or address to be set',
             );
 
         try {
             const address = (
-                options2.privateKey
-                    ? this.tronWeb.address.fromPrivateKey(options2.privateKey)
-                    : options2.address
+                options.privateKey
+                    ? this.tronWeb.address.fromPrivateKey(options.privateKey)
+                    : options.address
             ) as string;
             const unfreezeBalance =
                 await this.tronWeb.transactionBuilder.unfreezeBalance(
@@ -2499,7 +2033,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
                 );
             const signedTransaction = await this.sign(
                 unfreezeBalance,
-                options2.privateKey || undefined,
+                options.privateKey || undefined,
             );
             const result = await this.sendRawTransaction(signedTransaction);
 
@@ -2521,27 +2055,19 @@ export default class Trx extends WithTronwebAndInjectpromise {
      */
     async updateAccount(
         accountName: string,
-        options?: _CallbackT<IBroadcastResult>,
-        callback?: undefined,
-    ): Promise<void>;
-    async updateAccount(
-        accountName: string,
-        options?: _PureObject,
+        options?: IAddressOrPk,
         callback?: undefined,
     ): Promise<IBroadcastResult>;
     async updateAccount(
         accountName: string,
-        options: _PureObject | undefined,
+        options: IAddressOrPk | undefined,
         callback?: _CallbackT<IBroadcastResult>,
     ): Promise<void>;
     async updateAccount(
         accountName: string,
-        options?: _PureObject | _CallbackT<IBroadcastResult>,
+        options?: IAddressOrPk,
         callback?: _CallbackT<IBroadcastResult>,
     ): Promise<void | IBroadcastResult> {
-        if (utils.isFunction(options))
-            return this.updateAccount(accountName, {}, options);
-
         if (typeof options === 'string') options = {privateKey: options};
 
         if (!callback)
@@ -2550,24 +2076,22 @@ export default class Trx extends WithTronwebAndInjectpromise {
         if (!utils.isString(accountName) || !accountName.length)
             return callback('Name must be a string');
 
-        const options2:
-            | {privateKey: string; address: string | undefined}
-            | {privateKey: string | undefined; address: string} = {
+        options = {
             privateKey: this.tronWeb.defaultPrivateKey,
             address: this.tronWeb.defaultAddress.hex,
             ...options,
         };
 
-        if (!options2.privateKey && !options2.address)
+        if (!options.privateKey && !options.address)
             return callback(
                 'Function requires either a private key or address to be set',
             );
 
         try {
             const address = (
-                options2.privateKey
-                    ? this.tronWeb.address.fromPrivateKey(options2.privateKey)
-                    : options2.address
+                options.privateKey
+                    ? this.tronWeb.address.fromPrivateKey(options.privateKey)
+                    : options.address
             ) as string;
             const updateAccount =
                 await this.tronWeb.transactionBuilder.updateAccount(
@@ -2576,7 +2100,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
                 );
             const signedTransaction = await this.sign(
                 updateAccount,
-                options2.privateKey || undefined,
+                options.privateKey || undefined,
             );
             const result = await this.sendRawTransaction(signedTransaction);
 
@@ -2739,31 +2263,21 @@ export default class Trx extends WithTronwebAndInjectpromise {
     /**
      * Lists all network modification proposals.
      */
-    listExchangesPaginated(limit: number): Promise<IExchange[]>;
-    listExchangesPaginated(limit: _CallbackT<IExchange[]>): void;
-    listExchangesPaginated(limit: number, offset: number): Promise<IExchange[]>;
     listExchangesPaginated(
-        limit: number,
-        offset: _CallbackT<IExchange[]>,
-    ): void;
+        limit?: number,
+        offset?: number,
+        callback?: undefined,
+    ): Promise<IExchange[]>;
     listExchangesPaginated(
-        limit: number,
+        limit: number | undefined,
         offset: number | undefined,
         callback: _CallbackT<IExchange[]>,
     ): void;
     listExchangesPaginated(
-        limit: number | _CallbackT<IExchange[]> = 0,
-        offset: number | _CallbackT<IExchange[]> = 0,
+        limit = 0,
+        offset = 0,
         callback?: _CallbackT<IExchange[]>,
     ): void | Promise<IExchange[]> {
-        if (utils.isFunction(offset)) {
-            if (utils.isFunction(limit))
-                throw new TypeError('Two callbacks passed');
-            return this.listExchangesPaginated(limit, 30, offset);
-        }
-        if (utils.isFunction(limit))
-            return this.listExchangesPaginated(0, offset, limit);
-
         if (!callback)
             return this.injectPromise(
                 this.listExchangesPaginated,
@@ -2877,8 +2391,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
         callback?: _CallbackT<number>,
     ): Promise<void | number> {
         options.confirmed = true;
-        if (callback) return this._getReward(address, options, callback);
-        return this._getReward(address, options, callback);
+        return this._getReward(address, options, callback as any);
     }
 
     async getUnconfirmedReward(
@@ -2897,8 +2410,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
         callback?: _CallbackT<number>,
     ): Promise<void | number> {
         options.confirmed = false;
-        if (callback) return this._getReward(address, options, callback);
-        return this._getReward(address, options, callback);
+        return this._getReward(address, options, callback as any);
     }
 
     async getBrokerage(
@@ -2917,8 +2429,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
         callback?: _CallbackT<number>,
     ): Promise<void | number> {
         options.confirmed = true;
-        if (callback) return this._getBrokerage(address, options, callback);
-        return this._getBrokerage(address, options, callback);
+        return this._getBrokerage(address, options, callback as any);
     }
 
     async getUnconfirmedBrokerage(
@@ -2937,55 +2448,24 @@ export default class Trx extends WithTronwebAndInjectpromise {
         callback?: _CallbackT<number>,
     ): Promise<void | number> {
         options.confirmed = false;
-        if (callback) return this._getBrokerage(address, options, callback);
-        return this._getBrokerage(address, options, callback);
+        return this._getBrokerage(address, options, callback as any);
     }
 
-    async _getReward(address: string): Promise<number>;
-    async _getReward(address: {confirmed?: boolean}): Promise<number>;
-    async _getReward(address: _CallbackT<number>): Promise<void>;
     async _getReward(
-        address: string,
-        options: {confirmed?: boolean},
+        address?: string,
+        options?: {confirmed?: boolean},
         callback?: undefined,
     ): Promise<number>;
     async _getReward(
-        address: string,
-        options: _CallbackT<number>,
-    ): Promise<void>;
-    async _getReward(
-        address: {confirmed?: boolean},
-        options: _CallbackT<number>,
-    ): Promise<number>;
-    async _getReward(
-        address: string,
-        options: {confirmed?: boolean},
+        address: string | undefined,
+        options: {confirmed?: boolean} | undefined,
         callback: _CallbackT<number>,
     ): Promise<void>;
     async _getReward(
-        address: string | {confirmed?: boolean} | _CallbackT<number> = this
-            .tronWeb.defaultAddress.hex,
-        options: {confirmed?: boolean} | _CallbackT<number> = {},
+        address: string = this.tronWeb.defaultAddress.hex,
+        options: {confirmed?: boolean} = {},
         callback?: _CallbackT<number>,
     ): Promise<void | number> {
-        if (utils.isFunction(options))
-            if (utils.isFunction(address))
-                throw new TypeError('Two callbacks passed');
-            else if (utils.isString(address))
-                return this._getReward(address, {}, options);
-            else
-                return this._getReward(
-                    this.tronWeb.defaultAddress.hex,
-                    address,
-                    options,
-                );
-        else if (utils.isFunction(address))
-            return this._getReward(
-                this.tronWeb.defaultAddress.hex,
-                {},
-                address,
-            );
-
         if (!callback)
             return this.injectPromise(this._getReward, address, options);
         if (!utils.isString(address)) return callback('Invalid address.');
@@ -3004,9 +2484,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
         )
             return;
 
-        const data = {
-            address: toHex(address),
-        };
+        const data = {address: toHex(address)};
 
         (options.confirmed
             ? this.tronWeb.solidityNode.request(
@@ -3025,51 +2503,21 @@ export default class Trx extends WithTronwebAndInjectpromise {
             .catch((err) => callback(err));
     }
 
-    async _getBrokerage(address: string): Promise<number>;
-    async _getBrokerage(address: {confirmed?: boolean}): Promise<number>;
-    async _getBrokerage(address: _CallbackT<number>): Promise<void>;
     async _getBrokerage(
-        address: string,
-        options: {confirmed?: boolean},
+        address?: string,
+        options?: {confirmed?: boolean},
         callback?: undefined,
     ): Promise<number>;
     async _getBrokerage(
-        address: string,
-        options: _CallbackT<number>,
-    ): Promise<void>;
-    async _getBrokerage(
-        address: {confirmed?: boolean},
-        options: _CallbackT<number>,
-    ): Promise<number>;
-    async _getBrokerage(
-        address: string,
-        options: {confirmed?: boolean},
+        address: string | undefined,
+        options: {confirmed?: boolean} | undefined,
         callback: _CallbackT<number>,
     ): Promise<void>;
     async _getBrokerage(
-        address: string | {confirmed?: boolean} | _CallbackT<number> = this
-            .tronWeb.defaultAddress.hex,
-        options: {confirmed?: boolean} | _CallbackT<number> = {},
+        address: string = this.tronWeb.defaultAddress.hex,
+        options: {confirmed?: boolean} = {},
         callback?: _CallbackT<number>,
     ): Promise<void | number> {
-        if (utils.isFunction(options))
-            if (utils.isFunction(address))
-                throw new TypeError('Two callbacks passed');
-            else if (utils.isString(address))
-                return this._getBrokerage(address, {}, options);
-            else
-                return this._getBrokerage(
-                    this.tronWeb.defaultAddress.hex,
-                    address,
-                    options,
-                );
-        else if (utils.isFunction(address))
-            return this._getBrokerage(
-                this.tronWeb.defaultAddress.hex,
-                {},
-                address,
-            );
-
         if (!callback)
             return this.injectPromise(this._getBrokerage, address, options);
         if (!utils.isString(address))
@@ -3089,9 +2537,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
         )
             return;
 
-        const data = {
-            address: toHex(address),
-        };
+        const data = {address: toHex(address)};
 
         (options.confirmed
             ? this.tronWeb.solidityNode.request(

@@ -138,49 +138,18 @@ export default class TronWeb extends EventEmitter {
         this.transactionBuilder = new TransactionBuilder(this);
         this.trx = new Trx(this);
         this.plugin = new Plugin(this, options as Record<string, unknown>);
-        // this.utils = utils;
 
         this.setFullNode(fullNode);
         this.setSolidityNode(solidityNode as HttpProvider);
         this.setEventServer(eventServer!);
 
-        // this.providers = providers;
-        // this.BigNumber = BigNumber;
-
         // This allows undefined, but allowing it in class body raises 100+ errors
-        // @ts-ignore
-        this.defaultBlock = undefined;
-        // @ts-ignore
-        this.defaultPrivateKey = undefined;
+        this.defaultBlock = undefined as any;
+        this.defaultPrivateKey = undefined as any;
         this.defaultAddress = {
-            // @ts-ignore
-            hex: undefined,
-            // @ts-ignore
-            base58: undefined,
+            hex: undefined as any,
+            base58: undefined as any,
         };
-
-        // Done after defns?
-        // [
-        //     'sha3',
-        //     'toHex',
-        //     'toUtf8',
-        //     'fromUtf8',
-        //     'toAscii',
-        //     'fromAscii',
-        //     'toDecimal',
-        //     'fromDecimal',
-        //     'toSun',
-        //     'fromSun',
-        //     'toBigNumber',
-        //     'isAddress',
-        //     'createAccount',
-        //     'address',
-        //     'version',
-        //     'createRandom',
-        //     'fromMnemonic',
-        // ].forEach((key) => {
-        //     this[key] = TronWeb[key];
-        // });
 
         // for sidechain
         if (
@@ -203,8 +172,6 @@ export default class TronWeb extends EventEmitter {
         else if (sideOptions != null) privateKey = privateKey || sideOptions;
 
         if (privateKey) this.setPrivateKey(privateKey);
-        // this.fullnodeVersion = DEFAULT_VERSION;
-        // this.feeLimit = FEE_LIMIT;
         this.injectPromise = injectpromise(this);
 
         if (headers) this.setFullNodeHeader(headers);

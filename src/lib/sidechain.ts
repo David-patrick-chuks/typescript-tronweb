@@ -48,15 +48,8 @@ export default class SideChain<T extends TronWeb> {
         privateKey: string,
     ) {
         this.mainchain = mainchain;
-        const {
-            // fullHost,
-            // fullNode,
-            // solidityNode,
-            // eventServer,
-            mainGatewayAddress,
-            sideGatewayAddress,
-            sideChainId,
-        } = sideOptions;
+        const {mainGatewayAddress, sideGatewayAddress, sideChainId} =
+            sideOptions;
         if ('fullHost' in sideOptions)
             this.sidechain = new TronWebCls(
                 sideOptions.fullHost,
@@ -158,17 +151,6 @@ export default class SideChain<T extends TronWeb> {
         permissionId?: number,
         callback?: _CallbackT<MakeSigned<ITransaction>>,
     ): Promise<void | MakeSigned<ITransaction>> {
-        // if (this.utils.isFunction(permissionId)) {
-        //     callback = permissionId;
-        //     permissionId = 0;
-        // }
-
-        // if (this.utils.isFunction(privateKey)) {
-        //     callback = privateKey;
-        //     privateKey = this.mainchain.defaultPrivateKey;
-        //     permissionId = 0;
-        // }
-
         if (!callback)
             return this.injectPromise(
                 this.multiSign,
@@ -259,24 +241,6 @@ export default class SideChain<T extends TronWeb> {
         multisig = false,
         callback?: _CallbackT<MakeSigned<T>>,
     ): Promise<void | MakeSigned<T>> {
-        // if (this.utils.isFunction(multisig)) {
-        //     callback = multisig;
-        //     multisig = false;
-        // }
-
-        // if (this.utils.isFunction(useTronHeader)) {
-        //     callback = useTronHeader;
-        //     useTronHeader = true;
-        //     multisig = false;
-        // }
-
-        // if (this.utils.isFunction(privateKey)) {
-        //     callback = privateKey;
-        //     privateKey = this.sidechain.defaultPrivateKey;
-        //     useTronHeader = true;
-        //     multisig = false;
-        // }
-
         if (!callback)
             return this.injectPromise(
                 this.sign,
@@ -362,14 +326,6 @@ export default class SideChain<T extends TronWeb> {
         privateKey: string = this.mainchain.defaultPrivateKey,
         callback?: _CallbackT<any>,
     ): Promise<void | any> {
-        // if (this.utils.isFunction(privateKey)) {
-        //     callback = privateKey;
-        //     privateKey = this.mainchain.defaultPrivateKey;
-        // }
-        // if (this.utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
         if (!callback)
             return this.injectPromise(
                 this.depositTrx,
@@ -452,14 +408,6 @@ export default class SideChain<T extends TronWeb> {
         privateKey: string = this.mainchain.defaultPrivateKey,
         callback?: _CallbackT<any>,
     ): Promise<void | any> {
-        // if (this.utils.isFunction(privateKey)) {
-        //     callback = privateKey;
-        //     privateKey = this.mainchain.defaultPrivateKey;
-        // }
-        // if (this.utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
         if (!callback)
             return this.injectPromise(
                 this.depositTrc10,
@@ -554,14 +502,6 @@ export default class SideChain<T extends TronWeb> {
         privateKey: string = this.mainchain.defaultPrivateKey,
         callback?: _CallbackT<IDepositTrc>,
     ): Promise<void | IDepositTrc> {
-        // if (this.utils.isFunction(privateKey)) {
-        //     callback = privateKey;
-        //     privateKey = this.mainchain.defaultPrivateKey;
-        // }
-        // if (this.utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
         if (!callback)
             return this.injectPromise(
                 this.depositTrc,
@@ -835,14 +775,6 @@ export default class SideChain<T extends TronWeb> {
         privateKey: string = this.mainchain.defaultPrivateKey,
         callback?: _CallbackT<IMappingTrc>,
     ): Promise<void | IMappingTrc> {
-        // if (this.utils.isFunction(privateKey)) {
-        //     callback = privateKey;
-        //     privateKey = this.mainchain.defaultPrivateKey;
-        // }
-        // if (this.utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
         if (!callback)
             return this.injectPromise(
                 this.mappingTrc,
@@ -1006,14 +938,6 @@ export default class SideChain<T extends TronWeb> {
         privateKey: string = this.mainchain.defaultPrivateKey,
         callback?: _CallbackT<any>,
     ): Promise<void | any> {
-        // if (this.utils.isFunction(privateKey)) {
-        //     callback = privateKey;
-        //     privateKey = this.mainchain.defaultPrivateKey;
-        // }
-        // if (this.utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
         if (!callback)
             return this.injectPromise(
                 this.withdrawTrx,
@@ -1096,14 +1020,6 @@ export default class SideChain<T extends TronWeb> {
         privateKey: string = this.mainchain.defaultPrivateKey,
         callback?: _CallbackT<any>,
     ): Promise<void | any> {
-        // if (this.utils.isFunction(privateKey)) {
-        //     callback = privateKey;
-        //     privateKey = this.mainchain.defaultPrivateKey;
-        // }
-        // if (this.utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
         if (!callback)
             return this.injectPromise(
                 this.withdrawTrc10,
@@ -1199,14 +1115,6 @@ export default class SideChain<T extends TronWeb> {
         privateKey: string = this.mainchain.defaultPrivateKey,
         callback?: _CallbackT<any>,
     ): Promise<void | any> {
-        // if (this.utils.isFunction(privateKey)) {
-        //     callback = privateKey;
-        //     privateKey = this.mainchain.defaultPrivateKey;
-        // }
-        // if (this.utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
         if (!callback)
             return this.injectPromise(
                 this.withdrawTrc,
@@ -1381,15 +1289,6 @@ export default class SideChain<T extends TronWeb> {
         privateKey: string = this.mainchain.defaultPrivateKey,
         callback?: _CallbackT<string>,
     ): Promise<void | string> {
-        // if (this.utils.isFunction(privateKey)) {
-        //     callback = privateKey;
-        //     privateKey = this.mainchain.defaultPrivateKey;
-        // }
-
-        // if (this.utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
         if (!callback)
             return this.injectPromise(
                 this.injectFund,

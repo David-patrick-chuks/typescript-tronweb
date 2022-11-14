@@ -11,6 +11,7 @@ import {
 } from '../transactionBuilder';
 
 export interface IMethodSendOptions {
+    from?: string;
     shouldPollResponse?: boolean;
     maxRetries?: number; // Default: 20
     pollingInterval?: number; // Default: 3000 [ms]
@@ -92,10 +93,6 @@ export default class Method extends WithTronwebAndInjectpromise {
                 options: ITriggerContractOptions = {},
                 callback?: _CallbackT<any>,
             ) => {
-                // if (utils.isFunction(options)) {
-                //     callback = options;
-                //     options = {};
-                // }
                 options = {
                     ...options,
                     rawParameter,
@@ -110,14 +107,6 @@ export default class Method extends WithTronwebAndInjectpromise {
                 privateKey: string = this.tronWeb.defaultPrivateKey,
                 callback?: _CallbackT<any>,
             ) => {
-                // if (utils.isFunction(privateKey)) {
-                //     callback = privateKey;
-                //     privateKey = this.tronWeb.defaultPrivateKey;
-                // }
-                // if (utils.isFunction(options)) {
-                //     callback = options;
-                //     options = {};
-                // }
                 options = {
                     ...options,
                     rawParameter,
@@ -135,11 +124,6 @@ export default class Method extends WithTronwebAndInjectpromise {
         options: ITriggerContractOptions = {},
         callback?: _CallbackT<any>,
     ) {
-        // if (utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
-
         if (!callback)
             return this.injectPromise(this._call, types, args, options);
 
@@ -244,16 +228,6 @@ export default class Method extends WithTronwebAndInjectpromise {
         privateKey: string = this.tronWeb.defaultPrivateKey,
         callback?: _CallbackT<any>,
     ) {
-        // if (utils.isFunction(privateKey)) {
-        //     callback = privateKey;
-        //     privateKey = this.tronWeb.defaultPrivateKey;
-        // }
-
-        // if (utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
-
         if (!callback)
             return this.injectPromise(
                 this._send,
@@ -408,11 +382,6 @@ export default class Method extends WithTronwebAndInjectpromise {
         } = {},
         callback: _CallbackT<any>,
     ) {
-        // if (utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
-
         if (!utils.isFunction(callback))
             throw new Error('Expected callback to be provided');
 

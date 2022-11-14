@@ -45,7 +45,7 @@ describe('TronWeb.sidechain [ONLINE]', function () {
             .contract()
             .at(CONTRACT_ADDRESS721);
 
-        await contractInstance.mint(address, tokenId).send(PRIVATE_KEY);
+        await contractInstance.mint(address, tokenId).send({}, PRIVATE_KEY);
     });
     describe('#deposit', function () {
         describe('#depositTrx()', function () {

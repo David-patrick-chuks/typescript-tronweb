@@ -122,7 +122,7 @@ export interface IFunABI {
     outputs?: IFieldABI[];
 }
 
-export function encodeParamsV2ByABI(funABI: IFunABI, args) {
+export function encodeParamsV2ByABI(funABI: IFunABI, args: unknown[]) {
     const types: string[] = [];
 
     const buildFullTypeDefinition = (typeDef) => {

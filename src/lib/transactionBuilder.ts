@@ -87,16 +87,6 @@ export interface ICreateTokenOptions extends IUpdateTokenOptions {
     // for now there is no default for the following values
 }
 type IResources = any;
-// interface IPermissions {
-//     type: number;
-//     permission_name: string;
-//     threshold: number;
-//     keys: {
-//         address: string;
-//         weight: number;
-//     }[];
-//     operations?: any;
-// }
 
 export interface ITriggerSmartContract {
     transaction: ITransaction;
@@ -157,19 +147,6 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         options: IPermissionId = {},
         callback?: _CallbackT<ITransaction>,
     ): void | Promise<ITransaction> {
-        // if (utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
-
-        // if (utils.isFunction(from)) {
-        //     callback = from;
-        //     from = this.tronWeb.defaultAddress.hex;
-        // } else if (utils.isObject(from)) {
-        //     options = from;
-        //     from = this.tronWeb.defaultAddress.hex;
-        // }
-
         if (!callback)
             return this.injectPromise(this.sendTrx, to, amount, from, options);
 
@@ -246,19 +223,6 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         options: IPermissionId = {},
         callback?: _CallbackT<ITransaction>,
     ): void | Promise<ITransaction> {
-        // if (utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
-
-        // if (utils.isFunction(from)) {
-        //     callback = from;
-        //     from = this.tronWeb.defaultAddress.hex;
-        // } else if (utils.isObject(from)) {
-        //     options = from;
-        //     from = this.tronWeb.defaultAddress.hex;
-        // }
-
         if (!callback)
             return this.injectPromise(
                 this.sendToken,
@@ -346,19 +310,6 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         options: IPermissionId = {},
         callback?: _CallbackT<ITransaction>,
     ): void | Promise<ITransaction> {
-        // if (utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
-
-        // if (utils.isFunction(buyer)) {
-        //     callback = buyer;
-        //     buyer = this.tronWeb.defaultAddress.hex;
-        // } else if (utils.isObject(buyer)) {
-        //     options = buyer;
-        //     buyer = this.tronWeb.defaultAddress.hex;
-        // }
-
         if (!callback)
             return this.injectPromise(
                 this.purchaseToken,
@@ -448,37 +399,6 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         options: IPermissionId = {},
         callback?: _CallbackT<ITransaction>,
     ): void | Promise<ITransaction> {
-        // if (utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
-
-        // if (utils.isFunction(receiverAddress)) {
-        //     callback = receiverAddress;
-        //     receiverAddress = undefined;
-        // } else if (utils.isObject(receiverAddress)) {
-        //     options = receiverAddress;
-        //     receiverAddress = undefined;
-        // }
-
-        // if (utils.isFunction(address)) {
-        //     callback = address;
-        //     address = this.tronWeb.defaultAddress.hex;
-        // } else if (utils.isObject(address)) {
-        //     options = address;
-        //     address = this.tronWeb.defaultAddress.hex;
-        // }
-
-        // if (utils.isFunction(duration)) {
-        //     callback = duration;
-        //     duration = 3;
-        // }
-
-        // if (utils.isFunction(resource)) {
-        //     callback = resource;
-        //     resource = 'BANDWIDTH';
-        // }
-
         if (!callback)
             return this.injectPromise(
                 this.freezeBalance,
@@ -551,17 +471,17 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
     }
 
     unfreezeBalance(
-        resource: ResourceT,
-        address: string,
-        receiverAddress: string | undefined,
+        resource?: ResourceT,
+        address?: string,
+        receiverAddress?: string,
         options?: IPermissionId,
         callback?: undefined,
     ): Promise<ITransaction>;
     unfreezeBalance(
-        resource: ResourceT,
-        address: string,
+        resource: ResourceT | undefined,
+        address: string | undefined,
         receiverAddress: string | undefined,
-        options: IPermissionId,
+        options: IPermissionId | undefined,
         callback: _CallbackT<ITransaction>,
     ): void;
     unfreezeBalance(
@@ -571,32 +491,6 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         options: IPermissionId = {},
         callback?: _CallbackT<ITransaction>,
     ): void | Promise<ITransaction> {
-        // if (utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
-
-        // if (utils.isFunction(receiverAddress)) {
-        //     callback = receiverAddress;
-        //     receiverAddress = undefined;
-        // } else if (utils.isObject(receiverAddress)) {
-        //     options = receiverAddress;
-        //     receiverAddress = undefined;
-        // }
-
-        // if (utils.isFunction(address)) {
-        //     callback = address;
-        //     address = this.tronWeb.defaultAddress.hex;
-        // } else if (utils.isObject(address)) {
-        //     options = address;
-        //     address = this.tronWeb.defaultAddress.hex;
-        // }
-
-        // if (utils.isFunction(resource)) {
-        //     callback = resource;
-        //     resource = 'BANDWIDTH';
-        // }
-
         if (!callback)
             return this.injectPromise(
                 this.unfreezeBalance,
@@ -653,13 +547,13 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
     }
 
     withdrawBlockRewards(
-        address: string,
+        address?: string,
         options?: IPermissionId,
         callback?: undefined,
     ): Promise<ITransaction>;
     withdrawBlockRewards(
-        address: string,
-        options: IPermissionId,
+        address: string | undefined,
+        options: IPermissionId | undefined,
         callback: _CallbackT<ITransaction>,
     ): void;
     withdrawBlockRewards(
@@ -667,19 +561,6 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         options: IPermissionId = {},
         callback?: _CallbackT<ITransaction>,
     ): void | Promise<ITransaction> {
-        // if (utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
-
-        // if (utils.isFunction(address)) {
-        //     callback = address;
-        //     address = this.tronWeb.defaultAddress.hex;
-        // } else if (utils.isObject(address)) {
-        //     options = address;
-        //     address = this.tronWeb.defaultAddress.hex;
-        // }
-
         if (!callback)
             return this.injectPromise(
                 this.withdrawBlockRewards,
@@ -733,16 +614,6 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         options: IPermissionId = {},
         callback?: _CallbackT<ITransaction>,
     ): void | Promise<ITransaction> {
-        // if (utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
-        // if (utils.isObject(url) && utils.isValidURL(address)) {
-        //     options = url;
-        //     url = address;
-        //     address = this.tronWeb.defaultAddress.hex;
-        // }
-
         if (!callback)
             return this.injectPromise(this.applyForSR, address, url, options);
 
@@ -794,24 +665,11 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         callback: _CallbackT<ITransaction>,
     ): void;
     vote(
-        votes: Record<string, number> = {},
+        votes: Record<string, number>,
         voterAddress: string = this.tronWeb.defaultAddress.hex,
         options: IPermissionId = {},
         callback?: _CallbackT<ITransaction>,
     ) {
-        // if (utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
-
-        // if (utils.isFunction(voterAddress)) {
-        //     callback = voterAddress;
-        //     voterAddress = this.tronWeb.defaultAddress.hex;
-        // } else if (utils.isObject(voterAddress)) {
-        //     options = voterAddress;
-        //     voterAddress = this.tronWeb.defaultAddress.hex;
-        // }
-
         if (!callback)
             return this.injectPromise(this.vote, votes, voterAddress, options);
 
@@ -896,11 +754,6 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         issuerAddress: string = this.tronWeb.defaultAddress.hex,
         callback?: _CallbackT<ITransaction & {contract_address: string}>,
     ): void | Promise<ITransaction & {contract_address: string}> {
-        // if (utils.isFunction(issuerAddress)) {
-        //     callback = issuerAddress;
-        //     issuerAddress = this.tronWeb.defaultAddress.hex;
-        // }
-
         if (!callback)
             return this.injectPromise(
                 this.createSmartContract,
@@ -918,9 +771,8 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         const tokenValue = options.tokenValue;
         const tokenId = options.tokenId || options.token_id;
 
-        /* eslint-disable prefer-const */
+        // eslint-disable-next-line prefer-const
         let {abi = '', bytecode, parameters = [], name = ''} = options;
-        /* eslint-enable prefer-const */
 
         if (abi && utils.isString(abi))
             try {
@@ -1139,23 +991,13 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         issuerAddress: string | undefined = this.tronWeb.defaultAddress.hex,
         callback?: _CallbackT<ITriggerSmartContract>,
     ): void | Promise<ITriggerSmartContract> {
-        if (typeof options !== 'object')
-            return this.triggerSmartContract(
-                contractAddress,
-                functionSelector,
-                {
-                    feeLimit: options,
-                    callValue: parameters,
-                },
-            );
-
         return this._triggerSmartContract(
             contractAddress,
             functionSelector,
             options,
             parameters,
             issuerAddress,
-            callback,
+            callback as any,
         );
     }
 
@@ -1163,26 +1005,18 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         contractAddress: string,
         functionSelector: string,
         options: ITriggerContractOptions,
-        parameters: {type: string; value: any}[],
-        issuerAddress: string | undefined,
+        parameters?: {type: string; value: any}[],
+        issuerAddress?: string,
         callback?: undefined,
     ): Promise<ITriggerConstantContract>;
     triggerConstantContract(
         contractAddress: string,
         functionSelector: string,
         options: ITriggerContractOptions,
-        parameters: {type: string; value: any}[],
+        parameters: {type: string; value: any}[] | undefined,
         issuerAddress: string | undefined,
         callback: _CallbackT<ITriggerConstantContract>,
     ): void;
-    triggerConstantContract(
-        contractAddress: string,
-        functionSelector: string,
-        options: ITriggerContractOptions,
-        parameters: {type: string; value: any}[],
-        issuerAddress: string | undefined,
-        callback?: _CallbackT<ITriggerConstantContract>,
-    ): void | Promise<ITriggerConstantContract>;
     triggerConstantContract(
         contractAddress: string,
         functionSelector: string,
@@ -1206,26 +1040,18 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         contractAddress: string,
         functionSelector: string,
         options: ITriggerContractOptions,
-        parameters: {type: string; value: any}[],
-        issuerAddress: string | undefined,
+        parameters?: {type: string; value: any}[],
+        issuerAddress?: string,
         callback?: undefined,
     ): Promise<ITriggerConstantContract>;
     triggerConfirmedConstantContract(
         contractAddress: string,
         functionSelector: string,
         options: ITriggerContractOptions,
-        parameters: {type: string; value: any}[],
+        parameters: {type: string; value: any}[] | undefined,
         issuerAddress: string | undefined,
         callback: _CallbackT<ITriggerConstantContract>,
     ): void;
-    triggerConfirmedConstantContract(
-        contractAddress: string,
-        functionSelector: string,
-        options: ITriggerContractOptions,
-        parameters: {type: string; value: any}[],
-        issuerAddress: string | undefined,
-        callback?: _CallbackT<ITriggerConstantContract>,
-    ): void | Promise<ITriggerConstantContract>;
     triggerConfirmedConstantContract(
         contractAddress: string,
         functionSelector: string,
@@ -1250,7 +1076,7 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         contractAddress: string,
         functionSelector: string,
         options: ITriggerContractOptions,
-        parameters: {type: string; value: any}[],
+        parameters?: {type: string; value: any}[],
         issuerAddress?: string,
         callback?: undefined,
     ): Promise<ITriggerSmartContract>;
@@ -1258,18 +1084,10 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         contractAddress: string,
         functionSelector: string,
         options: ITriggerContractOptions,
-        parameters: {type: string; value: any}[],
-        issuerAddress: string,
+        parameters: {type: string; value: any}[] | undefined,
+        issuerAddress: string | undefined,
         callback: _CallbackT<ITriggerSmartContract>,
     ): void;
-    _triggerSmartContract(
-        contractAddress: string,
-        functionSelector: string,
-        options: ITriggerContractOptions,
-        parameters: {type: string; value: any}[],
-        issuerAddress?: string,
-        callback?: _CallbackT<ITriggerSmartContract>,
-    ): void | Promise<ITriggerSmartContract>;
     _triggerSmartContract(
         contractAddress: string,
         functionSelector: string,
@@ -1278,16 +1096,6 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         issuerAddress: string = this.tronWeb.defaultAddress.hex,
         callback?: _CallbackT<ITriggerSmartContract>,
     ): void | Promise<ITriggerSmartContract> {
-        // if (utils.isFunction(issuerAddress)) {
-        //     callback = issuerAddress;
-        //     issuerAddress = this.tronWeb.defaultAddress.hex;
-        // }
-
-        // if (utils.isFunction(parameters)) {
-        //     callback = parameters;
-        //     parameters = [];
-        // }
-
         if (!callback)
             return this.injectPromise(
                 this._triggerSmartContract,
@@ -1470,12 +1278,12 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
 
     clearABI(
         contractAddress: string,
-        ownerAddress: string,
+        ownerAddress?: string,
         callback?: undefined,
     ): void | Promise<ITransaction>;
     clearABI(
         contractAddress: string,
-        ownerAddress: string,
+        ownerAddress: string | undefined,
         callback: _CallbackT<ITransaction>,
     ): void | Promise<ITransaction>;
     clearABI(
@@ -1512,12 +1320,12 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
 
     updateBrokerage(
         brokerage: number,
-        ownerAddress: string,
+        ownerAddress?: string,
         callback?: undefined,
     ): void | Promise<ITransaction>;
     updateBrokerage(
         brokerage: number,
-        ownerAddress: string,
+        ownerAddress: string | undefined,
         callback: _CallbackT<ITransaction>,
     ): void | Promise<ITransaction>;
     updateBrokerage(
@@ -1567,11 +1375,6 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         issuerAddress: string = this.tronWeb.defaultAddress.hex,
         callback?: _CallbackT<ITransaction>,
     ): void | Promise<ITransaction> {
-        // if (utils.isFunction(issuerAddress)) {
-        //     callback = issuerAddress;
-        //     issuerAddress = this.tronWeb.defaultAddress.hex;
-        // }
-
         if (!callback)
             return this.injectPromise(this.createToken, options, issuerAddress);
 
@@ -1744,13 +1547,13 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
 
     updateAccount(
         accountName: string,
-        address: string,
+        address?: string,
         options?: IPermissionId,
         callback?: undefined,
     ): Promise<ITransaction>;
     updateAccount(
         accountName: string,
-        address: string,
+        address: string | undefined,
         options: IPermissionId,
         callback: _CallbackT<ITransaction>,
     ): Promise<ITransaction>;
@@ -1760,19 +1563,6 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         options?: IPermissionId,
         callback?: _CallbackT<ITransaction>,
     ): void | Promise<ITransaction> {
-        // if (utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
-
-        // if (utils.isFunction(address)) {
-        //     callback = address;
-        //     address = this.tronWeb.defaultAddress.hex;
-        // } else if (utils.isObject(address)) {
-        //     options = address;
-        //     address = this.tronWeb.defaultAddress.hex;
-        // }
-
         if (!callback)
             return this.injectPromise(
                 this.updateAccount,
@@ -1817,12 +1607,12 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
 
     setAccountId(
         accountId: string,
-        address: string,
+        address?: string,
         callback?: undefined,
     ): Promise<ITransaction>;
     setAccountId(
         accountId: string,
-        address: string,
+        address: string | undefined,
         callback: _CallbackT<ITransaction>,
     ): void;
     setAccountId(
@@ -1830,11 +1620,6 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         address: string = this.tronWeb.defaultAddress.hex,
         callback?: _CallbackT<ITransaction>,
     ): void | Promise<ITransaction> {
-        // if (utils.isFunction(address)) {
-        //     callback = address;
-        //     address = this.tronWeb.defaultAddress.hex;
-        // }
-
         if (!callback)
             return this.injectPromise(this.setAccountId, accountId, address);
 
@@ -1886,12 +1671,12 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
 
     updateToken(
         options: IUpdateTokenOptions & IPermissionId,
-        issuerAddress: string,
+        issuerAddress?: string,
         callback?: undefined,
     ): Promise<ITransaction>;
     updateToken(
         options: IUpdateTokenOptions & IPermissionId,
-        issuerAddress: string,
+        issuerAddress: string | undefined,
         callback: _CallbackT<ITransaction>,
     ): void;
     updateToken(
@@ -1899,14 +1684,6 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         issuerAddress: string = this.tronWeb.defaultAddress.hex,
         callback?: _CallbackT<ITransaction>,
     ): void | Promise<ITransaction> {
-        // if (utils.isFunction(issuerAddress)) {
-        //     callback = issuerAddress;
-        //     issuerAddress = this.tronWeb.defaultAddress.hex;
-        // } else if (utils.isObject(issuerAddress)) {
-        //     options = issuerAddress;
-        //     issuerAddress = this.tronWeb.defaultAddress.hex;
-        // }
-
         if (!callback)
             return this.injectPromise(this.updateToken, options, issuerAddress);
 
@@ -1996,7 +1773,7 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
             | {key: number; value: number}
             | {key: number; value: number}[],
         issuerAddress: string | undefined,
-        options: IPermissionId,
+        options: IPermissionId | undefined,
         callback: _CallbackT<ITransaction>,
     ): void;
     createProposal(
@@ -2007,19 +1784,6 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         options?: IPermissionId,
         callback?: _CallbackT<ITransaction>,
     ): void | Promise<ITransaction> {
-        // if (utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
-
-        // if (utils.isFunction(issuerAddress)) {
-        //     callback = issuerAddress;
-        //     issuerAddress = this.tronWeb.defaultAddress.hex;
-        // } else if (utils.isObject(issuerAddress)) {
-        //     options = issuerAddress;
-        //     issuerAddress = this.tronWeb.defaultAddress.hex;
-        // }
-
         if (!callback)
             return this.injectPromise(
                 this.createProposal,
@@ -2088,19 +1852,6 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         options?: IPermissionId,
         callback?: _CallbackT<ITransaction>,
     ): void | Promise<ITransaction> {
-        // if (utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
-
-        // if (utils.isFunction(issuerAddress)) {
-        //     callback = issuerAddress;
-        //     issuerAddress = this.tronWeb.defaultAddress.hex;
-        // } else if (utils.isObject(issuerAddress)) {
-        //     options = issuerAddress;
-        //     issuerAddress = this.tronWeb.defaultAddress.hex;
-        // }
-
         if (!callback)
             return this.injectPromise(
                 this.deleteProposal,
@@ -2151,15 +1902,15 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
     voteProposal(
         proposalID: number,
         isApproval: boolean,
-        voterAddress: string,
+        voterAddress?: string,
         options?: IPermissionId,
         callback?: undefined,
     ): Promise<ITransaction>;
     voteProposal(
         proposalID: number,
         isApproval: boolean,
-        voterAddress: string,
-        options: IPermissionId,
+        voterAddress: string | undefined,
+        options: IPermissionId | undefined,
         callback: _CallbackT<ITransaction>,
     ): void;
     voteProposal(
@@ -2169,19 +1920,6 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         options?: IPermissionId,
         callback?: _CallbackT<ITransaction>,
     ): void | Promise<ITransaction> {
-        // if (utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
-
-        // if (utils.isFunction(voterAddress)) {
-        //     callback = voterAddress;
-        //     voterAddress = this.tronWeb.defaultAddress.hex;
-        // } else if (utils.isObject(voterAddress)) {
-        //     options = voterAddress;
-        //     voterAddress = this.tronWeb.defaultAddress.hex;
-        // }
-
         if (!callback)
             return this.injectPromise(
                 this.voteProposal,
@@ -2241,7 +1979,7 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         tokenName: string,
         tokenBalance: number,
         trxBalance: number,
-        ownerAddress: string,
+        ownerAddress?: string,
         options?: IPermissionId,
         callback?: undefined,
     ): Promise<IResources>;
@@ -2249,8 +1987,8 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         tokenName: string,
         tokenBalance: number,
         trxBalance: number,
-        ownerAddress: string,
-        options: IPermissionId,
+        ownerAddress: string | undefined,
+        options: IPermissionId | undefined,
         callback: _CallbackT<IResources>,
     ): void;
     createTRXExchange(
@@ -2261,19 +1999,6 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         options?: IPermissionId,
         callback?: _CallbackT<IResources>,
     ): void | Promise<IResources> {
-        // if (utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
-
-        // if (utils.isFunction(ownerAddress)) {
-        //     callback = ownerAddress;
-        //     ownerAddress = this.tronWeb.defaultAddress.hex;
-        // } else if (utils.isObject(ownerAddress)) {
-        //     options = ownerAddress;
-        //     ownerAddress = this.tronWeb.defaultAddress.hex;
-        // }
-
         if (!callback)
             return this.injectPromise(
                 this.createTRXExchange,
@@ -2344,7 +2069,7 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         firstTokenBalance: number,
         secondTokenName: string,
         secondTokenBalance: number,
-        ownerAddress: string,
+        ownerAddress?: string,
         options?: IPermissionId,
         callback?: undefined,
     ): Promise<IResources>;
@@ -2353,8 +2078,8 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         firstTokenBalance: number,
         secondTokenName: string,
         secondTokenBalance: number,
-        ownerAddress: string,
-        options: IPermissionId,
+        ownerAddress: string | undefined,
+        options: IPermissionId | undefined,
         callback: _CallbackT<IResources>,
     ): void;
     createTokenExchange(
@@ -2366,19 +2091,6 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         options?: IPermissionId,
         callback?: _CallbackT<IResources>,
     ): void | Promise<IResources> {
-        // if (utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
-
-        // if (utils.isFunction(ownerAddress)) {
-        //     callback = ownerAddress;
-        //     ownerAddress = this.tronWeb.defaultAddress.hex;
-        // } else if (utils.isObject(ownerAddress)) {
-        //     options = ownerAddress;
-        //     ownerAddress = this.tronWeb.defaultAddress.hex;
-        // }
-
         if (!callback)
             return this.injectPromise(
                 this.createTokenExchange,
@@ -2453,7 +2165,7 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         exchangeID: number,
         tokenName: string,
         tokenAmount: number,
-        ownerAddress: string,
+        ownerAddress?: string,
         options?: IPermissionId,
         callback?: undefined,
     ): Promise<ITransaction>;
@@ -2461,8 +2173,8 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         exchangeID: number,
         tokenName: string,
         tokenAmount: number,
-        ownerAddress: string,
-        options: IPermissionId,
+        ownerAddress: string | undefined,
+        options: IPermissionId | undefined,
         callback: _CallbackT<ITransaction>,
     ): void;
     injectExchangeTokens(
@@ -2473,19 +2185,6 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         options?: IPermissionId,
         callback?: _CallbackT<ITransaction>,
     ): void | Promise<ITransaction> {
-        // if (utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
-
-        // if (utils.isFunction(ownerAddress)) {
-        //     callback = ownerAddress;
-        //     ownerAddress = this.tronWeb.defaultAddress.hex;
-        // } else if (utils.isObject(ownerAddress)) {
-        //     options = ownerAddress;
-        //     ownerAddress = this.tronWeb.defaultAddress.hex;
-        // }
-
         if (!callback)
             return this.injectPromise(
                 this.injectExchangeTokens,
@@ -2553,7 +2252,7 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         exchangeID: number,
         tokenName: string,
         tokenAmount: number,
-        ownerAddress: string,
+        ownerAddress?: string,
         options?: IPermissionId,
         callback?: undefined,
     ): Promise<ITransaction>;
@@ -2561,8 +2260,8 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         exchangeID: number,
         tokenName: string,
         tokenAmount: number,
-        ownerAddress: string,
-        options: IPermissionId,
+        ownerAddress: string | undefined,
+        options: IPermissionId | undefined,
         callback: _CallbackT<ITransaction>,
     ): void;
     withdrawExchangeTokens(
@@ -2573,19 +2272,6 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         options?: IPermissionId,
         callback?: _CallbackT<ITransaction>,
     ): void | Promise<ITransaction> {
-        // if (utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
-
-        // if (utils.isFunction(ownerAddress)) {
-        //     callback = ownerAddress;
-        //     ownerAddress = this.tronWeb.defaultAddress.hex;
-        // } else if (utils.isObject(ownerAddress)) {
-        //     options = ownerAddress;
-        //     ownerAddress = this.tronWeb.defaultAddress.hex;
-        // }
-
         if (!callback)
             return this.injectPromise(
                 this.withdrawExchangeTokens,
@@ -2654,7 +2340,7 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         tokenName: string,
         tokenAmountSold: number,
         tokenAmountExpected: number,
-        ownerAddress: string,
+        ownerAddress?: string,
         options?: IPermissionId,
         callback?: undefined,
     ): Promise<ITransaction>;
@@ -2663,8 +2349,8 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         tokenName: string,
         tokenAmountSold: number,
         tokenAmountExpected: number,
-        ownerAddress: string,
-        options: IPermissionId,
+        ownerAddress: string | undefined,
+        options: IPermissionId | undefined,
         callback: _CallbackT<ITransaction>,
     ): void;
     tradeExchangeTokens(
@@ -2761,15 +2447,15 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
     updateSetting(
         contractAddress: string,
         userFeePercentage: number,
-        ownerAddress: string,
+        ownerAddress?: string,
         options?: IPermissionId,
         callback?: undefined,
     ): Promise<ITransaction>;
     updateSetting(
         contractAddress: string,
         userFeePercentage: number,
-        ownerAddress: string,
-        options: IPermissionId,
+        ownerAddress: string | undefined,
+        options: IPermissionId | undefined,
         callback: _CallbackT<ITransaction>,
     ): void;
     updateSetting(
@@ -2779,19 +2465,6 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         options?: IPermissionId,
         callback?: _CallbackT<ITransaction>,
     ): void | Promise<ITransaction> {
-        // if (utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
-
-        // if (utils.isFunction(ownerAddress)) {
-        //     callback = ownerAddress;
-        //     ownerAddress = this.tronWeb.defaultAddress.hex;
-        // } else if (utils.isObject(ownerAddress)) {
-        //     options = ownerAddress;
-        //     ownerAddress = this.tronWeb.defaultAddress.hex;
-        // }
-
         if (!callback)
             return this.injectPromise(
                 this.updateSetting,
@@ -2849,15 +2522,15 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
     updateEnergyLimit(
         contractAddress: string,
         originEnergyLimit: number,
-        ownerAddress: string,
+        ownerAddress?: string,
         options?: IPermissionId,
         callback?: unknown,
     ): Promise<ITransaction>;
     updateEnergyLimit(
         contractAddress: string,
         originEnergyLimit: number,
-        ownerAddress: string,
-        options: IPermissionId,
+        ownerAddress: string | undefined,
+        options: IPermissionId | undefined,
         callback: _CallbackT<ITransaction>,
     ): void;
     updateEnergyLimit(
@@ -2867,19 +2540,6 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         options?: IPermissionId,
         callback?: _CallbackT<ITransaction>,
     ): void | Promise<ITransaction> {
-        // if (utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
-
-        // if (utils.isFunction(ownerAddress)) {
-        //     callback = ownerAddress;
-        //     ownerAddress = this.tronWeb.defaultAddress.hex;
-        // } else if (utils.isObject(ownerAddress)) {
-        //     options = ownerAddress;
-        //     ownerAddress = this.tronWeb.defaultAddress.hex;
-        // }
-
         if (!callback)
             return this.injectPromise(
                 this.updateEnergyLimit,
@@ -2960,51 +2620,33 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
     }
 
     updateAccountPermissions(
-        ownerAddress: string,
-        ownerPermissions?: IPermissionsMinimal | null,
-        witnessPermissions?: IPermissionsMinimal | null,
+        ownerAddress?: string,
+        ownerPermissions?: IPermissionsMinimal,
+        witnessPermissions?: IPermissionsMinimal,
         activesPermissions?:
             | IPermissionsMinimal
-            | (IPermissionsMinimal | null | undefined)[]
-            | null,
+            | (IPermissionsMinimal | undefined)[],
         callback?: unknown,
     ): Promise<ITransaction>;
     updateAccountPermissions(
-        ownerAddress: string,
-        ownerPermissions: IPermissionsMinimal | null | undefined,
-        witnessPermissions: IPermissionsMinimal | null | undefined,
+        ownerAddress: string | undefined,
+        ownerPermissions: IPermissionsMinimal | undefined,
+        witnessPermissions: IPermissionsMinimal | undefined,
         activesPermissions:
             | IPermissionsMinimal
-            | (IPermissionsMinimal | null | undefined)[]
-            | null
+            | (IPermissionsMinimal | undefined)[]
             | undefined,
         callback: _CallbackT<ITransaction>,
     ): void;
     updateAccountPermissions(
         ownerAddress: string = this.tronWeb.defaultAddress.hex,
-        ownerPermissions?: IPermissionsMinimal | null,
-        witnessPermissions?: IPermissionsMinimal | null,
+        ownerPermissions?: IPermissionsMinimal,
+        witnessPermissions?: IPermissionsMinimal,
         activesPermissions?:
             | IPermissionsMinimal
-            | (IPermissionsMinimal | null | undefined)[]
-            | null,
+            | (IPermissionsMinimal | undefined)[],
         callback?: _CallbackT<ITransaction>,
     ): void | Promise<ITransaction> {
-        // if (utils.isFunction(activesPermissions)) {
-        //     callback = activesPermissions;
-        //     activesPermissions = false;
-        // }
-
-        // if (utils.isFunction(witnessPermissions)) {
-        //     callback = witnessPermissions;
-        //     witnessPermissions = activesPermissions = false;
-        // }
-
-        // if (utils.isFunction(ownerPermissions)) {
-        //     callback = ownerPermissions;
-        //     ownerPermissions = witnessPermissions = activesPermissions = false;
-        // }
-
         if (!callback)
             return this.injectPromise(
                 this.updateAccountPermissions,
@@ -3183,11 +2825,6 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         dataFormat = 'utf8',
         callback?: _CallbackT<ITransaction>,
     ): Promise<void | ITransaction> {
-        // if (utils.isFunction(dataFormat)) {
-        //     callback = dataFormat;
-        //     dataFormat = 'utf8';
-        // }
-
         if (!callback)
             return this.injectPromise(
                 this.addUpdateData,

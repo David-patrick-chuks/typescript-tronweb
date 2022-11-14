@@ -181,18 +181,6 @@ export const walletExtensionMethods = {
 
 export function serviceToUrl(serviceFullName: string): string {
     return serviceFullName;
-    // let [src, service] = serviceFullName.split('/');
-    // let allowed: Record<string, string>;
-    // if (src === 'wallet')
-    //     allowed = walletMethods;
-    // else if (src === 'walletsolidity')
-    //     allowed = walletSolidityMethods;
-    // else if (src === 'walletextension')
-    //     allowed = walletExtensionMethods;
-    // else
-    //     throw new Error('Unknown source');
-    // if ((service + '2') in allowed) service += '2';
-    // return `${src}/${service}`;
 }
 
 export default serviceToUrl;

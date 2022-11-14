@@ -7,25 +7,32 @@ import {toUtf8Bytes} from '@ethersproject/strings';
 
 import TronWeb from '..';
 import {ADDRESS_PREFIX_REGEX} from './address';
+import type {SomeBytes} from './bytes';
 
 const version = 'tronweb/hash/5.4.0';
 const logger = new Logger(version);
 
-function getAddress(address) {
+function getAddress(address: string) {
     return TronWeb.address.toHex(address).replace(ADDRESS_PREFIX_REGEX, '0x');
 }
 
-function getTronAddress(address) {
+function getTronAddress(address: string) {
     return TronWeb.address.toHex(address);
 }
 
-function id(text) {
+function id(text: string) {
     return keccak256(toUtf8Bytes(text));
 }
 
 export interface IField {
     name: string;
     type: string;
+}
+export interface IDomain {
+    name: string;
+    version: string;
+    chainId: string;
+    verifyingContract: string;
 }
 
 const padding = new Uint8Array(32);
@@ -37,7 +44,7 @@ const MaxUint256 = BigNumber.from(
     '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
 );
 
-function hexPadRight(value) {
+function hexPadRight(value: string) {
     const bytes = arrayify(value);
     const padOffset = bytes.length % 32;
     if (padOffset) return hexConcat([bytes, padding.slice(padOffset)]);
@@ -62,8 +69,8 @@ const domainFieldNames = [
     'salt',
 ];
 
-function checkString(key) {
-    return function (value) {
+function checkString(key: string) {
+    return function <T>(value: T): T extends string ? T : never {
         if (typeof value !== 'string')
             logger.throwArgumentError(
                 `invalid domain value for ${JSON.stringify(key)}`,
@@ -71,14 +78,14 @@ function checkString(key) {
                 value,
             );
 
-        return value;
+        return value as any;
     };
 }
 
 const domainChecks = {
     name: checkString('name'),
     version: checkString('version'),
-    chainId: function (value) {
+    chainId: function (value: unknown) {
         try {
             return BigNumber.from(value).toString();
         } catch (error) {}
@@ -88,7 +95,7 @@ const domainChecks = {
             value,
         );
     },
-    verifyingContract: function (value) {
+    verifyingContract: function (value: string) {
         try {
             return getTronAddress(value).toLowerCase();
         } catch (error) {}
@@ -98,7 +105,7 @@ const domainChecks = {
             value,
         );
     },
-    salt: function (value) {
+    salt: function (value: string | number | SomeBytes) {
         try {
             const bytes = arrayify(value);
             if (bytes.length !== 32) throw new Error('bad length');
@@ -113,7 +120,7 @@ const domainChecks = {
     },
 };
 
-function getBaseEncoder(type) {
+function getBaseEncoder(type: string): ((value: any) => string) | null {
     // intXX and uintXX
     {
         const match = type.match(/^(u?)int(\d*)$/);
@@ -192,19 +199,19 @@ function getBaseEncoder(type) {
     return null;
 }
 
-function encodeType(name, fields) {
+function encodeType(name: string, fields: IField[]) {
     return `${name}(${fields
         .map(({name, type}) => type + ' ' + name)
         .join(',')})`;
 }
 
 export class TypedDataEncoder {
-    readonly types!: {[key: string]: IField[]};
+    readonly types!: Record<string, IField[]>;
     readonly primaryType!: string;
-    readonly _types!: {[key: string]: string};
-    readonly _encoderCache!: {[key: string]: (__v: unknown) => string};
+    readonly _types!: Record<string, string>;
+    readonly _encoderCache!: Record<string, (__v: unknown) => string>;
 
-    constructor(types) {
+    constructor(types: Record<string, IField[]>) {
         defineReadOnly(this, 'types', Object.freeze(deepCopy(types)));
         defineReadOnly(this, '_encoderCache', {});
         defineReadOnly(this, '_types', {});
@@ -234,7 +241,7 @@ export class TypedDataEncoder {
 
                 uniqueNames[field.name] = true;
                 // Get the base type (drop any array specifiers)
-                const baseType = field.type.match(/^([^\x5b]*)(\x5b|$)/)[1];
+                const baseType = field.type.match(/^([^\x5b]*)(\x5b|$)/)![1];
                 if (baseType === name)
                     logger.throwArgumentError(
                         `circular type reference to ${JSON.stringify(
@@ -308,14 +315,14 @@ export class TypedDataEncoder {
                 st.map((t) => encodeType(t, types[t])).join('');
         }
     }
-    getEncoder(type) {
+    getEncoder(type: string) {
         let encoder = this._encoderCache[type];
         if (!encoder)
             encoder = this._encoderCache[type] = this._getEncoder(type);
 
         return encoder;
     }
-    _getEncoder(type) {
+    private _getEncoder(type: string) {
         // Basic encoder type (address, bool, uint256, etc)
         {
             const encoder = getBaseEncoder(type);
@@ -358,7 +365,7 @@ export class TypedDataEncoder {
         }
         return logger.throwArgumentError(`unknown type: ${type}`, 'type', type);
     }
-    encodeType(name) {
+    encodeType(name: string) {
         const result = this._types[name];
         if (!result)
             logger.throwArgumentError(
@@ -369,19 +376,23 @@ export class TypedDataEncoder {
 
         return result;
     }
-    encodeData(type, value) {
+    encodeData(type: string, value: unknown) {
         return this.getEncoder(type)(value);
     }
-    hashStruct(name, value) {
+    hashStruct(name: string, value: unknown) {
         return keccak256(this.encodeData(name, value));
     }
-    encode(value) {
+    encode(value: unknown) {
         return this.encodeData(this.primaryType, value);
     }
-    hash(value) {
+    hash(value: unknown) {
         return this.hashStruct(this.primaryType, value);
     }
-    _visit(type, value, callback) {
+    private _visit(
+        type: string,
+        value: unknown,
+        callback: (type: string, value: unknown) => any,
+    ): any {
         // Basic encoder type (address, bool, uint256, etc)
         {
             const encoder = getBaseEncoder(type);
@@ -392,38 +403,46 @@ export class TypedDataEncoder {
         if (match) {
             const subtype = match[1];
             const length = parseInt(match[3]);
-            if (length >= 0 && value.length !== length)
+            if (
+                !Array.isArray(value) ||
+                (length >= 0 && value.length !== length)
+            )
                 logger.throwArgumentError(
                     'array length mismatch; expected length ${ arrayLength }',
                     'value',
                     value,
                 );
 
-            return value.map((v) => this._visit(subtype, v, callback));
+            if (Array.isArray(value))
+                return value.map((v) => this._visit(subtype, v, callback));
         }
         // Struct
         const fields = this.types[type];
         if (fields)
             return fields.reduce((accum, {name, type}) => {
-                accum[name] = this._visit(type, value[name], callback);
+                accum[name] = this._visit(type, value![name], callback);
                 return accum;
             }, {});
 
         return logger.throwArgumentError(`unknown type: ${type}`, 'type', type);
     }
-    visit(value, callback) {
+    visit(value: unknown, callback: (type: string, value: unknown) => any) {
         return this._visit(this.primaryType, value, callback);
     }
-    static from(types) {
+    static from(types: Record<string, IField[]>) {
         return new TypedDataEncoder(types);
     }
-    static getPrimaryType(types) {
+    static getPrimaryType(types: Record<string, IField[]>) {
         return TypedDataEncoder.from(types).primaryType;
     }
-    static hashStruct(name, types, value) {
+    static hashStruct(
+        name: string,
+        types: Record<string, IField[]>,
+        value: unknown,
+    ) {
         return TypedDataEncoder.from(types).hashStruct(name, value);
     }
-    static hashDomain(domain) {
+    static hashDomain(domain: IDomain) {
         const domainFields: IField[] = [];
         for (const name in domain) {
             const type = domainFieldTypes[name];
@@ -448,17 +467,29 @@ export class TypedDataEncoder {
             domain,
         );
     }
-    static encode(domain, types, value) {
+    static encode(
+        domain: IDomain,
+        types: Record<string, IField[]>,
+        value: unknown,
+    ) {
         return hexConcat([
             '0x1901',
             TypedDataEncoder.hashDomain(domain),
             TypedDataEncoder.from(types).hash(value),
         ]);
     }
-    static hash(domain, types, value) {
+    static hash(
+        domain: IDomain,
+        types: Record<string, IField[]>,
+        value: unknown,
+    ) {
         return keccak256(TypedDataEncoder.encode(domain, types, value));
     }
-    static getPayload(domain, types, value) {
+    static getPayload(
+        domain: IDomain,
+        types: Record<string, IField[]>,
+        value: unknown,
+    ) {
         // Validate the domain fields
         TypedDataEncoder.hashDomain(domain);
         // Derive the EIP712Domain Struct reference type
@@ -489,7 +520,8 @@ export class TypedDataEncoder {
             primaryType: encoder.primaryType,
             message: encoder.visit(value, (type, value) => {
                 // bytes
-                if (type.match(/^bytes(\d*)/)) return hexlify(arrayify(value));
+                if (type.match(/^bytes(\d*)/))
+                    return hexlify(arrayify(value as string));
 
                 // uint or int
                 if (type.match(/^u?int/))
@@ -499,7 +531,7 @@ export class TypedDataEncoder {
                     case 'trcToken':
                         return BigNumber.from(value).toString();
                     case 'address':
-                        return getTronAddress(value).toLowerCase();
+                        return getTronAddress(value as string).toLowerCase();
                     case 'bool':
                         return !!value;
                     case 'string':

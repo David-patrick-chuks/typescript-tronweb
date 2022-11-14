@@ -12,17 +12,12 @@ import {
 } from './code';
 import {SigningKey, sha256 as ethSha256, keccak256} from './ethersUtils';
 import {TypedDataEncoder} from './typedData';
+import type {IDomain} from './typedData';
 
 // import {TransactionExtention as ITransactionExtention} from '../proto/api/api'
 
 export {byteArray2hexStr} from './bytes';
 
-export interface IDomain {
-    name: string;
-    version: string;
-    chainId: string;
-    verifyingContract: string;
-}
 export type TypedDataTypes = Record<string, {name: string; type: string}[]>;
 
 export function getBase58CheckAddress(

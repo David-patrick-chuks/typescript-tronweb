@@ -138,11 +138,6 @@ class _Contract extends WithTronwebAndInjectpromise {
         options: ContractOptions = {},
         callback?: (event: IEvent) => void,
     ) {
-        // if (utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
-
         if (this.eventListener) clearInterval(this.eventListener);
 
         if (!this.tronWeb.eventServer)
@@ -260,11 +255,6 @@ class _Contract extends WithTronwebAndInjectpromise {
         privateKey: string = this.tronWeb.defaultPrivateKey,
         callback?: _CallbackT<this>,
     ): Promise<void | this> {
-        // if (utils.isFunction(privateKey)) {
-        //     callback = privateKey;
-        //     privateKey = this.tronWeb.defaultPrivateKey;
-        // }
-
         if (!callback) return this.injectPromise(this.new, options, privateKey);
 
         try {
@@ -338,11 +328,6 @@ class _Contract extends WithTronwebAndInjectpromise {
     }
 
     events(options: ContractOptions = {}, callback: _CallbackT<any>) {
-        // if (utils.isFunction(options)) {
-        //     callback = options;
-        //     options = {};
-        // }
-
         if (!utils.isFunction(callback))
             throw new Error('Callback function expected');
 

@@ -18,6 +18,8 @@ describe('TronWeb.utils.bytes', function () {
             const tronWeb = createInstance();
 
             assert.throws(() => {
+                // Intentionally invalid
+                // @ts-ignore
                 tronWeb.utils.bytes.byte2hexStr('15');
             }, 'Input must be a number');
 
