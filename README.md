@@ -72,7 +72,9 @@ docker run -it --rm \
 First off, in your javascript file, define TronWeb:
 
 ```js
-const TronWeb = require('tronweb');
+const TronWeb = require('@sterliakov/tstron');
+// or (typescript)
+import TronWeb from '@sterliakov/tstron';
 ```
 
 When you instantiate TronWeb you can define
@@ -132,4 +134,4 @@ TronWeb is distributed under a MIT licence.
 ---
 
 For more historic data, check the original repo at
-[https://github.com/tronprotocol/tron-web](https://github.com/tronprotocol/tron-web)
+[https://github.com/tronprotocol/tronweb](https://github.com/tronprotocol/tronweb)
