@@ -574,10 +574,14 @@ export default class SideChain<T extends TronWeb> {
                 switch (functionSelector) {
                     case 'depositTRC20':
                     case 'depositTRC721':
+                        result = await contractInstance[functionSelector](
+                            contractAddress,
+                            num,
+                        ).send(options, privateKey);
+                        break;
                     case 'retryDeposit':
                     case 'retryMapping':
                         result = await contractInstance[functionSelector](
-                            contractAddress,
                             num,
                         ).send(options, privateKey);
                         break;
