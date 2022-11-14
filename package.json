@@ -1,6 +1,6 @@
 {
     "name": "@sterliakov/tstron",
-    "version": "0.0.0",
+    "version": "0.1.0-alpha.1",
     "description": "TypeScript SDK that encapsulates the TRON HTTP API",
     "scripts": {
         "build": "npm run clean && npm run build:esm && npm run build:cjs",
