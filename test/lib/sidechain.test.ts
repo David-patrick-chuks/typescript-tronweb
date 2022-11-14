@@ -58,35 +58,41 @@ describe('TronWeb.sidechain [ONLINE]', function () {
                 assert.isDefined(tronWeb.sidechain);
             });
 
-            it('should check the balance of mainchain and sidechain after depositTrx', async function () {
-                const balanceBefore =
-                    await tronWeb.sidechain!.sidechain.trx.getUnconfirmedBalance();
-
-                const [txID] = await tronWeb.sidechain!.depositTrx(
-                    callValue,
-                    DEPOSIT_FEE,
-                    FEE_LIMIT,
-                    {
-                        shouldPollResponse: true,
-                        keepTxID: true,
-                        maxRetries: 50,
-                        pollingInterval: 3000,
-                    },
-                );
-                assert.equal(txID.length, 64);
-
-                while (true) {
-                    const balanceAfter =
+            it.only(
+                'should check the balance of mainchain and sidechain after depositTrx',
+                async function () {
+                    const balanceBefore =
                         await tronWeb.sidechain!.sidechain.trx.getUnconfirmedBalance();
 
-                    try {
-                        assert.equal(balanceBefore + callValue, balanceAfter);
-                        break;
-                    } catch {
-                        await wait(5);
+                    const [txID] = await tronWeb.sidechain!.depositTrx(
+                        callValue,
+                        DEPOSIT_FEE,
+                        FEE_LIMIT,
+                        {
+                            shouldPollResponse: true,
+                            keepTxID: true,
+                            maxRetries: 50,
+                            pollingInterval: 3000,
+                        },
+                    );
+                    assert.equal(txID.length, 64);
+
+                    while (true) {
+                        const balanceAfter =
+                            await tronWeb.sidechain!.sidechain.trx.getUnconfirmedBalance();
+
+                        try {
+                            assert.equal(
+                                balanceBefore + callValue,
+                                balanceAfter,
+                            );
+                            break;
+                        } catch {
+                            await wait(5);
+                        }
                     }
-                }
-            }).timeout(5 * 60_000);
+                },
+            ).timeout(5 * 60_000);
 
             it('deposit trx from main chain to side chain', async function () {
                 // TODO: is it possible to define a constructor such that

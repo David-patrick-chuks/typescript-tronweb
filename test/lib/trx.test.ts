@@ -1048,7 +1048,7 @@ describe('TronWeb.trx', function () {
     });
 
     // Block Test
-    describe.only('#Block Test', function () {
+    describe('#Block Test', function () {
         describe('#getBlock', async function () {
             it('should get earliest or latest block', async function () {
                 const earliestParentHash =

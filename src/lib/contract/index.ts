@@ -1,10 +1,10 @@
 import TronWeb from '../..';
 import {WithTronwebAndInjectpromise} from '../../../src/utils/_base';
-import {SmartContract_ABI_Entry_StateMutabilityType as IAbiStateMutability} from '../../proto/core/contract/smart_contract';
+import type {SmartContract_ABI_Entry_StateMutabilityType as IAbiStateMutability} from '../../proto/core/contract/smart_contract';
 import utils from '../../utils';
-import _CallbackT from '../../utils/typing';
-import {IEvent} from '../event';
-import {ContractOptions as ExtendedContractOptions} from '../transactionBuilder';
+import type _CallbackT from '../../utils/typing';
+import type {IEvent} from '../event';
+import type {ContractOptions} from '../transactionBuilder';
 import Method from './method';
 
 export type {IMethodSendOptions} from './method';
@@ -40,7 +40,7 @@ export interface IErrorAbi {
 }
 export type IAbi = IFuncAbi | IEventAbi | IErrorAbi;
 
-export interface ContractOptions {
+export interface ContractEventOptions {
     sinceTimestamp?: number;
     since?: any;
     fromTimestamp?: number;
@@ -95,7 +95,7 @@ class _Contract extends WithTronwebAndInjectpromise {
         return this;
     }
 
-    async _getEvents(options: ContractOptions = {}) {
+    async _getEvents(options: ContractEventOptions = {}) {
         if (!this.address)
             throw new Error('Contract is not configured with an address');
         if (options.rawResponse)
@@ -103,7 +103,7 @@ class _Contract extends WithTronwebAndInjectpromise {
 
         const events = await this.tronWeb.event.getEventsByContractAddress(
             this.address,
-            options as ContractOptions & {rawResponse?: false},
+            options as ContractEventOptions & {rawResponse?: false},
         );
         const [latestEvent] = events.sort((a, b) => b.block - a.block);
         const newEvents = events.filter((event, index) => {
@@ -135,7 +135,7 @@ class _Contract extends WithTronwebAndInjectpromise {
     }
 
     async _startEventListener(
-        options: ContractOptions = {},
+        options: ContractEventOptions = {},
         callback?: (event: IEvent) => void,
     ) {
         if (this.eventListener) clearInterval(this.eventListener);
@@ -241,17 +241,17 @@ class _Contract extends WithTronwebAndInjectpromise {
     }
 
     async new(
-        options: ExtendedContractOptions,
+        options: ContractOptions,
         privateKey: string,
         callback?: unknown,
     ): Promise<this>;
     async new(
-        options: ExtendedContractOptions,
+        options: ContractOptions,
         privateKey: string,
         callback: _CallbackT<this>,
     ): Promise<void>;
     async new(
-        options: ExtendedContractOptions,
+        options: ContractOptions,
         privateKey: string = this.tronWeb.defaultPrivateKey,
         callback?: _CallbackT<this>,
     ): Promise<void | this> {
@@ -327,7 +327,7 @@ class _Contract extends WithTronwebAndInjectpromise {
         }
     }
 
-    events(options: ContractOptions = {}, callback: _CallbackT<any>) {
+    events(options: ContractEventOptions = {}, callback: _CallbackT<any>) {
         if (!utils.isFunction(callback))
             throw new Error('Callback function expected');
 

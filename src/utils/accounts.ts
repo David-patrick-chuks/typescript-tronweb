@@ -7,7 +7,8 @@ import {
     getPubKeyFromPriKey,
     pkToAddress,
 } from './crypto';
-import {Mnemonic, Wordlist, ethersWallet} from './ethersUtils';
+import type {Mnemonic, Wordlist} from './ethersUtils';
+import {ethersWallet} from './ethersUtils';
 import utils from './index';
 
 const INVALID_TRON_PATH_ERROR_MSG = 'Invalid tron path provided';

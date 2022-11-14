@@ -1,15 +1,13 @@
+import BigNumber from 'bignumber.js';
 import injectpromise from 'injectpromise';
 
 import TronWeb from '..';
 import Validator from '../paramValidator';
-import _CallbackT from '../utils/typing';
-import {IMethodSendOptions} from './contract';
+import type _CallbackT from '../utils/typing';
+import type {IMethodSendOptions} from './contract';
 import {HttpProvider} from './providers';
-import {
-    ITransaction, // ContractOptions,
-    ITriggerContractOptions,
-} from './transactionBuilder';
-import {MakeSigned} from './trx';
+import type {ITransaction} from './transactionBuilder';
+import type {ITransactionInfo, MakeSigned} from './trx';
 
 // ! This file shows [almost] proper overloads for
 // - methods accepting callback
@@ -26,8 +24,6 @@ export type IChainOptions = {
           eventServer?: HttpProvider | string;
       }
 );
-export type IDepositTrc = any;
-export type IMappingTrc = any;
 
 const INVALID_TX_MESSAGE = 'Invalid transaction provided';
 
@@ -308,23 +304,105 @@ export default class SideChain<T extends TronWeb> {
         callValue: number,
         depositFee: number,
         feeLimit: number,
-        options?: Record<string, unknown>, // FIXME: iface (almost ContractOptions)
+        options?: IMethodSendOptions & {shouldPollResponse?: false},
         privateKey?: string,
         callback?: undefined,
-    ): Promise<any>;
+    ): Promise<string>;
     async depositTrx(
         callValue: number,
         depositFee: number,
         feeLimit: number,
-        options: Record<string, unknown> | undefined,
+        options: undefined | (IMethodSendOptions & {shouldPollResponse: false}),
         privateKey: string | undefined,
-        callback: _CallbackT<any>,
+        callback: _CallbackT<string>,
     ): Promise<void>;
+
     async depositTrx(
         callValue: number,
         depositFee: number,
         feeLimit: number,
-        options: Record<string, unknown> = {},
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<ITransactionInfo>;
+    async depositTrx(
+        callValue: number,
+        depositFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<ITransactionInfo>,
+    ): Promise<void>;
+
+    async depositTrx(
+        callValue: number,
+        depositFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<[string, BigNumber]>;
+    async depositTrx(
+        callValue: number,
+        depositFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<[string, BigNumber]>,
+    ): Promise<void>;
+
+    async depositTrx(
+        callValue: number,
+        depositFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<BigNumber>;
+    async depositTrx(
+        callValue: number,
+        depositFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<BigNumber>,
+    ): Promise<void>;
+
+    async depositTrx(
+        callValue: number,
+        depositFee: number,
+        feeLimit: number,
+        options?: IMethodSendOptions,
+        privateKey?: string,
+        callback?: _CallbackT<BigNumber>,
+    ): Promise<BigNumber>;
+    async depositTrx(
+        callValue: number,
+        depositFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions = {},
         privateKey: string = this.mainchain.defaultPrivateKey,
         callback?: _CallbackT<any>,
     ): Promise<void | any> {
@@ -388,25 +466,114 @@ export default class SideChain<T extends TronWeb> {
         tokenValue: number,
         depositFee: number,
         feeLimit: number,
-        options?: Record<string, unknown>,
+        options?: IMethodSendOptions & {shouldPollResponse?: false},
         privateKey?: string,
         callback?: undefined,
-    ): Promise<any>;
+    ): Promise<string>;
     async depositTrc10(
         tokenId: number,
         tokenValue: number,
         depositFee: number,
         feeLimit: number,
-        options: Record<string, unknown> | undefined,
+        options: undefined | (IMethodSendOptions & {shouldPollResponse: false}),
         privateKey: string | undefined,
-        callback: _CallbackT<any>,
+        callback: _CallbackT<string>,
     ): Promise<void>;
+
     async depositTrc10(
         tokenId: number,
         tokenValue: number,
         depositFee: number,
         feeLimit: number,
-        options: Record<string, unknown> = {},
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<ITransactionInfo>;
+    async depositTrc10(
+        tokenId: number,
+        tokenValue: number,
+        depositFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<ITransactionInfo>,
+    ): Promise<void>;
+
+    async depositTrc10(
+        tokenId: number,
+        tokenValue: number,
+        depositFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<[string, BigNumber]>;
+    async depositTrc10(
+        tokenId: number,
+        tokenValue: number,
+        depositFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<[string, BigNumber]>,
+    ): Promise<void>;
+
+    async depositTrc10(
+        tokenId: number,
+        tokenValue: number,
+        depositFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<BigNumber>;
+    async depositTrc10(
+        tokenId: number,
+        tokenValue: number,
+        depositFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<BigNumber>,
+    ): Promise<void>;
+
+    async depositTrc10(
+        tokenId: number,
+        tokenValue: number,
+        depositFee: number,
+        feeLimit: number,
+        options?: IMethodSendOptions,
+        privateKey?: string,
+        callback?: _CallbackT<BigNumber>,
+    ): Promise<BigNumber>;
+    async depositTrc10(
+        tokenId: number,
+        tokenValue: number,
+        depositFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions = {},
         privateKey: string = this.mainchain.defaultPrivateKey,
         callback?: _CallbackT<any>,
     ): Promise<void | any> {
@@ -480,30 +647,126 @@ export default class SideChain<T extends TronWeb> {
         fee: number,
         feeLimit: number,
         contractAddress: string,
-        options?: Record<string, unknown>,
+        options?: IMethodSendOptions & {shouldPollResponse?: false},
         privateKey?: string,
         callback?: undefined,
-    ): Promise<IDepositTrc>;
+    ): Promise<string>;
     async depositTrc(
         functionSelector: string,
         num: number,
         fee: number,
         feeLimit: number,
         contractAddress: string,
-        options: Record<string, unknown> | undefined,
+        options: undefined | (IMethodSendOptions & {shouldPollResponse: false}),
         privateKey: string | undefined,
-        callback: _CallbackT<IDepositTrc>,
+        callback: _CallbackT<string>,
     ): Promise<void>;
+
     async depositTrc(
         functionSelector: string,
         num: number,
         fee: number,
         feeLimit: number,
         contractAddress: string,
-        options: Record<string, unknown> = {},
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<ITransactionInfo>;
+    async depositTrc(
+        functionSelector: string,
+        num: number,
+        fee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<ITransactionInfo>,
+    ): Promise<void>;
+
+    async depositTrc(
+        functionSelector: string,
+        num: number,
+        fee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<[string, BigNumber]>;
+    async depositTrc(
+        functionSelector: string,
+        num: number,
+        fee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<[string, BigNumber]>,
+    ): Promise<void>;
+
+    async depositTrc(
+        functionSelector: string,
+        num: number,
+        fee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<BigNumber>;
+    async depositTrc(
+        functionSelector: string,
+        num: number,
+        fee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<BigNumber>,
+    ): Promise<void>;
+
+    async depositTrc(
+        functionSelector: string,
+        num: number,
+        fee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options?: IMethodSendOptions,
+        privateKey?: string,
+        callback?: _CallbackT<BigNumber>,
+    ): Promise<BigNumber>;
+    async depositTrc(
+        functionSelector: string,
+        num: number,
+        fee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions = {},
         privateKey: string = this.mainchain.defaultPrivateKey,
-        callback?: _CallbackT<IDepositTrc>,
-    ): Promise<void | IDepositTrc> {
+        callback?: _CallbackT<any>,
+    ): Promise<void | any> {
         if (!callback)
             return this.injectPromise(
                 this.depositTrc,
@@ -601,26 +864,108 @@ export default class SideChain<T extends TronWeb> {
         num: number,
         feeLimit: number,
         contractAddress: string,
-        options?: Record<string, unknown>,
+        options?: IMethodSendOptions & {shouldPollResponse?: false},
         privateKey?: string,
         callback?: undefined,
-    ): Promise<IDepositTrc>;
+    ): Promise<string>;
     async approveTrc20(
         num: number,
         feeLimit: number,
         contractAddress: string,
-        options: Record<string, unknown> | undefined,
+        options: undefined | (IMethodSendOptions & {shouldPollResponse: false}),
         privateKey: string | undefined,
-        callback: _CallbackT<IDepositTrc>,
+        callback: _CallbackT<string>,
     ): Promise<void>;
+
     async approveTrc20(
         num: number,
         feeLimit: number,
         contractAddress: string,
-        options: Record<string, unknown> = {},
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<ITransactionInfo>;
+    async approveTrc20(
+        num: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<ITransactionInfo>,
+    ): Promise<void>;
+
+    async approveTrc20(
+        num: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<[string, BigNumber]>;
+    async approveTrc20(
+        num: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<[string, BigNumber]>,
+    ): Promise<void>;
+
+    async approveTrc20(
+        num: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<BigNumber>;
+    async approveTrc20(
+        num: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<BigNumber>,
+    ): Promise<void>;
+
+    async approveTrc20(
+        num: number,
+        feeLimit: number,
+        contractAddress: string,
+        options?: IMethodSendOptions,
+        privateKey?: string,
+        callback?: _CallbackT<BigNumber>,
+    ): Promise<BigNumber>;
+    async approveTrc20(
+        num: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions = {},
         privateKey: string = this.mainchain.defaultPrivateKey,
-        callback?: _CallbackT<IDepositTrc>,
-    ): Promise<void | IDepositTrc> {
+        callback?: _CallbackT<any>,
+    ): Promise<void | any> {
         const functionSelector = 'approve';
         return this.depositTrc(
             functionSelector,
@@ -635,29 +980,111 @@ export default class SideChain<T extends TronWeb> {
     }
 
     async approveTrc721(
-        id: number,
+        num: number,
         feeLimit: number,
         contractAddress: string,
-        options?: Record<string, unknown>,
+        options?: IMethodSendOptions & {shouldPollResponse?: false},
         privateKey?: string,
         callback?: undefined,
-    ): Promise<IDepositTrc>;
+    ): Promise<string>;
     async approveTrc721(
-        id: number,
+        num: number,
         feeLimit: number,
         contractAddress: string,
-        options: Record<string, unknown> | undefined,
+        options: undefined | (IMethodSendOptions & {shouldPollResponse: false}),
         privateKey: string | undefined,
-        callback: _CallbackT<IDepositTrc>,
+        callback: _CallbackT<string>,
     ): Promise<void>;
+
+    async approveTrc721(
+        num: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<ITransactionInfo>;
+    async approveTrc721(
+        num: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<ITransactionInfo>,
+    ): Promise<void>;
+
+    async approveTrc721(
+        num: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<[string, BigNumber]>;
+    async approveTrc721(
+        num: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<[string, BigNumber]>,
+    ): Promise<void>;
+
+    async approveTrc721(
+        num: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<BigNumber>;
+    async approveTrc721(
+        num: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<BigNumber>,
+    ): Promise<void>;
+
+    async approveTrc721(
+        num: number,
+        feeLimit: number,
+        contractAddress: string,
+        options?: IMethodSendOptions,
+        privateKey?: string,
+        callback?: _CallbackT<BigNumber>,
+    ): Promise<BigNumber>;
     async approveTrc721(
         id: number,
         feeLimit: number,
         contractAddress: string,
-        options: Record<string, unknown> = {},
+        options: IMethodSendOptions = {},
         privateKey: string = this.mainchain.defaultPrivateKey,
-        callback?: _CallbackT<IDepositTrc>,
-    ): Promise<void | IDepositTrc> {
+        callback?: _CallbackT<any>,
+    ): Promise<void | any> {
         const functionSelector = 'approve';
         return this.depositTrc(
             functionSelector,
@@ -676,28 +1103,117 @@ export default class SideChain<T extends TronWeb> {
         depositFee: number,
         feeLimit: number,
         contractAddress: string,
-        options?: Record<string, unknown>,
+        options?: IMethodSendOptions & {shouldPollResponse?: false},
         privateKey?: string,
         callback?: undefined,
-    ): Promise<IDepositTrc>;
+    ): Promise<string>;
     async depositTrc20(
         num: number,
         depositFee: number,
         feeLimit: number,
         contractAddress: string,
-        options: Record<string, unknown> | undefined,
+        options: undefined | (IMethodSendOptions & {shouldPollResponse: false}),
         privateKey: string | undefined,
-        callback: _CallbackT<IDepositTrc>,
+        callback: _CallbackT<string>,
     ): Promise<void>;
+
     async depositTrc20(
         num: number,
         depositFee: number,
         feeLimit: number,
         contractAddress: string,
-        options: Record<string, unknown> = {},
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<ITransactionInfo>;
+    async depositTrc20(
+        num: number,
+        depositFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<ITransactionInfo>,
+    ): Promise<void>;
+
+    async depositTrc20(
+        num: number,
+        depositFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<[string, BigNumber]>;
+    async depositTrc20(
+        num: number,
+        depositFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<[string, BigNumber]>,
+    ): Promise<void>;
+
+    async depositTrc20(
+        num: number,
+        depositFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<BigNumber>;
+    async depositTrc20(
+        num: number,
+        depositFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<BigNumber>,
+    ): Promise<void>;
+
+    async depositTrc20(
+        num: number,
+        depositFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options?: IMethodSendOptions,
+        privateKey?: string,
+        callback?: _CallbackT<BigNumber>,
+    ): Promise<BigNumber>;
+    async depositTrc20(
+        num: number,
+        depositFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions = {},
         privateKey: string = this.mainchain.defaultPrivateKey,
-        callback?: _CallbackT<IDepositTrc>,
-    ): Promise<void | IDepositTrc> {
+        callback?: _CallbackT<any>,
+    ): Promise<void | any> {
         const functionSelector = 'depositTRC20';
         return this.depositTrc(
             functionSelector,
@@ -711,33 +1227,15 @@ export default class SideChain<T extends TronWeb> {
         );
     }
 
-    async depositTrc721(
+    depositTrc721: this['depositTrc20'] = async (
         id: number,
         depositFee: number,
         feeLimit: number,
         contractAddress: string,
-        options?: Record<string, unknown>,
-        privateKey?: string,
-        callback?: undefined,
-    ): Promise<IDepositTrc>;
-    async depositTrc721(
-        id: number,
-        depositFee: number,
-        feeLimit: number,
-        contractAddress: string,
-        options: Record<string, unknown> | undefined,
-        privateKey: string | undefined,
-        callback: _CallbackT<IDepositTrc>,
-    ): Promise<void>;
-    async depositTrc721(
-        id: number,
-        depositFee: number,
-        feeLimit: number,
-        contractAddress: string,
-        options: Record<string, unknown> = {},
+        options: IMethodSendOptions = {},
         privateKey: string = this.mainchain.defaultPrivateKey,
-        callback?: _CallbackT<IDepositTrc>,
-    ): Promise<void | IDepositTrc> {
+        callback?: _CallbackT<any>,
+    ): Promise<void | any> => {
         const functionSelector = 'depositTRC721';
         return this.depositTrc(
             functionSelector,
@@ -749,7 +1247,7 @@ export default class SideChain<T extends TronWeb> {
             privateKey,
             callback as any,
         );
-    }
+    };
 
     /**
      * mapping asset TRC20 or TRC721 to DAppChain
@@ -759,28 +1257,117 @@ export default class SideChain<T extends TronWeb> {
         mappingFee: number,
         feeLimit: number,
         functionSelector: string,
-        options?: Record<string, unknown>,
+        options?: IMethodSendOptions & {shouldPollResponse?: false},
         privateKey?: string,
-        callback?: unknown,
-    ): Promise<IMappingTrc>;
+        callback?: undefined,
+    ): Promise<string>;
     async mappingTrc(
         trxHash: string,
         mappingFee: number,
         feeLimit: number,
         functionSelector: string,
-        options: Record<string, unknown> | undefined,
+        options: undefined | (IMethodSendOptions & {shouldPollResponse: false}),
         privateKey: string | undefined,
-        callback: _CallbackT<IMappingTrc>,
+        callback: _CallbackT<string>,
     ): Promise<void>;
+
     async mappingTrc(
         trxHash: string,
         mappingFee: number,
         feeLimit: number,
         functionSelector: string,
-        options: Record<string, unknown> = {},
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<ITransactionInfo>;
+    async mappingTrc(
+        trxHash: string,
+        mappingFee: number,
+        feeLimit: number,
+        functionSelector: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<ITransactionInfo>,
+    ): Promise<void>;
+
+    async mappingTrc(
+        trxHash: string,
+        mappingFee: number,
+        feeLimit: number,
+        functionSelector: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<[string, BigNumber]>;
+    async mappingTrc(
+        trxHash: string,
+        mappingFee: number,
+        feeLimit: number,
+        functionSelector: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<[string, BigNumber]>,
+    ): Promise<void>;
+
+    async mappingTrc(
+        trxHash: string,
+        mappingFee: number,
+        feeLimit: number,
+        functionSelector: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<BigNumber>;
+    async mappingTrc(
+        trxHash: string,
+        mappingFee: number,
+        feeLimit: number,
+        functionSelector: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<BigNumber>,
+    ): Promise<void>;
+
+    async mappingTrc(
+        trxHash: string,
+        mappingFee: number,
+        feeLimit: number,
+        functionSelector: string,
+        options?: IMethodSendOptions,
+        privateKey?: string,
+        callback?: _CallbackT<BigNumber>,
+    ): Promise<BigNumber>;
+    async mappingTrc(
+        trxHash: string,
+        mappingFee: number,
+        feeLimit: number,
+        functionSelector: string,
+        options: IMethodSendOptions = {},
         privateKey: string = this.mainchain.defaultPrivateKey,
-        callback?: _CallbackT<IMappingTrc>,
-    ): Promise<void | IMappingTrc> {
+        callback?: _CallbackT<any>,
+    ): Promise<void | any> {
         if (!callback)
             return this.injectPromise(
                 this.mappingTrc,
@@ -849,26 +1436,108 @@ export default class SideChain<T extends TronWeb> {
         trxHash: string,
         mappingFee: number,
         feeLimit: number,
-        options?: Record<string, unknown>,
+        options?: IMethodSendOptions & {shouldPollResponse?: false},
         privateKey?: string,
         callback?: undefined,
-    ): Promise<IMappingTrc>;
+    ): Promise<string>;
     async mappingTrc20(
         trxHash: string,
         mappingFee: number,
         feeLimit: number,
-        options: Record<string, unknown> | undefined,
+        options: undefined | (IMethodSendOptions & {shouldPollResponse: false}),
         privateKey: string | undefined,
-        callback: _CallbackT<IMappingTrc>,
+        callback: _CallbackT<string>,
     ): Promise<void>;
+
     async mappingTrc20(
         trxHash: string,
         mappingFee: number,
         feeLimit: number,
-        options: Record<string, unknown> = {},
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<ITransactionInfo>;
+    async mappingTrc20(
+        trxHash: string,
+        mappingFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<ITransactionInfo>,
+    ): Promise<void>;
+
+    async mappingTrc20(
+        trxHash: string,
+        mappingFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<[string, BigNumber]>;
+    async mappingTrc20(
+        trxHash: string,
+        mappingFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<[string, BigNumber]>,
+    ): Promise<void>;
+
+    async mappingTrc20(
+        trxHash: string,
+        mappingFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<BigNumber>;
+    async mappingTrc20(
+        trxHash: string,
+        mappingFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<BigNumber>,
+    ): Promise<void>;
+
+    async mappingTrc20(
+        trxHash: string,
+        mappingFee: number,
+        feeLimit: number,
+        options?: IMethodSendOptions,
+        privateKey?: string,
+        callback?: _CallbackT<BigNumber>,
+    ): Promise<BigNumber>;
+    async mappingTrc20(
+        trxHash: string,
+        mappingFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions = {},
         privateKey: string = this.mainchain.defaultPrivateKey,
-        callback?: _CallbackT<IMappingTrc>,
-    ): Promise<void | IMappingTrc> {
+        callback?: _CallbackT<any>,
+    ): Promise<void | any> {
         const functionSelector = 'mappingTRC20';
         return this.mappingTrc(
             trxHash,
@@ -881,30 +1550,14 @@ export default class SideChain<T extends TronWeb> {
         );
     }
 
-    async mappingTrc721(
+    mappingTrc721: this['mappingTrc20'] = async (
         trxHash: string,
         mappingFee: number,
         feeLimit: number,
-        options?: Record<string, unknown>,
-        privateKey?: string,
-        callback?: undefined,
-    ): Promise<IMappingTrc>;
-    async mappingTrc721(
-        trxHash: string,
-        mappingFee: number,
-        feeLimit: number,
-        options: Record<string, unknown> | undefined,
-        privateKey: string | undefined,
-        callback: _CallbackT<IMappingTrc>,
-    ): Promise<void>;
-    async mappingTrc721(
-        trxHash: string,
-        mappingFee: number,
-        feeLimit: number,
-        options: Record<string, unknown> = {},
+        options: IMethodSendOptions = {},
         privateKey: string = this.mainchain.defaultPrivateKey,
-        callback?: _CallbackT<IMappingTrc>,
-    ): Promise<void | IMappingTrc> {
+        callback?: _CallbackT<any>,
+    ): Promise<void | any> => {
         const functionSelector = 'mappingTRC721';
         return this.mappingTrc(
             trxHash,
@@ -915,7 +1568,7 @@ export default class SideChain<T extends TronWeb> {
             privateKey,
             callback,
         );
-    }
+    };
 
     /**
      * withdraw trx from sidechain to mainchain
@@ -924,23 +1577,105 @@ export default class SideChain<T extends TronWeb> {
         callValue: number,
         withdrawFee: number,
         feeLimit: number,
-        options?: Record<string, unknown>,
+        options?: IMethodSendOptions & {shouldPollResponse?: false},
         privateKey?: string,
-        callback?: _CallbackT<any>,
-    ): Promise<void | any>;
+        callback?: undefined,
+    ): Promise<string>;
     async withdrawTrx(
         callValue: number,
         withdrawFee: number,
         feeLimit: number,
-        options: Record<string, unknown>,
-        privateKey: string,
-        callback?: _CallbackT<any>,
-    ): Promise<void | any>;
+        options: undefined | (IMethodSendOptions & {shouldPollResponse: false}),
+        privateKey: string | undefined,
+        callback: _CallbackT<string>,
+    ): Promise<void>;
+
     async withdrawTrx(
         callValue: number,
         withdrawFee: number,
         feeLimit: number,
-        options: Record<string, unknown> = {},
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<ITransactionInfo>;
+    async withdrawTrx(
+        callValue: number,
+        withdrawFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<ITransactionInfo>,
+    ): Promise<void>;
+
+    async withdrawTrx(
+        callValue: number,
+        withdrawFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<[string, BigNumber]>;
+    async withdrawTrx(
+        callValue: number,
+        withdrawFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<[string, BigNumber]>,
+    ): Promise<void>;
+
+    async withdrawTrx(
+        callValue: number,
+        withdrawFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<BigNumber>;
+    async withdrawTrx(
+        callValue: number,
+        withdrawFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<BigNumber>,
+    ): Promise<void>;
+
+    async withdrawTrx(
+        callValue: number,
+        withdrawFee: number,
+        feeLimit: number,
+        options?: IMethodSendOptions,
+        privateKey?: string,
+        callback?: _CallbackT<BigNumber>,
+    ): Promise<BigNumber>;
+    async withdrawTrx(
+        callValue: number,
+        withdrawFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions = {},
         privateKey: string = this.mainchain.defaultPrivateKey,
         callback?: _CallbackT<any>,
     ): Promise<void | any> {
@@ -1004,25 +1739,114 @@ export default class SideChain<T extends TronWeb> {
         tokenValue: number,
         withdrawFee: number,
         feeLimit: number,
-        options?: Record<string, unknown>,
+        options?: IMethodSendOptions & {shouldPollResponse?: false},
         privateKey?: string,
         callback?: undefined,
-    ): Promise<any>;
+    ): Promise<string>;
     async withdrawTrc10(
         tokenId: number,
         tokenValue: number,
         withdrawFee: number,
         feeLimit: number,
-        options: Record<string, unknown>,
-        privateKey: string,
-        callback: _CallbackT<any>,
+        options: undefined | (IMethodSendOptions & {shouldPollResponse: false}),
+        privateKey: string | undefined,
+        callback: _CallbackT<string>,
     ): Promise<void>;
+
     async withdrawTrc10(
         tokenId: number,
         tokenValue: number,
         withdrawFee: number,
         feeLimit: number,
-        options: Record<string, unknown> = {},
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<ITransactionInfo>;
+    async withdrawTrc10(
+        tokenId: number,
+        tokenValue: number,
+        withdrawFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<ITransactionInfo>,
+    ): Promise<void>;
+
+    async withdrawTrc10(
+        tokenId: number,
+        tokenValue: number,
+        withdrawFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<[string, BigNumber]>;
+    async withdrawTrc10(
+        tokenId: number,
+        tokenValue: number,
+        withdrawFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<[string, BigNumber]>,
+    ): Promise<void>;
+
+    async withdrawTrc10(
+        tokenId: number,
+        tokenValue: number,
+        withdrawFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<BigNumber>;
+    async withdrawTrc10(
+        tokenId: number,
+        tokenValue: number,
+        withdrawFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<BigNumber>,
+    ): Promise<void>;
+
+    async withdrawTrc10(
+        tokenId: number,
+        tokenValue: number,
+        withdrawFee: number,
+        feeLimit: number,
+        options?: IMethodSendOptions,
+        privateKey?: string,
+        callback?: _CallbackT<BigNumber>,
+    ): Promise<BigNumber>;
+    async withdrawTrc10(
+        tokenId: number,
+        tokenValue: number,
+        withdrawFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions = {},
         privateKey: string = this.mainchain.defaultPrivateKey,
         callback?: _CallbackT<any>,
     ): Promise<void | any> {
@@ -1096,28 +1920,123 @@ export default class SideChain<T extends TronWeb> {
         withdrawFee: number,
         feeLimit: number,
         contractAddress: string,
-        options?: ITriggerContractOptions & IMethodSendOptions,
+        options?: IMethodSendOptions & {shouldPollResponse?: false},
         privateKey?: string,
         callback?: undefined,
-    ): Promise<any>;
+    ): Promise<string>;
     async withdrawTrc(
         functionSelector: string,
         numOrId: number,
         withdrawFee: number,
         feeLimit: number,
         contractAddress: string,
-        options: ITriggerContractOptions & IMethodSendOptions,
-        privateKey: string,
-        callback: _CallbackT<any>,
+        options: undefined | (IMethodSendOptions & {shouldPollResponse: false}),
+        privateKey: string | undefined,
+        callback: _CallbackT<string>,
     ): Promise<void>;
+
     async withdrawTrc(
         functionSelector: string,
         numOrId: number,
         withdrawFee: number,
         feeLimit: number,
         contractAddress: string,
-        // FIXME: these options have to be merged
-        options: ITriggerContractOptions & IMethodSendOptions = {},
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<ITransactionInfo>;
+    async withdrawTrc(
+        functionSelector: string,
+        numOrId: number,
+        withdrawFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<ITransactionInfo>,
+    ): Promise<void>;
+
+    async withdrawTrc(
+        functionSelector: string,
+        numOrId: number,
+        withdrawFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<[string, BigNumber]>;
+    async withdrawTrc(
+        functionSelector: string,
+        numOrId: number,
+        withdrawFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<[string, BigNumber]>,
+    ): Promise<void>;
+
+    async withdrawTrc(
+        functionSelector: string,
+        numOrId: number,
+        withdrawFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<BigNumber>;
+    async withdrawTrc(
+        functionSelector: string,
+        numOrId: number,
+        withdrawFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<BigNumber>,
+    ): Promise<void>;
+
+    async withdrawTrc(
+        functionSelector: string,
+        numOrId: number,
+        withdrawFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options?: IMethodSendOptions,
+        privateKey?: string,
+        callback?: _CallbackT<BigNumber>,
+    ): Promise<BigNumber>;
+    async withdrawTrc(
+        functionSelector: string,
+        numOrId: number,
+        withdrawFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions = {},
         privateKey: string = this.mainchain.defaultPrivateKey,
         callback?: _CallbackT<any>,
     ): Promise<void | any> {
@@ -1197,29 +2116,118 @@ export default class SideChain<T extends TronWeb> {
     }
 
     async withdrawTrc20(
-        num: number,
+        numOrId: number,
         withdrawFee: number,
         feeLimit: number,
         contractAddress: string,
-        options?: ITriggerContractOptions & IMethodSendOptions,
+        options?: IMethodSendOptions & {shouldPollResponse?: false},
         privateKey?: string,
         callback?: undefined,
-    ): Promise<any>;
+    ): Promise<string>;
     async withdrawTrc20(
-        num: number,
+        numOrId: number,
         withdrawFee: number,
         feeLimit: number,
         contractAddress: string,
-        options: ITriggerContractOptions & IMethodSendOptions,
-        privateKey: string,
-        callback: _CallbackT<any>,
+        options: undefined | (IMethodSendOptions & {shouldPollResponse: false}),
+        privateKey: string | undefined,
+        callback: _CallbackT<string>,
     ): Promise<void>;
+
+    async withdrawTrc20(
+        numOrId: number,
+        withdrawFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<ITransactionInfo>;
+    async withdrawTrc20(
+        numOrId: number,
+        withdrawFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<ITransactionInfo>,
+    ): Promise<void>;
+
+    async withdrawTrc20(
+        numOrId: number,
+        withdrawFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<[string, BigNumber]>;
+    async withdrawTrc20(
+        numOrId: number,
+        withdrawFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<[string, BigNumber]>,
+    ): Promise<void>;
+
+    async withdrawTrc20(
+        numOrId: number,
+        withdrawFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<BigNumber>;
+    async withdrawTrc20(
+        numOrId: number,
+        withdrawFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<BigNumber>,
+    ): Promise<void>;
+
+    async withdrawTrc20(
+        numOrId: number,
+        withdrawFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options?: IMethodSendOptions,
+        privateKey?: string,
+        callback?: _CallbackT<BigNumber>,
+    ): Promise<BigNumber>;
     async withdrawTrc20(
         num: number,
         withdrawFee: number,
         feeLimit: number,
         contractAddress: string,
-        options: ITriggerContractOptions & IMethodSendOptions = {},
+        options: IMethodSendOptions = {},
         privateKey: string = this.mainchain.defaultPrivateKey,
         callback?: _CallbackT<any>,
     ): Promise<void | any> {
@@ -1236,29 +2244,118 @@ export default class SideChain<T extends TronWeb> {
     }
 
     async withdrawTrc721(
-        id: number,
+        numOrId: number,
         withdrawFee: number,
         feeLimit: number,
         contractAddress: string,
-        options?: ITriggerContractOptions & IMethodSendOptions,
+        options?: IMethodSendOptions & {shouldPollResponse?: false},
         privateKey?: string,
         callback?: undefined,
-    ): Promise<any>;
+    ): Promise<string>;
     async withdrawTrc721(
-        id: number,
+        numOrId: number,
         withdrawFee: number,
         feeLimit: number,
         contractAddress: string,
-        options: ITriggerContractOptions & IMethodSendOptions,
-        privateKey: string,
-        callback: _CallbackT<any>,
+        options: undefined | (IMethodSendOptions & {shouldPollResponse: false}),
+        privateKey: string | undefined,
+        callback: _CallbackT<string>,
     ): Promise<void>;
+
+    async withdrawTrc721(
+        numOrId: number,
+        withdrawFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<ITransactionInfo>;
+    async withdrawTrc721(
+        numOrId: number,
+        withdrawFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<ITransactionInfo>,
+    ): Promise<void>;
+
+    async withdrawTrc721(
+        numOrId: number,
+        withdrawFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<[string, BigNumber]>;
+    async withdrawTrc721(
+        numOrId: number,
+        withdrawFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<[string, BigNumber]>,
+    ): Promise<void>;
+
+    async withdrawTrc721(
+        numOrId: number,
+        withdrawFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<BigNumber>;
+    async withdrawTrc721(
+        numOrId: number,
+        withdrawFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<BigNumber>,
+    ): Promise<void>;
+
+    async withdrawTrc721(
+        numOrId: number,
+        withdrawFee: number,
+        feeLimit: number,
+        contractAddress: string,
+        options?: IMethodSendOptions,
+        privateKey?: string,
+        callback?: _CallbackT<BigNumber>,
+    ): Promise<BigNumber>;
     async withdrawTrc721(
         id: number,
         withdrawFee: number,
         feeLimit: number,
         contractAddress: string,
-        options: ITriggerContractOptions & IMethodSendOptions = {},
+        options: IMethodSendOptions = {},
         privateKey: string = this.mainchain.defaultPrivateKey,
         callback?: _CallbackT<any>,
     ): Promise<void | any> {
@@ -1369,25 +2466,107 @@ export default class SideChain<T extends TronWeb> {
 
     async retryWithdraw(
         nonce: number,
-        retryWithdrawFee: number,
+        retryFee: number,
         feeLimit: number,
-        options?: ITriggerContractOptions & IMethodSendOptions,
+        options?: IMethodSendOptions & {shouldPollResponse?: false},
         privateKey?: string,
         callback?: undefined,
-    ): Promise<any>;
+    ): Promise<string>;
     async retryWithdraw(
         nonce: number,
-        retryWithdrawFee: number,
+        retryFee: number,
         feeLimit: number,
-        options: ITriggerContractOptions & IMethodSendOptions,
-        privateKey: string,
-        callback: _CallbackT<any>,
+        options: undefined | (IMethodSendOptions & {shouldPollResponse: false}),
+        privateKey: string | undefined,
+        callback: _CallbackT<string>,
     ): Promise<void>;
+
     async retryWithdraw(
         nonce: number,
-        retryWithdrawFee: number,
+        retryFee: number,
         feeLimit: number,
-        options: ITriggerContractOptions & IMethodSendOptions = {},
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<ITransactionInfo>;
+    async retryWithdraw(
+        nonce: number,
+        retryFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<ITransactionInfo>,
+    ): Promise<void>;
+
+    async retryWithdraw(
+        nonce: number,
+        retryFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<[string, BigNumber]>;
+    async retryWithdraw(
+        nonce: number,
+        retryFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<[string, BigNumber]>,
+    ): Promise<void>;
+
+    async retryWithdraw(
+        nonce: number,
+        retryFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<BigNumber>;
+    async retryWithdraw(
+        nonce: number,
+        retryFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse?: false;
+            keepTxID?: false;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<BigNumber>,
+    ): Promise<void>;
+
+    async retryWithdraw(
+        nonce: number,
+        retryFee: number,
+        feeLimit: number,
+        options?: IMethodSendOptions,
+        privateKey?: string,
+        callback?: _CallbackT<BigNumber>,
+    ): Promise<BigNumber>;
+    async retryWithdraw(
+        nonce: number,
+        retryFee: number,
+        feeLimit: number,
+        options: IMethodSendOptions = {},
         privateKey: string = this.mainchain.defaultPrivateKey,
         callback?: _CallbackT<any>,
     ): Promise<void | any> {
@@ -1395,7 +2574,7 @@ export default class SideChain<T extends TronWeb> {
         return this.withdrawTrc(
             functionSelector,
             nonce,
-            retryWithdrawFee,
+            retryFee,
             feeLimit,
             this.sideGatewayAddress,
             options,
@@ -1404,77 +2583,45 @@ export default class SideChain<T extends TronWeb> {
         );
     }
 
-    async retryDeposit(
+    retryDeposit: this['retryWithdraw'] = async (
         nonce: number,
-        retryDepositFee: number,
+        retryFee: number,
         feeLimit: number,
-        options?: Record<string, unknown>,
-        privateKey?: string,
-        callback?: undefined,
-    ): Promise<IDepositTrc>;
-    async retryDeposit(
-        nonce: number,
-        retryDepositFee: number,
-        feeLimit: number,
-        options: Record<string, unknown>,
-        privateKey: string,
-        callback: _CallbackT<IDepositTrc>,
-    ): Promise<void>;
-    async retryDeposit(
-        nonce: number,
-        retryDepositFee: number,
-        feeLimit: number,
-        options: Record<string, unknown> = {},
+        options: IMethodSendOptions = {},
         privateKey: string = this.mainchain.defaultPrivateKey,
-        callback?: _CallbackT<IDepositTrc>,
-    ): Promise<void | IDepositTrc> {
+        callback?: _CallbackT<any>,
+    ): Promise<void | any> => {
         const functionSelector = 'retryDeposit';
         return this.depositTrc(
             functionSelector,
             nonce,
-            retryDepositFee,
+            retryFee,
             feeLimit,
             this.mainGatewayAddress,
             options,
             privateKey,
             callback as any,
         );
-    }
+    };
 
-    async retryMapping(
+    retryMapping: this['retryWithdraw'] = async (
         nonce: number,
-        retryMappingFee: number,
+        retryFee: number,
         feeLimit: number,
-        options?: Record<string, unknown>,
-        privateKey?: string,
-        callback?: undefined,
-    ): Promise<IDepositTrc>;
-    async retryMapping(
-        nonce: number,
-        retryMappingFee: number,
-        feeLimit: number,
-        options: Record<string, unknown>,
-        privateKey: string,
-        callback: _CallbackT<IDepositTrc>,
-    ): Promise<void>;
-    async retryMapping(
-        nonce: number,
-        retryMappingFee: number,
-        feeLimit: number,
-        options: Record<string, unknown> = {},
+        options: IMethodSendOptions = {},
         privateKey: string = this.mainchain.defaultPrivateKey,
-        callback?: _CallbackT<IDepositTrc>,
-    ): Promise<void | IDepositTrc> {
+        callback?: _CallbackT<any>,
+    ): Promise<void | any> => {
         const functionSelector = 'retryMapping';
         return this.depositTrc(
             functionSelector,
             nonce,
-            retryMappingFee,
+            retryFee,
             feeLimit,
             this.mainGatewayAddress,
             options,
             privateKey,
             callback as any,
         );
-    }
+    };
 }

@@ -3,23 +3,24 @@ import EventEmitter from 'eventemitter3';
 import injectpromise from 'injectpromise';
 import semver from 'semver';
 
-import {version} from '../package.json';
-import {default as Contract, IAbi} from './lib/contract';
-import {ContractOptions} from './lib/contract';
+import * as pack from '../package.json';
+import Contract from './lib/contract';
+import type {IAbi} from './lib/contract';
+import type {ContractEventOptions} from './lib/contract';
 import Event from './lib/event';
-import {IEvent, IEventResponse} from './lib/event';
+import type {IEvent, IEventResponse} from './lib/event';
 import Plugin from './lib/plugin';
 import providers from './lib/providers';
 import {HttpProvider} from './lib/providers';
 import SideChain from './lib/sidechain';
-import {IChainOptions} from './lib/sidechain';
+import type {IChainOptions} from './lib/sidechain';
 import TransactionBuilder from './lib/transactionBuilder';
 import Trx from './lib/trx';
-import {BlockT} from './lib/trx';
+import type {BlockT} from './lib/trx';
 import utils from './utils';
 import {ADDRESS_PREFIX, TRON_BIP39_PATH_INDEX_0} from './utils/address';
 import {keccak256} from './utils/ethersUtils';
-import _CallbackT from './utils/typing';
+import type _CallbackT from './utils/typing';
 
 const DEFAULT_VERSION = '3.5.0';
 
@@ -47,9 +48,9 @@ export default class TronWeb extends EventEmitter {
     static Contract = Contract;
     static Plugin = Plugin;
     static Event = Event;
-    static version = version;
+    static version = pack.version;
     static utils = utils;
-    version = version;
+    version = pack.version;
 
     providers = providers;
     utils = utils;
@@ -353,27 +354,27 @@ export default class TronWeb extends EventEmitter {
 
     getEventResult(
         contractAddress: string,
-        options: ContractOptions & {rawResponse: true},
+        options: ContractEventOptions & {rawResponse: true},
         callback?: undefined,
     ): Promise<IEventResponse>;
     getEventResult(
         contractAddress: string,
-        options: ContractOptions & {rawResponse?: false},
+        options: ContractEventOptions & {rawResponse?: false},
         callback?: undefined,
     ): Promise<IEvent>;
     getEventResult(
         contractAddress: string,
-        options: ContractOptions & {rawResponse: true},
+        options: ContractEventOptions & {rawResponse: true},
         callback: _CallbackT<IEventResponse>,
     ): void;
     getEventResult(
         contractAddress: string,
-        options: ContractOptions & {rawResponse?: false},
+        options: ContractEventOptions & {rawResponse?: false},
         callback: _CallbackT<IEvent>,
     ): void;
     getEventResult(
         contractAddress: string,
-        options: ContractOptions = {},
+        options: ContractEventOptions = {},
         callback?: _CallbackT<IEvent> | _CallbackT<IEventResponse>,
     ): void | Promise<IEvent> | Promise<IEventResponse> {
         // getEventResult(...params) {
@@ -409,27 +410,27 @@ export default class TronWeb extends EventEmitter {
 
     getEventByTransactionID(
         transactionID: string,
-        options: ContractOptions & {rawResponse: true},
+        options: ContractEventOptions & {rawResponse: true},
         callback?: undefined,
     ): Promise<IEventResponse>;
     getEventByTransactionID(
         transactionID: string,
-        options: ContractOptions & {rawResponse?: false},
+        options: ContractEventOptions & {rawResponse?: false},
         callback?: undefined,
     ): Promise<IEvent>;
     getEventByTransactionID(
         transactionID: string,
-        options: ContractOptions & {rawResponse: true},
+        options: ContractEventOptions & {rawResponse: true},
         callback: _CallbackT<IEventResponse>,
     ): void;
     getEventByTransactionID(
         transactionID: string,
-        options: ContractOptions & {rawResponse?: false},
+        options: ContractEventOptions & {rawResponse?: false},
         callback: _CallbackT<IEvent>,
     ): void;
     getEventByTransactionID(
         transactionID: string,
-        options: ContractOptions = {},
+        options: ContractEventOptions = {},
         callback?: _CallbackT<IEvent> | _CallbackT<IEventResponse>,
     ): void | Promise<IEvent> | Promise<IEventResponse> {
         return this.event.getEventsByTransactionID(

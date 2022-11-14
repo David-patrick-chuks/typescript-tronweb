@@ -1,16 +1,18 @@
 import Contract from '.';
-import {IAbiItem, IFuncAbi} from '.';
+import type {IAbiItem, IFuncAbi} from '.';
+import type {ContractEventOptions} from '.';
 import utils from '../../utils';
 import {WithTronwebAndInjectpromise} from '../../utils/_base';
 import {decodeParamsV2ByABI, encodeParamsV2ByABI} from '../../utils/abi';
-import _CallbackT from '../../utils/typing';
-import {
+import type _CallbackT from '../../utils/typing';
+import type {
     ContractOptions,
     ITriggerConstantContract,
     ITriggerContractOptions,
 } from '../transactionBuilder';
+import type {ITransactionInfo} from '../trx';
 
-export interface IMethodSendOptions {
+export interface IMethodSendOptions extends Partial<ContractOptions> {
     from?: string;
     shouldPollResponse?: boolean;
     maxRetries?: number; // Default: 20
@@ -41,6 +43,94 @@ const getFunctionSelector = (abi) => {
 const decodeOutput = (abi, output) => {
     return decodeParamsV2ByABI(abi, output);
 };
+
+export interface IOnMethod {
+    call(options?: ITriggerContractOptions, callback?: undefined): Promise<any>;
+    call(
+        options: ITriggerContractOptions | undefined,
+        callback: _CallbackT<any>,
+    ): Promise<void>;
+
+    send(
+        options: IMethodSendOptions & {shouldPollResponse: false},
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<string>;
+    send(
+        options: IMethodSendOptions & {shouldPollResponse: false},
+        privateKey: string | undefined,
+        callback: _CallbackT<string>,
+    ): Promise<void>;
+
+    send(
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<ITransactionInfo>;
+    send(
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<ITransactionInfo>,
+    ): Promise<void>;
+
+    send(
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: false;
+            keepTxID: true;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<[string, any]>;
+    send(
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: false;
+            keepTxID: true;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<[string, any]>,
+    ): Promise<void>;
+
+    send(
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: false;
+            keepTxID: false;
+        },
+        privateKey?: string,
+        callback?: undefined,
+    ): Promise<any>;
+    send(
+        options: IMethodSendOptions & {
+            shouldPollResponse: true;
+            rawResponse: false;
+            keepTxID: false;
+        },
+        privateKey: string | undefined,
+        callback: _CallbackT<any>,
+    ): Promise<void>;
+
+    send(
+        options?: IMethodSendOptions,
+        privateKey?: string,
+        callback?: _CallbackT<any>,
+    ): Promise<any>;
+
+    watch(
+        options: ContractEventOptions,
+        callback: _CallbackT<any>,
+    ): Promise<{
+        start: () => void;
+        stop: () => void;
+    }>;
+}
 
 export default class Method extends WithTronwebAndInjectpromise {
     contract: Contract;
@@ -102,6 +192,7 @@ export default class Method extends WithTronwebAndInjectpromise {
 
                 return this._call([], [], options, callback);
             },
+
             send: (
                 options: Partial<ContractOptions> & IMethodSendOptions = {},
                 privateKey: string = this.tronWeb.defaultPrivateKey,
@@ -115,7 +206,7 @@ export default class Method extends WithTronwebAndInjectpromise {
                 return this._send([], [], options, privateKey, callback);
             },
             watch: (this['_watch'] = this._watch.bind(this)),
-        };
+        } as IOnMethod;
     }
 
     async _call(
@@ -217,11 +308,10 @@ export default class Method extends WithTronwebAndInjectpromise {
         );
     }
 
-    // TODO: Need overloads depending on options keys (shouldPollResponse, ...)
     async _send(
         types: string[],
         args: unknown[],
-        options: Partial<ContractOptions> & IMethodSendOptions = {},
+        options: IMethodSendOptions = {},
         privateKey: string = this.tronWeb.defaultPrivateKey,
         callback?: _CallbackT<any>,
     ) {
@@ -373,7 +463,7 @@ export default class Method extends WithTronwebAndInjectpromise {
     }
 
     async _watch(
-        options: Partial<ContractOptions> = {},
+        options: Partial<ContractEventOptions> = {},
         callback: _CallbackT<any>,
     ) {
         if (!utils.isFunction(callback))

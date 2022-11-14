@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import validator from 'validator';
 
-import {IAbiItem} from '../lib/contract/index';
+import type {IAbiItem} from '../lib/contract/index';
 import type {IEvent, IEventResponse} from '../lib/event';
 import * as abi from './abi';
 import * as accounts from './accounts';

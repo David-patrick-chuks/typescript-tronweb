@@ -23,16 +23,16 @@ import type {SmartContract as ISmartContract} from '../proto/core/contract/smart
 import utils from '../utils';
 import {ADDRESS_PREFIX} from '../utils/address';
 import type {SomeBytes} from '../utils/bytes';
-import {TypedDataTypes} from '../utils/crypto';
+import type {TypedDataTypes} from '../utils/crypto';
 import {
     SigningKey,
     keccak256,
     recoverAddress,
     toUtf8Bytes,
 } from '../utils/ethersUtils';
-import {IDomain} from '../utils/typedData';
-import _CallbackT from '../utils/typing';
-import {
+import type {IDomain} from '../utils/typedData';
+import type _CallbackT from '../utils/typing';
+import type {
     ISignedTransaction,
     Transaction as ITransaction,
 } from './transactionBuilder';

@@ -2,8 +2,8 @@ import querystring from 'querystring';
 
 import {WithTronwebAndInjectpromise} from '../../src/utils/_base';
 import utils from '../utils';
-import _CallbackT from '../utils/typing';
-import {ContractOptions} from './contract';
+import type _CallbackT from '../utils/typing';
+import type {ContractEventOptions} from './contract';
 import * as providers from './providers';
 
 export interface IEventResponse {
@@ -57,27 +57,27 @@ export default class Event extends WithTronwebAndInjectpromise {
 
     getEventsByContractAddress(
         contractAddress: string,
-        options?: ContractOptions & {rawResponse: true},
+        options?: ContractEventOptions & {rawResponse: true},
         callback?: undefined,
     ): Promise<IEventResponse[]>;
     getEventsByContractAddress(
         contractAddress: string,
-        options?: ContractOptions & {rawResponse?: false},
+        options?: ContractEventOptions & {rawResponse?: false},
         callback?: undefined,
     ): Promise<IEvent[]>;
     getEventsByContractAddress(
         contractAddress: string,
-        options: ContractOptions & {rawResponse: true},
+        options: ContractEventOptions & {rawResponse: true},
         callback: _CallbackT<IEventResponse[]>,
     ): void;
     getEventsByContractAddress(
         contractAddress: string,
-        options: ContractOptions & {rawResponse?: false},
+        options: ContractEventOptions & {rawResponse?: false},
         callback: _CallbackT<IEvent[]>,
     ): void;
     getEventsByContractAddress(
         contractAddress: string,
-        options: ContractOptions = {},
+        options: ContractEventOptions = {},
         callback?: _CallbackT<IEventResponse[]> | _CallbackT<IEvent[]>,
     ): void | Promise<IEventResponse[]> | Promise<IEvent[]> {
         /* eslint-disable prefer-const */
@@ -106,7 +106,7 @@ export default class Event extends WithTronwebAndInjectpromise {
                 page: 1,
             },
             options,
-        ) as ContractOptions;
+        ) as ContractEventOptions;
         /* eslint-enable prefer-const */
 
         if (!callback)

@@ -1,6 +1,6 @@
 import {ec as EC} from 'elliptic';
 
-import {ISignedTransaction, ITransaction} from '../lib/transactionBuilder';
+import type {ISignedTransaction, ITransaction} from '../lib/transactionBuilder';
 import {ADDRESS_PREFIX, ADDRESS_PREFIX_BYTE, ADDRESS_SIZE} from './address';
 import {decode58, encode58} from './base58';
 import {byte2hexStr, byteArray2hexStr} from './bytes';

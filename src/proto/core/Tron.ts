@@ -509,20 +509,20 @@ export interface TransactionInfo {
     contract_address: string;
     receipt: ResourceReceipt | undefined;
     log: TransactionInfo_Log[];
-    result: TransactionInfo_code;
-    resMessage: string;
-    assetIssueID: string;
-    withdraw_amount: number;
-    unfreeze_amount: number;
-    internal_transactions: InternalTransaction[];
-    exchange_received_amount: number;
-    exchange_inject_another_amount: number;
-    exchange_withdraw_another_amount: number;
-    exchange_id: number;
-    shielded_transaction_fee: number;
-    orderId: string;
-    orderDetails: MarketOrderDetail[];
-    packingFee: number;
+    result?: TransactionInfo_code;
+    resMessage?: string;
+    assetIssueID?: string;
+    withdraw_amount?: number;
+    unfreeze_amount?: number;
+    internal_transactions?: InternalTransaction[];
+    exchange_received_amount?: number;
+    exchange_inject_another_amount?: number;
+    exchange_withdraw_another_amount?: number;
+    exchange_id?: number;
+    shielded_transaction_fee?: number;
+    orderId?: string;
+    orderDetails?: MarketOrderDetail[];
+    packingFee?: number;
 }
 
 export const TransactionInfo_code = {

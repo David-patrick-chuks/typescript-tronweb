@@ -7,11 +7,16 @@
         "strict": true,
         "noImplicitAny": false,
         "esModuleInterop": true,
-        "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "resolveJsonModule": true,
         "sourceMap": true,
-        "experimentalDecorators": true
+        "skipLibCheck": true,
+        "checkJs": true,
+        "allowJs": true,
+        "declaration": true,
+        "declarationMap": true,
+        "allowSyntheticDefaultImports": true
     },
-    "include": ["src/**/*"]
+    "include": ["src/**/*", "src/index.ts"],
+    "files": ["src/index.ts"]
 }

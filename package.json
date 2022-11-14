@@ -1,10 +1,12 @@
 {
-    "name": "tronweb",
-    "version": "4.4.0",
-    "description": "JavaScript SDK that encapsulates the TRON HTTP API",
-    "main": "src/index.js",
+    "name": "@sterliakov/tstron",
+    "version": "0.0.0",
+    "description": "TypeScript SDK that encapsulates the TRON HTTP API",
     "scripts": {
-        "build": "npm run clean && webpack --config webpack.config.js --progress --color",
+        "build": "npm run clean && npm run build:esm && npm run build:cjs",
+        "build:esm": "tsc -p ./tsconfig.esm.json && mv dist/esm/src/index.js dist/esm/src/index.mjs",
+        "build:cjs": "tsc -p ./tsconfig.cjs.json",
+        "prepack": "npm run build",
         "clean": "rimraf dist",
         "newaccount": "npx ts-node test/helpers/newAccounts 50",
         "do-test": "TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\"}' npx nyc mocha --colors -r ts-node/register -r source-map-support/register --timeout 180000",
@@ -60,20 +62,28 @@
         "webpack-node-externals": "^3.0.0"
     },
     "author": {
-        "name": "Kondax",
-        "url": "https://github.com/Kondax"
+        "name": "Stanislav Terliakov",
+        "url": "https://github.com/sterliakov",
+        "email": "terlya.stas@gmail.com"
     },
-    "contributors": [
-        {
-            "name": "Francesco Sullo",
-            "url": "https://github.com/sullof"
-        },
-        {
-            "name": "TRON-US",
-            "url": "https://github.com/tron-us"
-        }
-    ],
-    "homepage": "https://github.com/tronprotocol/tronweb",
+    "homepage": "https://github.com/sterliakov/tronweb",
     "license": "MIT",
-    "repository": "https://github.com/tronprotocol/tronweb.git"
+    "repository": "https://github.com/sterliakov/tronweb.git",
+    "files": [
+        "dist/**/*"
+    ],
+    "exports": {
+        ".": {
+            "import": {
+                "types": "./dist/esm/types/index.d.ts",
+                "default": "./dist/esm/src/index.mjs"
+            },
+            "require": {
+                "types": "./dist/cjs/types/index.d.ts",
+                "default": "./dist/cjs/src/index.js"
+            }
+        }
+    },
+    "types": "./dist/cjs/types/index.d.ts",
+    "main": "./dist/cjs/src/index.js"
 }

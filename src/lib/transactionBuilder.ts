@@ -6,10 +6,10 @@ import {WithTronwebAndInjectpromise} from '../utils/_base';
 import {encodeParamsV2ByABI} from '../utils/abi';
 import {ADDRESS_PREFIX_REGEX} from '../utils/address';
 import {AbiCoder} from '../utils/ethersUtils';
-import _CallbackT from '../utils/typing';
-import {ContractOptions as OtherContractOptions} from './contract';
-import {IAbi} from './contract';
-import {ILog, ResourceT} from './trx';
+import type _CallbackT from '../utils/typing';
+import type {IAbi} from './contract';
+import type {ILog} from './trx';
+import {ResourceT} from './trx';
 
 export type {Transaction, Permission as IPermissions} from '../proto/core/Tron';
 
@@ -19,7 +19,7 @@ let self;
 
 // @ts-ignore
 export interface IPermissionsMinimal extends IPermissions {
-    // making 'm optional without importing all that stuff
+    // making some fields optional without importing all that stuff
     id?: number;
     parent_id?: number;
     operations?: string;
@@ -35,7 +35,7 @@ export interface BaseOptions {
     originEnergyLimit?: number;
     callValue?: any;
     tokenValue?: number;
-    tokenId?: number;
+    tokenId?: number | string;
     token_id?: number;
     funcABIV2?: any;
     parametersV2?: any;
@@ -44,8 +44,7 @@ export interface BaseOptions {
     shieldedParameter?: string;
     confirmed?: boolean;
 }
-export interface ContractOptions extends BaseOptions, OtherContractOptions {
-    // FIXME: how does this relate to src/lib/contract/index.ts:ContractOptions
+export interface ContractOptions extends BaseOptions {
     abi: string | {entrys: IAbi[]} | IAbi[];
     bytecode: string;
     parameters?: any[] | string;
