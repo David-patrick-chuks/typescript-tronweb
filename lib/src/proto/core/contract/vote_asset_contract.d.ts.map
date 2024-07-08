@@ -1,0 +1,1 @@
+{"version":3,"file":"vote_asset_contract.d.ts","sourceRoot":"","sources":["../../../../../src/proto/core/contract/vote_asset_contract.ts"],"names":[],"mappings":"AAEA,eAAO,MAAM,eAAe,aAAa,CAAC;AAE1C,MAAM,WAAW,iBAAiB;IAC9B,aAAa,EAAE,MAAM,CAAC;IACtB,YAAY,EAAE,MAAM,EAAE,CAAC;IACvB,OAAO,EAAE,OAAO,CAAC;IACjB,KAAK,EAAE,MAAM,CAAC;CACjB"}

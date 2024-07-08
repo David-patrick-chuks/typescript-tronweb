@@ -4,7 +4,7 @@ node_modules
 test/setup/TronWeb.[jt]s
 coverage
 yarn-error.log
-/dist
+# /dist
 .env
 .vscode/
 .idea/
@@ -14,5 +14,5 @@ test/lib/dist/
 /proto/
 .nyc_output
 *.sublime-*
-/lib
+# /lib
 /*.tgz
