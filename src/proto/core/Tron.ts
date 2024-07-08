@@ -389,6 +389,10 @@ export interface Transaction {
     raw_data_hex: string;
 }
 
+export interface EstimateEnergyResponse {
+    result: Object | string
+    energy_required: string
+}
 export interface Transaction_Contract {
     type: Transaction_Contract_ContractType;
     parameter: Any;

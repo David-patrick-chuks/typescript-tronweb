@@ -132,6 +132,8 @@ export const walletMethods = {
     withdrawbalance: 'WithdrawBalance2',
     fundinject: 'FundInject',
     sidechainproposalcreate: 'SideChainProposalCreate',
+    estimateenergy: 'EstimateEnergy'
+
 } as const;
 
 export const walletSolidityMethods = {

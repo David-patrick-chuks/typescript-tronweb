@@ -58,3 +58,12 @@ export interface ParticipateAssetIssueContract {
     /** the amount of drops */
     amount: number;
 }
+
+
+export interface EnergyEstimateContract {
+    owner_address: string
+    contract_address: string;
+    function_selector: string;
+    parameter: string;
+    visible: boolean
+}
