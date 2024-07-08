@@ -7,6 +7,7 @@ import type {
     DelegatedResource,
     DelegatedResourceAccountIndex,
     DynamicProperties,
+    EstimateEnergyResponse,
     Exchange,
     InternalTransaction,
     MarketOrder,
@@ -32,6 +33,7 @@ import type {
 } from '../core/contract/account_contract';
 import type {
     AssetIssueContract,
+    EnergyEstimateContract,
     ParticipateAssetIssueContract,
     TransferAssetContract,
     UnfreezeAssetContract,
@@ -990,6 +992,7 @@ export interface Wallet {
         request: SideChainProposalCreateContract,
     ): Promise<Transaction>;
     FundInject(request: FundInjectContract): Promise<Transaction>;
+    EstimateEnergy(request: EnergyEstimateContract): Promise<EstimateEnergyResponse>
 }
 
 export interface WalletSolidity {
@@ -1061,6 +1064,7 @@ export interface WalletSolidity {
     GetMarketPairList(request: EmptyMessage): Promise<MarketOrderPairList>;
     GetBurnTrx(request: EmptyMessage): Promise<NumberMessage>;
     GetBlock(request: BlockReq): Promise<BlockExtention>;
+    EstimateEnergy(request: EnergyEstimateContract): Promise<EstimateEnergyResponse>
 }
 
 export interface WalletExtension {

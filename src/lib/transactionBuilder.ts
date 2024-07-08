@@ -43,6 +43,7 @@ export interface BaseOptions {
     rawParameter?: string;
     shieldedParameter?: string;
     confirmed?: boolean;
+    estimateEnergy?: boolean;
 }
 export interface ContractOptions extends BaseOptions {
     abi: string | {entrys: IAbi[]} | IAbi[];
@@ -1071,6 +1072,11 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         ) as any;
     }
 
+    estimateEnergy(...params) {
+        params[2].estimateEnergy = true;
+        return this._triggerSmartContract(params[0], params[1], params[2], params[3], params[4]. params[5])
+    }
+
     _triggerSmartContract(
         contractAddress: string,
         functionSelector: string,
@@ -1257,17 +1263,24 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
             args.call_token_value = parseInt(tokenValue.toString());
         if (tokenId != null) args.token_id = parseInt(tokenId.toString());
 
-        if (!options._isConstant)
+        if (!(options._isConstant || options.estimateEnergy))
             args.fee_limit = parseInt(feeLimit.toString());
 
         if (options.permissionId) args.Permission_id = options.permissionId;
 
+        let pathInfo = 'triggesmartcontract';
+        if(options._isConstant) {
+            pathInfo = 'triggerconstantcontract';
+        } else if (options.estimateEnergy) {
+            pathInfo = 'estimateenergy';
+        }
+        pathInfo = `wallet${options.confirmed ? 'solidity' : ''}/${pathInfo}`
+
         this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode']
+            // An error occurs here we need to fix it
             .request(
-                // FIXME: it is actually an error
-                `wallet${options.confirmed ? 'solidity' : ''}/trigger${
-                    options._isConstant ? 'constant' : 'smart'
-                }contract` as any as 'wallet/triggersmartcontract',
+                pathInfo,
+                // @ts-ignore
                 args,
                 'post',
             )
