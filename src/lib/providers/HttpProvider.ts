@@ -86,6 +86,11 @@ export class HttpProvider {
     ): ReturnType<Wallet[typeof walletMethods[T]]>;
     request<T extends string & keyof typeof walletMethods>(
         serviceName: `wallet/${T}` | `/wallet/${T}`,
+        payload: Parameters<Wallet[typeof walletMethods[T]]>[0],
+        method?: 'post' | 'POST',
+    ): ReturnType<Wallet[typeof walletMethods[T]]>;
+    request<T extends string & keyof typeof walletMethods>(
+        serviceName: `wallet/${T}` | `/wallet/${T}`,
         payload?: Parameters<
             Wallet[typeof walletMethods[T]]
         >[0] extends ITransaction
@@ -150,6 +155,9 @@ export class HttpProvider {
     ): Promise<unknown>;
     request(serviceName: string, payload = {}, method: Method = 'get') {
         method = method.toLowerCase() as Method;
+        console.log(method === 'post' && Object.keys(payload).length
+                        ? payload
+                        : null)
 
         return this.instance
             .request({

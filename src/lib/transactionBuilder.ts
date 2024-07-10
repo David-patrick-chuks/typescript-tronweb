@@ -1,6 +1,7 @@
 import TronWeb from '..';
 import Validator from '../paramValidator';
-import type {Permission as IPermissions, Transaction} from '../proto/core/Tron';
+import type {Permission as IPermissions, Transaction, EstimateEnergyResponse} from '../proto/core/Tron';
+import { EnergyEstimateContract } from '../proto/core/contract/asset_issue_contract';
 import utils from '../utils';
 import {WithTronwebAndInjectpromise} from '../utils/_base';
 import {encodeParamsV2ByABI} from '../utils/abi';
@@ -54,6 +55,9 @@ export interface ContractOptions extends BaseOptions {
 }
 export interface ITriggerContractOptions extends BaseOptions {
     _isConstant?: boolean;
+}
+export interface ITriggerContractEnergyOptions extends BaseOptions {
+    estimateEnergy?: boolean;
 }
 
 interface IPermissionId {
@@ -109,6 +113,7 @@ function fromUtf8(value: string): string {
 }
 
 function resultManager(transaction, callback) {
+    console.log(transaction)
     if (transaction.Error) return callback(transaction.Error);
 
     if (transaction.result && transaction.result.message)
@@ -1074,7 +1079,7 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
 
     estimateEnergy(...params) {
         params[2].estimateEnergy = true;
-        return this._triggerSmartContract(params[0], params[1], params[2], params[3], params[4]. params[5])
+        return this._estimateEnergyCall(params[0], params[1], params[2], params[3], params[4], params[5])
     }
 
     _triggerSmartContract(
@@ -1279,12 +1284,175 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode']
             // An error occurs here we need to fix it
             .request(
-                pathInfo,
-                // @ts-ignore
+                pathInfo as any as 'wallet/triggersmartcontract',
                 args,
                 'post',
             )
             .then((transaction) => resultManager(transaction, callback))
+            .catch((err) => callback(err));
+    }
+
+    _estimateEnergyCall(
+        contractAddress: string,
+        functionSelector: string,
+        options: ITriggerContractEnergyOptions,
+        parameters: {type: string; value: any}[],
+        issuerAddress: string,
+        callback?: _CallbackT<EstimateEnergyResponse>,
+    ): void | Promise<EstimateEnergyResponse> {
+        if (!callback)
+            return this.injectPromise(
+                this._estimateEnergyCall,
+                contractAddress,
+                functionSelector,
+                options,
+                parameters,
+                issuerAddress,
+            );
+
+        const {tokenValue, tokenId, callValue, feeLimit} = Object.assign(
+            {
+                callValue: 0,
+                feeLimit: this.tronWeb.feeLimit,
+            },
+            options,
+        );
+
+        if (
+            this.validator.notValid(
+                [
+                    {
+                        name: 'feeLimit',
+                        type: 'integer',
+                        value: feeLimit,
+                        gt: 0,
+                    },
+                    {
+                        name: 'callValue',
+                        type: 'integer',
+                        value: callValue,
+                        gte: 0,
+                    },
+                    {
+                        name: 'parameters',
+                        type: 'array',
+                        value: parameters,
+                    },
+                    {
+                        name: 'contract',
+                        type: 'address',
+                        value: contractAddress,
+                    },
+                    {
+                        name: 'issuer',
+                        type: 'address',
+                        value: issuerAddress,
+                        optional: true,
+                    },
+                    {
+                        name: 'tokenValue',
+                        type: 'integer',
+                        value: tokenValue,
+                        gte: 0,
+                        optional: true,
+                    },
+                    {
+                        name: 'tokenId',
+                        type: 'integer',
+                        value: tokenId,
+                        gte: 0,
+                        optional: true,
+                    },
+                ],
+                callback,
+            )
+        )
+            return;
+
+        const args = {
+            // contract_address: toHex(contractAddress),
+            // owner_address: toHex(issuerAddress),
+            contract_address: contractAddress,
+            owner_address: issuerAddress,
+        } as EnergyEstimateContract
+
+        let param_str: string;
+        if (functionSelector && utils.isString(functionSelector)) {
+            functionSelector = functionSelector.replace('/s*/g', '');
+            if (parameters.length) {
+                const abiCoder = new AbiCoder();
+                let types: string[] = [];
+                const values: unknown[] = [];
+
+                for (let i = 0; i < parameters.length; i++) {
+                    // eslint-disable-next-line prefer-const
+                    let {type, value} = parameters[i];
+
+                    if (!type || !utils.isString(type) || !type.length)
+                        return callback(
+                            'Invalid parameter type provided: ' + type,
+                        ) as any as void;
+
+                    if (type === 'address')
+                        value = toHex(value).replace(
+                            ADDRESS_PREFIX_REGEX,
+                            '0x',
+                        );
+                    else if (
+                        type.match(/^([^\x5b]*)(\x5b|$)/)![0] === 'address['
+                    )
+                        value = value.map((v) =>
+                            toHex(v).replace(ADDRESS_PREFIX_REGEX, '0x'),
+                        );
+
+                    types.push(type);
+                    values.push(value);
+                }
+
+                try {
+                    // workaround for unsupported trcToken type
+                    types = types.map((type) => {
+                        if (/trcToken/.test(type))
+                            type = type.replace(/trcToken/, 'uint256');
+
+                        return type;
+                    });
+
+                    param_str = abiCoder
+                        .encode(types, values)
+                        .replace(/^(0x)/, '');
+                } catch (ex) {
+                    return callback(ex) as any as void;
+                }
+            } else {
+                param_str = '';
+            }
+
+            // work for abiv2 if passed the function abi in options
+            if (options.funcABIV2)
+                param_str = encodeParamsV2ByABI(
+                    options.funcABIV2,
+                    options.parametersV2,
+                ).replace(/^(0x)/, '');
+
+            if (
+                options.shieldedParameter &&
+                utils.isString(options.shieldedParameter)
+            )
+                param_str = options.shieldedParameter.replace(/^(0x)/, '');
+
+            if (options.rawParameter && utils.isString(options.rawParameter))
+                param_str = options.rawParameter.replace(/^(0x)/, '');
+
+            args.function_selector = functionSelector;
+            args.parameter = param_str;
+            args.visible = true
+        }
+
+        console.log("All args", args)
+
+        this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode']
+        .request("wallet/estimateenergy", args, 'post').then((transaction) => resultManager(transaction, callback))
             .catch((err) => callback(err));
     }
 

@@ -1,6 +1,6 @@
 import TronWeb from '..';
 import Validator from '../paramValidator';
-import type { Permission as IPermissions, Transaction } from '../proto/core/Tron';
+import type { Permission as IPermissions, Transaction, EstimateEnergyResponse } from '../proto/core/Tron';
 import { WithTronwebAndInjectpromise } from '../utils/_base';
 import type _CallbackT from '../utils/typing';
 import type { IAbi } from './contract';
@@ -43,6 +43,9 @@ export interface ContractOptions extends BaseOptions {
 }
 export interface ITriggerContractOptions extends BaseOptions {
     _isConstant?: boolean;
+}
+export interface ITriggerContractEnergyOptions extends BaseOptions {
+    estimateEnergy?: boolean;
 }
 interface IPermissionId {
     permissionId?: number;
@@ -127,7 +130,7 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         type: string;
         value: any;
     }[] | undefined, issuerAddress: string | undefined, callback: _CallbackT<ITriggerConstantContract>): void;
-    estimateEnergy(...params: any[]): Promise<ITriggerSmartContract>;
+    estimateEnergy(...params: any[]): void | Promise<EstimateEnergyResponse>;
     _triggerSmartContract(contractAddress: string, functionSelector: string, options: ITriggerContractOptions, parameters?: {
         type: string;
         value: any;
@@ -136,6 +139,10 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
         type: string;
         value: any;
     }[] | undefined, issuerAddress: string | undefined, callback: _CallbackT<ITriggerSmartContract>): void;
+    _estimateEnergyCall(contractAddress: string, functionSelector: string, options: ITriggerContractEnergyOptions, parameters: {
+        type: string;
+        value: any;
+    }[], issuerAddress: string, callback?: _CallbackT<EstimateEnergyResponse>): void | Promise<EstimateEnergyResponse>;
     clearABI(contractAddress: string, ownerAddress?: string, callback?: undefined): void | Promise<ITransaction>;
     clearABI(contractAddress: string, ownerAddress: string | undefined, callback: _CallbackT<ITransaction>): void | Promise<ITransaction>;
     updateBrokerage(brokerage: number, ownerAddress?: string, callback?: undefined): void | Promise<ITransaction>;

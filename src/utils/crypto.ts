@@ -10,7 +10,7 @@ import {
     base64EncodeToString,
     hexStr2byteArray,
 } from './code';
-import {SigningKey, sha256 as ethSha256, keccak256} from './ethersUtils';
+import {SigningKey, sha256 as ethSha256, keccak256, recoverAddress, joinSignature, arrayify, splitSignature} from './ethersUtils';
 import {TypedDataEncoder} from './typedData';
 import type {IDomain} from './typedData';
 
@@ -71,6 +71,15 @@ export function signTransaction(
         transaction.signature = [signature];
     }
     return transaction as ISignedTransaction;
+}
+
+export function ecRecover(signedData, signature) {
+    signedData = '0x' + signedData.replace(/^0x/, '');
+    signature = '0x' + signature.replace(/^0x/, '');
+
+    const recovered = recoverAddress(arrayify(signedData), splitSignature(signature));
+    const tronAddress = ADDRESS_PREFIX + recovered.substring(2);
+    return tronAddress;
 }
 
 export function arrayToBase64String(a: SomeBytes) {

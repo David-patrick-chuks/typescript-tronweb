@@ -1,6 +1,6 @@
 {
     "name": "tstron",
-    "version": "0.1.0-alpha.2",
+    "version": "0.1.0-alpha.3",
     "description": "TypeScript SDK that encapsulates the TRON HTTP API",
     "scripts": {
         "build": "npm run clean && npx genversion --es6 --semi version.js && tsc && webpack && echo '{\"type\": \"commonjs\"}' > lib/package.json",
@@ -20,6 +20,7 @@
         "@ethersproject/hdnode": "^5.7.0",
         "axios": "^0.26.1",
         "bignumber.js": "^9.0.1",
+        "@tronweb3/google-protobuf": "^3.21.2",
         "elliptic": "^6.5.4",
         "ethers": "^5.7.1",
         "eventemitter3": "^3.1.0",

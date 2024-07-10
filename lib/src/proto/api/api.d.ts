@@ -1,4 +1,4 @@
-import type { Account, Block, BlockHeader, ChainParameters, DelegatedResource, DelegatedResourceAccountIndex, DynamicProperties, EstimateEnergyResponse, Exchange, InternalTransaction, MarketOrder, MarketOrderList, MarketOrderPair, MarketOrderPairList, MarketPriceList, MetricsInfo, NodeInfo, Permission, Proposal, Transaction, TransactionInfo, TransactionInfo_Log, TransactionSign, Witness } from '../core/Tron';
+import type { Account, Block, BlockHeader, ChainParameters, DelegatedResource, DelegatedResourceAccountIndex, DynamicProperties, EstimateEnergyResponse, EstimatePrices, Exchange, InternalTransaction, MarketOrder, MarketOrderList, MarketOrderPair, MarketOrderPairList, MarketPriceList, MetricsInfo, NodeInfo, Permission, Proposal, Transaction, TransactionInfo, TransactionInfo_Log, TransactionSign, Witness } from '../core/Tron';
 import type { AccountCreateContract, AccountPermissionUpdateContract, AccountUpdateContract, SetAccountIdContract } from '../core/contract/account_contract';
 import type { AssetIssueContract, EnergyEstimateContract, ParticipateAssetIssueContract, TransferAssetContract, UnfreezeAssetContract, UpdateAssetContract } from '../core/contract/asset_issue_contract';
 import type { AccountBalanceRequest, AccountBalanceResponse, BlockBalanceTrace, BlockBalanceTrace_BlockIdentifier, FreezeBalanceContract, TransferContract, UnfreezeBalanceContract, WithdrawBalanceContract } from '../core/contract/balance_contract';
@@ -705,6 +705,8 @@ export interface Wallet {
     SideChainProposalCreate(request: SideChainProposalCreateContract): Promise<Transaction>;
     FundInject(request: FundInjectContract): Promise<Transaction>;
     EstimateEnergy(request: EnergyEstimateContract): Promise<EstimateEnergyResponse>;
+    GetBandwidthPrices(request: any | undefined): Promise<EstimatePrices>;
+    GetEnergyPrices(request: any | undefined): Promise<EstimatePrices>;
 }
 export interface WalletSolidity {
     GetAccount(request: Account): Promise<Account>;
@@ -752,6 +754,8 @@ export interface WalletSolidity {
     GetBurnTrx(request: EmptyMessage): Promise<NumberMessage>;
     GetBlock(request: BlockReq): Promise<BlockExtention>;
     EstimateEnergy(request: EnergyEstimateContract): Promise<EstimateEnergyResponse>;
+    GetBandwidthPrices(request: any | undefined): Promise<EstimatePrices>;
+    GetEnergyPrices(request: any | undefined): Promise<EstimatePrices>;
 }
 export interface WalletExtension {
     /** Please use GetTransactionsFromThis2 instead of this function. */

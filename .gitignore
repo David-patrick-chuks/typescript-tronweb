@@ -16,3 +16,4 @@ test/lib/dist/
 *.sublime-*
 # /lib
 /*.tgz
+script

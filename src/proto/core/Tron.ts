@@ -393,6 +393,10 @@ export interface EstimateEnergyResponse {
     result: Object | string
     energy_required: string
 }
+
+export interface EstimatePrices {
+    prices: MarketPrice[]
+}
 export interface Transaction_Contract {
     type: Transaction_Contract_ContractType;
     parameter: Any;

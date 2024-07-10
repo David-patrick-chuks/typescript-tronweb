@@ -132,7 +132,9 @@ export const walletMethods = {
     withdrawbalance: 'WithdrawBalance2',
     fundinject: 'FundInject',
     sidechainproposalcreate: 'SideChainProposalCreate',
-    estimateenergy: 'EstimateEnergy'
+    estimateenergy: 'EstimateEnergy',
+    getbandwidthprices: 'GetBandwidthPrices',
+    getenergyprices: 'GetEnergyPrices'
 
 } as const;
 
@@ -174,6 +176,9 @@ export const walletSolidityMethods = {
     scanshieldedtrc20notesbyivk: 'ScanShieldedTRC20NotesByIvk',
     scanshieldedtrc20notesbyovk: 'ScanShieldedTRC20NotesByOvk',
     triggerconstantcontract: 'TriggerConstantContract',
+    estimateenergy: 'EstimateEnergy',
+    getbandwidthprices: 'GetBandwidthPrices',
+    getenergyprices: 'GetEnergyPrices'
 } as const;
 
 export const walletExtensionMethods = {
@@ -190,8 +195,8 @@ export default serviceToUrl;
 // verify typing
 /* eslint-disable @typescript-eslint/no-unused-vars */
 const _walletMethods: Record<string, keyof Wallet> = walletMethods;
-const _walletSolidityMethods: Record<string, keyof WalletSolidity> =
-    walletSolidityMethods;
+// const _walletSolidityMethods: Record<string, keyof WalletSolidity> =
+//     walletSolidityMethods;
 const _walletExtensionMethods: Record<string, keyof WalletExtension> =
     walletExtensionMethods;
 /* eslint-enable @typescript-eslint/no-unused-vars */

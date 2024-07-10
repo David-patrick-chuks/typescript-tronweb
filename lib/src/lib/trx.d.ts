@@ -7,7 +7,7 @@ import type { AssetIssueContract as IToken } from '../proto/core/contract/asset_
 import { ResourceCode as ResourceT } from '../proto/core/contract/common';
 import type { SmartContract as ISmartContract } from '../proto/core/contract/smart_contract';
 import type { SomeBytes } from '../utils/bytes';
-import type { TypedDataTypes } from '../utils/crypto';
+import { type TypedDataTypes } from '../utils/crypto';
 import type { IDomain } from '../utils/typedData';
 import type _CallbackT from '../utils/typing';
 import type { ISignedTransaction, Transaction as ITransaction } from './transactionBuilder';
@@ -138,6 +138,8 @@ export default class Trx extends WithTronwebAndInjectpromise {
     timeUntilNextVoteCycle(callback: _CallbackT<number>): void;
     getContract(contractAddress: string, callback?: undefined): Promise<ISmartContract>;
     getContract(contractAddress: string, callback: _CallbackT<ISmartContract>): void;
+    ecRecover(transaction: any): any;
+    static ecRecover(transaction: any): any;
     verifyMessage(message: string, signature: string, address?: string, useTronHeader?: boolean, callback?: undefined): Promise<boolean>;
     verifyMessage(message: string, signature: string, address: string | undefined, useTronHeader: boolean | undefined, callback: _CallbackT<boolean>): Promise<void>;
     static verifySignature(message: string, address: string, signature: string, useTronHeader?: boolean | undefined): boolean;
@@ -309,5 +311,7 @@ export default class Trx extends WithTronwebAndInjectpromise {
     _getBrokerage(address: string | undefined, options: {
         confirmed?: boolean;
     } | undefined, callback: _CallbackT<number>): Promise<void>;
+    getBandwidthPrices(): Promise<any>;
+    getEnergyPrices(): Promise<any>;
 }
 //# sourceMappingURL=trx.d.ts.map
