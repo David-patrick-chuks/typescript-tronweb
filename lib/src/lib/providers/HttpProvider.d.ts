@@ -15,6 +15,7 @@ export declare class HttpProvider {
     setStatusPage(statusPage?: string): void;
     isConnected(statusPage?: string): Promise<boolean>;
     request<T extends string & keyof typeof walletMethods>(serviceName: `wallet/${T}` | `/wallet/${T}`, payload?: undefined, method?: 'get' | 'GET'): ReturnType<Wallet[typeof walletMethods[T]]>;
+    request<T extends string & keyof typeof walletMethods>(serviceName: `wallet/${T}` | `/wallet/${T}`, payload: Parameters<Wallet[typeof walletMethods[T]]>[0], method?: 'post' | 'POST'): ReturnType<Wallet[typeof walletMethods[T]]>;
     request<T extends string & keyof typeof walletMethods>(serviceName: `wallet/${T}` | `/wallet/${T}`, payload?: Parameters<Wallet[typeof walletMethods[T]]>[0] extends ITransaction ? Parameters<Wallet[typeof walletMethods[T]]>[0] : never, method?: Method): ReturnType<Wallet[typeof walletMethods[T]]>;
     request<T extends string & keyof typeof walletMethods>(serviceName: `wallet/${T}` | `/wallet/${T}`, payload: Parameters<Wallet[typeof walletMethods[T]]>[0], method?: Method): ReturnType<Wallet[typeof walletMethods[T]]>;
     request<T extends string & keyof typeof walletSolidityMethods>(serviceName: `walletsolidity/${T}` | `/walletsolidity/${T}`, payload?: undefined, method?: 'get' | 'GET'): ReturnType<WalletSolidity[typeof walletSolidityMethods[T]]>;

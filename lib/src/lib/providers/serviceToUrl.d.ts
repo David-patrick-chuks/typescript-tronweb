@@ -124,6 +124,8 @@ export declare const walletMethods: {
     readonly fundinject: "FundInject";
     readonly sidechainproposalcreate: "SideChainProposalCreate";
     readonly estimateenergy: "EstimateEnergy";
+    readonly getbandwidthprices: "GetBandwidthPrices";
+    readonly getenergyprices: "GetEnergyPrices";
 };
 export declare const walletSolidityMethods: {
     readonly generateaddress: "GenerateAddress";
@@ -163,6 +165,9 @@ export declare const walletSolidityMethods: {
     readonly scanshieldedtrc20notesbyivk: "ScanShieldedTRC20NotesByIvk";
     readonly scanshieldedtrc20notesbyovk: "ScanShieldedTRC20NotesByOvk";
     readonly triggerconstantcontract: "TriggerConstantContract";
+    readonly estimateenergy: "EstimateEnergy";
+    readonly getbandwidthprices: "GetBandwidthPrices";
+    readonly getenergyprices: "GetEnergyPrices";
 };
 export declare const walletExtensionMethods: {
     readonly gettransactionsfromthis: "GetTransactionsFromThis2";

@@ -8,6 +8,7 @@ import type {
     DelegatedResourceAccountIndex,
     DynamicProperties,
     EstimateEnergyResponse,
+    EstimatePrices,
     Exchange,
     InternalTransaction,
     MarketOrder,
@@ -993,6 +994,8 @@ export interface Wallet {
     ): Promise<Transaction>;
     FundInject(request: FundInjectContract): Promise<Transaction>;
     EstimateEnergy(request: EnergyEstimateContract): Promise<EstimateEnergyResponse>
+    GetBandwidthPrices(request: any | undefined): Promise<EstimatePrices>
+    GetEnergyPrices(request: any | undefined): Promise<EstimatePrices>
 }
 
 export interface WalletSolidity {
@@ -1065,6 +1068,8 @@ export interface WalletSolidity {
     GetBurnTrx(request: EmptyMessage): Promise<NumberMessage>;
     GetBlock(request: BlockReq): Promise<BlockExtention>;
     EstimateEnergy(request: EnergyEstimateContract): Promise<EstimateEnergyResponse>
+    GetBandwidthPrices(request: any | undefined): Promise<EstimatePrices>
+    GetEnergyPrices(request: any | undefined): Promise<EstimatePrices>
 }
 
 export interface WalletExtension {

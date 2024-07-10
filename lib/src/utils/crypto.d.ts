@@ -10,6 +10,7 @@ export declare type TypedDataTypes = Record<string, {
 export declare function getBase58CheckAddress(addressBytes: SomeBytes | Buffer | number[]): string;
 export declare function decodeBase58Address(base58String: string): Uint8Array;
 export declare function signTransaction(priKeyBytes: string | SomeBytes, transaction: ITransaction): ISignedTransaction;
+export declare function ecRecover(signedData: any, signature: any): string;
 export declare function arrayToBase64String(a: SomeBytes): string;
 export declare function signBytes(privateKey: string | SomeBytes, contents: SomeBytes): string;
 export declare function _signTypedData(domain: IDomain, types: TypedDataTypes, value: Record<string, unknown>, privateKey: string): string;

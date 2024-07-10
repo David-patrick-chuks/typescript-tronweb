@@ -23,13 +23,14 @@ import type {SmartContract as ISmartContract} from '../proto/core/contract/smart
 import utils from '../utils';
 import {ADDRESS_PREFIX} from '../utils/address';
 import type {SomeBytes} from '../utils/bytes';
-import type {TypedDataTypes} from '../utils/crypto';
+import {ecRecover, type TypedDataTypes} from '../utils/crypto';
 import {
     SigningKey,
     keccak256,
     recoverAddress,
     toUtf8Bytes,
 } from '../utils/ethersUtils';
+import {txCheck} from "../utils/transaction"
 import type {IDomain} from '../utils/typedData';
 import type _CallbackT from '../utils/typing';
 import type {
@@ -1066,6 +1067,27 @@ export default class Trx extends WithTronwebAndInjectpromise {
                 callback(null, contract);
             })
             .catch((err) => callback(err));
+    }
+
+    ecRecover(transaction) {
+        return Trx.ecRecover(transaction);
+    }
+
+    static ecRecover(transaction) {
+        if (!txCheck(transaction)) {
+            throw new Error('Invalid transaction');
+        }
+        if (!transaction.signature?.length) {
+            throw new Error('Transaction is not signed');
+        }
+        if (transaction.signature.length === 1) {
+            const tronAddress = ecRecover(transaction.txID, transaction.signature[0]);
+            return TronWeb.address.fromHex(tronAddress);
+        }
+        return transaction.signature.map((sig) => {
+            const tronAddress = ecRecover(transaction.txID, sig);
+            return TronWeb.address.fromHex(tronAddress);
+        });
     }
 
     async verifyMessage(
@@ -2551,5 +2573,27 @@ export default class Trx extends WithTronwebAndInjectpromise {
                 callback(null, result.brokerage);
             })
             .catch((err) => callback(err));
+    }
+
+    async getBandwidthPrices() {
+        return this.tronWeb.fullNode.request('wallet/getbandwidthprices', {}, 'get')
+            .then((result: any) => {
+                if (typeof result.prices === 'undefined') {
+                    throw new Error('Not found.');
+                }
+
+                return result.prices;
+            });
+    }
+
+    async getEnergyPrices() {
+        return this.tronWeb.fullNode.request('wallet/getenergyprices', {}, 'get')
+            .then((result: any) => {
+                if (typeof result.prices === 'undefined') {
+                    throw new Error('Not found.');
+                }
+
+                return result.prices;
+            });
     }
 }
