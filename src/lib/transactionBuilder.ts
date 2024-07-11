@@ -113,7 +113,6 @@ function fromUtf8(value: string): string {
 }
 
 function resultManager(transaction, callback) {
-    console.log(transaction)
     if (transaction.Error) return callback(transaction.Error);
 
     if (transaction.result && transaction.result.message)
@@ -1448,8 +1447,6 @@ export default class TransactionBuilder extends WithTronwebAndInjectpromise {
             args.parameter = param_str;
             args.visible = true
         }
-
-        console.log("All args", args)
 
         this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode']
         .request("wallet/estimateenergy", args, 'post').then((transaction) => resultManager(transaction, callback))

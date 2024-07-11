@@ -155,10 +155,6 @@ export class HttpProvider {
     ): Promise<unknown>;
     request(serviceName: string, payload = {}, method: Method = 'get') {
         method = method.toLowerCase() as Method;
-        console.log(method === 'post' && Object.keys(payload).length
-                        ? payload
-                        : null)
-
         return this.instance
             .request({
                 data:
